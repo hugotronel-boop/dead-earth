@@ -1,0 +1,4 @@
+/* Canvas GPS : la carte centrale occupe toute la zone de jeu. */
+#map{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;touch-action:none}
+.fast-map-canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab;image-rendering:pixelated}
+.fast-map-canvas:active{cursor:grabbing}

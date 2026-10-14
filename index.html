@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+  <meta name="theme-color" content="#151b20">
+  <meta name="description" content="DEAD EARTH : un jeu mobile de survie zombie en pixel art sur une carte GPS du monde réel.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="fast-map.css">
+  <title>DEAD EARTH — Pixel Survival</title>
+</head>
+<body>
+<div id="app">
+  <header class="topbar" aria-label="État du survivant">
+    <div class="top-line">
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.3 · PIXEL</small></div>
+      <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
+    </div>
+    <div class="stats-strip">
+      <div class="stat"><div class="stat-title"><span>♥ SANTÉ</span><strong id="hudHp">100</strong></div><div class="pixel-track"><i id="hpBar" class="red"></i></div></div>
+      <div class="stat"><div class="stat-title"><span>ϟ ENDURANCE</span><strong id="hudEnergy">100</strong></div><div class="pixel-track"><i id="energyBar" class="gold"></i></div></div>
+      <div class="stat"><div class="stat-title"><span>◉ EAU</span><strong id="hudWater">86</strong></div><div class="pixel-track"><i id="waterBar" class="blue"></i></div></div>
+      <div class="stat"><div class="stat-title"><span>★ NIVEAU</span><strong id="hudLevel">01</strong></div><div class="pixel-track"><i id="xpBar" class="green"></i></div></div>
+    </div>
+  </header>
+
+  <main class="viewport" id="gameViewport">
+    <section id="page-map" class="page active" aria-label="Carte de jeu">
+      <div class="map-wrap">
+        <div id="map" aria-label="Carte GPS interactive de l'environnement post-apocalyptique"></div>
+        <div id="mapFallback" class="map-fallback" hidden>Carte schématique active — chargement du terrain réel en arrière-plan</div>
+        <div class="map-art-filter" aria-hidden="true"></div>
+        <div class="map-vignette" aria-hidden="true"></div>
+      </div>
+
+      <div class="map-top" aria-label="Statut de la zone">
+        <div class="pixel-frame sector-card"><span class="eyebrow">SECTEUR · <span id="mapModeLabel">DÉMO</span></span><strong>ZONE CONTAMINÉE</strong><span class="mini-status">☣ <b id="sidebarThreat">14%</b> MENACE <span class="mobile-only">· <b id="poiCount">06</b> ZONES</span></span><div class="threat-track"><div id="sidebarThreatBar"></div></div><span id="sidebarThreatText" class="sr-only">Faible activité</span><span id="mapCoords" class="sr-only">POSITION MASQUÉE</span><span id="poiCounter" class="sr-only">06 ACTIFS</span></div>
+        <div class="map-utilities"><button id="gpsMode" class="pixel-button utility" aria-label="Activer le GPS">◎ GPS</button><button id="demoMode" class="pixel-button utility" aria-label="Mode démonstration">◇ DÉMO</button><button id="recenter" class="pixel-button utility" aria-label="Recentrer la carte">⌖ CENTRER</button><div class="map-zoom"><button id="zoomIn" class="pixel-button utility" aria-label="Zoom avant">＋</button><button id="zoomOut" class="pixel-button utility" aria-label="Zoom arrière">－</button></div></div>
+      </div>
+
+      <div class="action-dock">
+        <div class="remote-chip">⌕ <span id="remoteCount">2 / 2 FOUILLES</span></div>
+        <button id="openLoot" class="pixel-button main-action">▣ FOUILLER <small>POINTS DE RAVITAILLEMENT</small></button>
+        <button id="openRefuge" class="pixel-button refuge-action">⌂<small>REFUGE</small></button>
+      </div>
+      <div class="drawing-controls pixel-frame" id="drawingControls" hidden><span>✎ TRACE TON REFUGE SUR LA CARTE</span><button id="drawingUndo" type="button">↶</button><button id="drawingDone" type="button">✓ TERMINER</button><button id="drawingCancel" type="button">×</button></div>
+      <div class="map-attribution">© OpenStreetMap contributors · OpenFreeMap</div>
+      <div class="survivor-figure" aria-hidden="true">
+        <div class="hero-target"></div>
+        <img id="heroSprite" src="assets/survivor.png" alt="">
+      </div>
+      <div class="status-toast" id="heroAction" aria-hidden="true"></div>
+
+      <div class="game-panels">
+        <button id="portraitPanel" class="pixel-frame portrait-panel" type="button" aria-label="Ouvrir le survivant">
+          <span class="panel-title">SURVIVANT</span>
+          <img src="assets/portrait.png" alt="Portrait du survivant" class="hero-portrait">
+          <span class="panel-mini-label">SANTÉ</span><span class="portrait-track"><i id="miniHpBar"></i></span>
+          <span class="panel-mini-label">ÉNERGIE</span><span class="portrait-track"><i id="miniEnergyBar"></i></span>
+          <span class="panel-mini-label subtle">DISCRÉTION <b id="stealthMini">100%</b></span>
+        </button>
+        <button id="inventoryPanel" class="pixel-frame pocket-panel" type="button" aria-label="Ouvrir l'inventaire">
+          <span class="panel-title">INVENTAIRE</span>
+          <div id="miniInventory" class="mini-inventory" aria-hidden="true"></div>
+          <span class="pocket-capacity"><b id="capacityMini">0/30</b> KG · OUVRIR LE SAC ›</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="page-survivor" class="page scroll-page" aria-label="Survivant">
+      <h1>◈ SURVIVANT</h1>
+      <div class="pixel-frame character-card">
+        <div class="character-profile"><div class="character-image"><img src="assets/survivor.png" alt="Survivant équipé d'un sac et de lunettes orange"></div><div class="character-summary"><b>IDENTITÉ #001</b><span>STATUT : <strong id="survivorStatus">OPÉRATIONNEL</strong></span><div id="survivorStats"></div></div></div>
+        <div class="pixel-heading">◉ DISCRÉTION / MICROPHONE</div>
+        <div class="metric-row"><span>DISCRÉTION ACTUELLE</span><strong id="stealthValue">100%</strong></div><div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
+        <p class="help-text" id="micExplanation">Le micro, facultatif, mesure le bruit localement pendant les fouilles et s'arrête ensuite. Aucune voix n'est enregistrée.</p>
+        <button id="micToggle" class="pixel-button full" aria-pressed="false">🎙 ACTIVER LE MICRO PENDANT LES FOUILLES</button>
+        <p class="help-text" id="lastMicReading">Dernière fouille : aucun bruit mesuré.</p>
+      </div>
+      <div class="pixel-frame page-panel"><div class="pixel-heading">ACTIONS DE SURVIE</div>
+        <div class="action-list"><button id="eatBtn" class="pixel-button">▣ MANGER UNE CONSERVE</button><button id="drinkBtn" class="pixel-button">◉ BOIRE DE L'EAU</button><button id="healBtn" class="pixel-button">✚ UTILISER UN BANDAGE</button><button id="restBtn" class="pixel-button">☾ SE REPOSER AU REFUGE</button></div>
+      </div>
+    </section>
+
+    <section id="page-base" class="page scroll-page" aria-label="Base">
+      <h1>⌂ MON REFUGE</h1><div class="pixel-frame page-panel">
+        <div class="pixel-heading">SECTEUR SÉCURISÉ</div>
+        <div class="base-visual"><div class="base-safe-square">⌂</div><span>ABRI DE FORTUNE</span></div>
+        <div class="metric-row"><span>NIVEAU BASE</span><strong id="baseLevel">1</strong></div><div class="metric-row"><span>FORTIFICATIONS</span><strong id="fortValue">25 / 100</strong></div><div class="pixel-track dark"><i id="fortBar" class="green"></i></div>
+        <p class="help-text">Ton refuge est virtuel. Sa position est privée et conservée uniquement sur ton appareil.</p>
+        <button id="defendBtn" class="pixel-button full">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
+      </div><div class="pixel-frame page-panel"><div class="pixel-heading">AMÉLIORATIONS</div><div id="upgradeList" class="item-list"></div></div>
+    </section>
+
+    <section id="page-inventory" class="page scroll-page" aria-label="Inventaire">
+      <h1>▦ INVENTAIRE</h1><div class="pixel-frame page-panel"><div class="metric-row"><span>CHARGE DU SAC</span><strong id="capacityText">0/30 KG</strong></div><div class="pixel-track dark"><i id="capacityBar" class="gold"></i></div><div id="inventoryGrid" class="inventory-grid"></div></div>
+      <div class="pixel-frame page-panel"><div class="pixel-heading">ATELIER DE FABRICATION</div><div id="craftList" class="item-list"></div></div>
+    </section>
+
+    <section id="page-missions" class="page scroll-page" aria-label="Quêtes">
+      <h1>✦ MISSIONS</h1><div class="pixel-frame page-panel"><div class="pixel-heading">OBJECTIFS DE SURVIE</div><div id="missionList" class="item-list"></div></div>
+      <div class="pixel-frame page-panel"><div class="pixel-heading">JOURNAL DES ÉVÉNEMENTS</div><div id="journal" class="journal"></div><button id="resetBtn" class="pixel-button full danger-button">↻ RECOMMENCER UNE PARTIE</button></div>
+    </section>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Navigation">
+    <button class="nav-item active" data-tab="map"><span>◈</span><b>CARTE</b></button>
+    <button class="nav-item" data-tab="survivor"><span>♙</span><b>PERSO</b></button>
+    <button class="nav-item" data-tab="base"><span>⌂</span><b>BASE</b></button>
+    <button class="nav-item" data-tab="inventory"><span>▦</span><b>SAC</b></button>
+    <button class="nav-item" data-tab="missions"><span>☷</span><b>QUÊTES</b></button>
+  </nav>
+</div>
+
+<!-- Les tiroirs restent sur la page Carte pour préserver toute la surface du terrain. -->
+<div id="drawerScrim" class="drawer-scrim" hidden></div>
+<div class="drawer pixel-frame" id="lootDrawer" role="dialog" aria-modal="true" aria-labelledby="lootTitle" hidden>
+  <div class="drawer-head"><h2 id="lootTitle">⌕ RAVITAILLEMENT</h2><button class="close-button" data-close-drawer aria-label="Fermer">×</button></div>
+  <div class="drawer-body"><div class="pixel-heading">LIEUX À PROXIMITÉ</div><div id="poiList" class="poi-list"></div><div id="targetCard" class="target-card"></div><p id="remoteInfo" class="help-text">Deux fouilles à distance par jour. Les suivantes exigent le GPS et la proximité d'un lieu réel.</p></div>
+</div>
+<div class="drawer pixel-frame" id="refugeDrawer" role="dialog" aria-modal="true" aria-labelledby="refugeTitle" hidden>
+  <div class="drawer-head"><h2 id="refugeTitle">⌂ ZONE SAFE</h2><button class="close-button" data-close-drawer aria-label="Fermer">×</button></div>
+  <div class="drawer-body">
+    <p class="help-text">Saisis ton adresse pour situer ton refuge. Le contour initial de 18 × 12 m est une estimation, pas un relevé cadastral. Surface maximale : 500 m².</p>
+    <form id="addressForm" class="address-form"><label for="addressInput">ADRESSE PERSONNELLE</label><input id="addressInput" type="search" maxlength="180" placeholder="Rue, code postal, ville" autocomplete="street-address"><button id="findHome" type="submit" class="pixel-button full">⌖ LOCALISER LE REFUGE</button></form>
+    <div class="action-list"><button id="editSafeZone" class="pixel-button">✎ DESSINER LA ZONE SUR LA CARTE</button><button id="finishSafeZone" class="pixel-button" hidden>✓ TERMINER LE CONTOUR</button><button id="undoSafePoint" class="pixel-button" hidden>↶ ANNULER LE DERNIER POINT</button><button id="cancelSafeZone" class="pixel-button" hidden>ANNULER LE DESSIN</button></div>
+    <p id="safeZoneStatus" class="help-text" aria-live="polite">Aucun refuge personnel défini.</p>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite" class="toast"></div>
+<div id="modal" class="modal-backdrop" hidden><div class="pixel-frame modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div id="modalTag" class="modal-eyebrow">CONTACT HOSTILE</div><h2 id="modalTitle">INFECTÉ DÉTECTÉ</h2><p id="modalText"></p><div id="modalContent"></div><div id="modalActions" class="modal-actions"></div></div></div>
+<div id="connection" class="sr-only">MODE DÉMO</div>
+<script src="fast-map.js" defer></script>
+<script src="app.js" defer></script>
+<script src="pixel-ui.js" defer></script>
+</body>
+</html>

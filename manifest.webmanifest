@@ -1,0 +1,12 @@
+{
+  "name": "DEAD EARTH — Pixel Survival",
+  "short_name": "DEAD EARTH",
+  "description": "Survie post-apocalyptique sur une carte GPS, en pixel art.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#151b20",
+  "theme_color": "#151b20",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
