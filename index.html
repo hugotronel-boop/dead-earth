@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0a1111">
+  <meta name="description" content="DEAD EARTH — prototype de survie zombie GPS, jouable chez soi ou en exploration.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" integrity="sha256-p4NxAoJBhIIN+hmNHrzxZJsqK+orPZc8fE3M0P8bqj8=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+  <title>DEAD EARTH — SURVIVE THE FALL</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">D<span>Ξ</span></div><div><strong>DEAD EARTH</strong><small>SURVIVE THE FALL <i>•</i> ALPHA 0.1</small></div></div>
+      <div class="header-right"><div class="signal"><span class="pulse"></span><span id="connection">MODE DÉMO</span></div><div class="day-pill">JOUR <strong id="day">01</strong></div><button id="soundToggle" class="icon-button" aria-label="Activer ou désactiver le son" title="Son">♪</button></div>
+    </header>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="sidebar-label">TERMINAL DE SURVIE <span>01—05</span></div>
+        <nav class="main-nav" aria-label="Navigation principale">
+          <button class="nav-item active" data-tab="map"><span class="nav-icon">◈</span><span>CARTE TACTIQUE</span><b>01</b></button>
+          <button class="nav-item" data-tab="survivor"><span class="nav-icon">♙</span><span>SURVIVANT</span><b>02</b></button>
+          <button class="nav-item" data-tab="base"><span class="nav-icon">⌂</span><span>MON REFUGE</span><b>03</b></button>
+          <button class="nav-item" data-tab="inventory"><span class="nav-icon">▦</span><span>INVENTAIRE</span><b>04</b></button>
+          <button class="nav-item" data-tab="missions"><span class="nav-icon">☷</span><span>MISSIONS</span><b>05</b></button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-label">DIRECTEUR DE MENACE</div>
+          <div class="threat-top"><span>NIVEAU D'ALERTE</span><strong id="sidebarThreat">14%</strong></div>
+          <div class="progress threat"><div id="sidebarThreatBar"></div></div>
+          <p id="sidebarThreatText">Faible activité des infectés.</p>
+          <div class="sidebar-note">⚠ EXPLORE PRUDEMMENT<br><span>Jeu fictif. Ne prends aucun risque dans le monde réel.</span></div>
+        </div>
+      </aside>
+      <main class="main-content">
+        <section class="stats-strip" aria-label="Statistiques du survivant">
+          <div class="stat"><span>♥ <em>SANTÉ</em></span><strong id="hudHp">100 <small>/ 100</small></strong><div class="mini-progress"><i id="hpBar" class="red"></i></div></div>
+          <div class="stat"><span>ϟ <em>ENDURANCE</em></span><strong id="hudEnergy">100 <small>/ 100</small></strong><div class="mini-progress"><i id="energyBar" class="yellow"></i></div></div>
+          <div class="stat"><span>◉ <em>HYDRATATION</em></span><strong id="hudWater">100 <small>/ 100</small></strong><div class="mini-progress"><i id="waterBar" class="blue"></i></div></div>
+          <div class="stat"><span>✦ <em>EXPÉRIENCE</em></span><strong id="hudLevel">NIV. 01</strong><div class="mini-progress"><i id="xpBar" class="green"></i></div></div>
+        </section>
+
+        <section class="page active" id="page-map">
+          <div class="page-head"><div><div class="eyebrow">/ ZONE D'OPÉRATION</div><h1>CARTE <span>TACTIQUE</span></h1><p>Explore, fouille et évite les infectés.</p></div><div class="map-controls"><button id="demoMode" class="btn small outlined">◈ MODE DÉMO</button><button id="gpsMode" class="btn small accent">◎ ACTIVER GPS</button></div></div>
+          <div class="map-grid">
+            <div class="map-wrap">
+              <div id="map" aria-label="Carte interactive de la zone"></div>
+              <div id="mapFallback" class="map-fallback" hidden>FOND DE CARTE HORS LIGNE<br>Les fouilles restent jouables depuis la liste des lieux.</div>
+              <div class="map-top"><span><span class="live-dot"></span> <span id="mapModeLabel">ZONE SIMULÉE</span></span><span id="mapCoords">ZONE 01 / ALPHA</span></div>
+              <div class="map-bottom"><span>◉ <strong id="poiCount">06</strong> POINTS D'INTÉRÊT</span><button id="recenter" class="mini-btn" title="Recentrer la carte">⌖ RECADRER</button></div>
+            </div>
+            <div class="operations-panel">
+              <div class="section-heading"><span>POINTS D'INTÉRÊT</span><span class="counter" id="poiCounter">06 ACTIFS</span></div>
+              <div id="poiList" class="poi-list"></div>
+              <div class="target-card" id="targetCard"></div>
+            </div>
+          </div>
+          <div class="feed-row"><div><strong>◉ JOURNAL RADIO</strong><span id="latestLog">Fréquence de survie active.</span></div><button id="viewJournal" class="text-button">VOIR LE JOURNAL →</button></div>
+        </section>
+
+        <section class="page" id="page-survivor">
+          <div class="page-head"><div><div class="eyebrow">/ DOSSIER PERSONNEL</div><h1>MON <span>SURVIVANT</span></h1><p>Ton équipement et tes capacités de survie.</p></div></div>
+          <div class="two-col"><div class="panel"><div class="section-heading">FICHE DE SURVIE <span>IDENTITÉ #001</span></div><div class="survivor-art"><div class="survivor-silhouette">♟</div><span>STATUT : <strong id="survivorStatus">OPÉRATIONNEL</strong></span></div><div id="survivorStats"></div></div><div class="panel"><div class="section-heading">ACTIONS DE SURVIE</div><div class="stack"><button class="action-row" id="eatBtn"><span>▣</span><div><b>MANGER UNE CONSERVE</b><small>Restaure la satiété • 1 conserve</small></div><span>→</span></button><button class="action-row" id="drinkBtn"><span>◉</span><div><b>BOIRE DE L'EAU</b><small>Restaure l'hydratation • 1 eau</small></div><span>→</span></button><button class="action-row" id="healBtn"><span>✚</span><div><b>UTILISER UN BANDAGE</b><small>Restaure 30 points de santé</small></div><span>→</span></button><button class="action-row" id="restBtn"><span>☾</span><div><b>SE REPOSER AU REFUGE</b><small>Restaure 45 points d'endurance</small></div><span>→</span></button></div></div></div>
+        </section>
+
+        <section class="page" id="page-base">
+          <div class="page-head"><div><div class="eyebrow">/ SECTEUR SÉCURISÉ</div><h1>MON <span>REFUGE</span></h1><p>La dernière ligne de défense.</p></div><span class="safe-badge">● ZONE SÛRE</span></div>
+          <div class="two-col"><div class="panel"><div class="section-heading">ÉTAT DE LA BASE <span>SECTEUR 01</span></div><div class="base-art"><div class="base-house">⌂</div><div class="base-caption">ABRI DE FORTUNE // NIVEAU <span id="baseLevel">1</span></div></div><div class="meter-row"><span>RÉSISTANCE DES BARRICADES</span><strong id="fortValue">25 / 100</strong></div><div class="progress fort"><div id="fortBar"></div></div><p class="hint">Le refuge est fictif et privé. Il n'est pas partagé avec d'autres joueurs.</p><button class="btn outlined wide" id="defendBtn">⚠ SIMULER UNE ATTAQUE DE HORDE</button></div><div class="panel"><div class="section-heading">AMÉLIORATIONS DISPONIBLES</div><div id="upgradeList" class="upgrade-list"></div></div></div>
+        </section>
+
+        <section class="page" id="page-inventory">
+          <div class="page-head"><div><div class="eyebrow">/ MATÉRIEL RÉCUPÉRÉ</div><h1>MON <span>INVENTAIRE</span></h1><p>Chaque ressource compte.</p></div><div class="capacity"><span>CHARGE DU SAC</span><strong id="capacityText">0 / 30 KG</strong><div class="progress"><div id="capacityBar"></div></div></div></div>
+          <div class="two-col"><div class="panel"><div class="section-heading">ÉQUIPEMENT ET RESSOURCES</div><div id="inventoryGrid" class="inventory-grid"></div></div><div class="panel"><div class="section-heading">ATELIER DE FABRICATION</div><div id="craftList" class="upgrade-list"></div></div></div>
+        </section>
+
+        <section class="page" id="page-missions">
+          <div class="page-head"><div><div class="eyebrow">/ DIRECTIVES DE SURVIE</div><h1>LES <span>MISSIONS</span></h1><p>Les objectifs donnent un sens à chaque expédition.</p></div></div>
+          <div class="two-col"><div class="panel"><div class="section-heading">OBJECTIFS DE SURVIE</div><div id="missionList" class="mission-list"></div></div><div class="panel"><div class="section-heading">JOURNAL DES ÉVÉNEMENTS</div><div id="journal" class="journal"></div><button class="btn outlined wide" id="resetBtn">↻ RECOMMENCER UNE PARTIE</button></div></div>
+        </section>
+      </main>
+    </div>
+    <nav class="mobile-nav" aria-label="Navigation mobile"><button class="active" data-tab="map"><span>◈</span>CARTE</button><button data-tab="survivor"><span>♙</span>PERSO</button><button data-tab="base"><span>⌂</span>BASE</button><button data-tab="inventory"><span>▦</span>SAC</button><button data-tab="missions"><span>☷</span>QUÊTES</button></nav>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal" class="modal-backdrop" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-eyebrow" id="modalTag">CONTACT HOSTILE</div><h2 id="modalTitle">INFECTÉ DÉTECTÉ</h2><p id="modalText"></p><div id="modalContent"></div><div id="modalActions" class="modal-actions"></div></div></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
