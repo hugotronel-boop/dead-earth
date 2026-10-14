@@ -17,7 +17,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.3 · PIXEL</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.4 · PIXEL</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -37,17 +37,29 @@
         <div class="map-vignette" aria-hidden="true"></div>
       </div>
 
-      <div class="map-top" aria-label="Statut de la zone">
-        <div class="pixel-frame sector-card"><span class="eyebrow">SECTEUR · <span id="mapModeLabel">DÉMO</span></span><strong>ZONE CONTAMINÉE</strong><span class="mini-status">☣ <b id="sidebarThreat">14%</b> MENACE <span class="mobile-only">· <b id="poiCount">06</b> ZONES</span></span><div class="threat-track"><div id="sidebarThreatBar"></div></div><span id="sidebarThreatText" class="sr-only">Faible activité</span><span id="mapCoords" class="sr-only">POSITION MASQUÉE</span><span id="poiCounter" class="sr-only">06 ACTIFS</span></div>
-        <div class="map-utilities"><button id="gpsMode" class="pixel-button utility" aria-label="Activer le GPS">◎ GPS</button><button id="demoMode" class="pixel-button utility" aria-label="Mode démonstration">◇ DÉMO</button><button id="recenter" class="pixel-button utility" aria-label="Recentrer la carte">⌖ CENTRER</button><div class="map-zoom"><button id="zoomIn" class="pixel-button utility" aria-label="Zoom avant">＋</button><button id="zoomOut" class="pixel-button utility" aria-label="Zoom arrière">－</button></div></div>
+      <div class="map-top" aria-label="Commandes de navigation">
+        <div class="map-utilities" id="mapTools">
+          <button id="mapMenuToggle" class="pixel-button utility map-menu-toggle" type="button" aria-controls="mapToolsPanel" aria-expanded="false">⚙ OPTIONS <span id="mapMenuChevron">▾</span></button>
+          <div class="map-tools-panel pixel-frame" id="mapToolsPanel" hidden>
+            <button id="gpsMode" class="pixel-button utility" type="button">◎ GPS</button>
+            <button id="demoMode" class="pixel-button utility" type="button">◇ DÉMO</button>
+            <button id="recenter" class="pixel-button utility" type="button">⌖ CENTRER</button>
+            <div class="map-zoom"><button id="zoomIn" class="pixel-button utility" type="button" aria-label="Zoom avant">＋</button><button id="zoomOut" class="pixel-button utility" type="button" aria-label="Zoom arrière">－</button></div>
+            <span class="menu-mode" id="mapModeLabel">MODE DÉMO</span>
+          </div>
+        </div>
       </div>
-
+      <div class="sr-only" aria-hidden="true"><span id="sidebarThreat"></span><div id="sidebarThreatBar"></div><span id="sidebarThreatText"></span><span id="mapCoords"></span><span id="poiCounter"></span><span id="poiCount"></span></div>
       <div class="action-dock">
         <div class="remote-chip">⌕ <span id="remoteCount">2 / 2 FOUILLES</span></div>
         <button id="openLoot" class="pixel-button main-action">▣ FOUILLER <small>POINTS DE RAVITAILLEMENT</small></button>
         <button id="openRefuge" class="pixel-button refuge-action">⌂<small>REFUGE</small></button>
       </div>
-      <div class="drawing-controls pixel-frame" id="drawingControls" hidden><span>✎ TRACE TON REFUGE SUR LA CARTE</span><button id="drawingUndo" type="button">↶</button><button id="drawingDone" type="button">✓ TERMINER</button><button id="drawingCancel" type="button">×</button></div>
+      <div class="drawing-controls pixel-frame" id="drawingControls" hidden>
+        <span id="placementHint">⌂ TOUCHE LA CARTE POUR POSER LE CARRÉ (20 × 20 M)</span>
+        <button id="drawingDone" type="button" disabled>✓ VALIDER</button>
+        <button id="drawingCancel" type="button">× ANNULER</button>
+      </div>
       <div class="map-attribution">© OpenStreetMap contributors · OpenFreeMap</div>
       <div class="survivor-figure" aria-hidden="true">
         <div class="hero-target"></div>
@@ -55,20 +67,7 @@
       </div>
       <div class="status-toast" id="heroAction" aria-hidden="true"></div>
 
-      <div class="game-panels">
-        <button id="portraitPanel" class="pixel-frame portrait-panel" type="button" aria-label="Ouvrir le survivant">
-          <span class="panel-title">SURVIVANT</span>
-          <img src="assets/portrait.png" alt="Portrait du survivant" class="hero-portrait">
-          <span class="panel-mini-label">SANTÉ</span><span class="portrait-track"><i id="miniHpBar"></i></span>
-          <span class="panel-mini-label">ÉNERGIE</span><span class="portrait-track"><i id="miniEnergyBar"></i></span>
-          <span class="panel-mini-label subtle">DISCRÉTION <b id="stealthMini">100%</b></span>
-        </button>
-        <button id="inventoryPanel" class="pixel-frame pocket-panel" type="button" aria-label="Ouvrir l'inventaire">
-          <span class="panel-title">INVENTAIRE</span>
-          <div id="miniInventory" class="mini-inventory" aria-hidden="true"></div>
-          <span class="pocket-capacity"><b id="capacityMini">0/30</b> KG · OUVRIR LE SAC ›</span>
-        </button>
-      </div>
+
     </section>
 
     <section id="page-survivor" class="page scroll-page" aria-label="Survivant">
@@ -125,10 +124,10 @@
 <div class="drawer pixel-frame" id="refugeDrawer" role="dialog" aria-modal="true" aria-labelledby="refugeTitle" hidden>
   <div class="drawer-head"><h2 id="refugeTitle">⌂ ZONE SAFE</h2><button class="close-button" data-close-drawer aria-label="Fermer">×</button></div>
   <div class="drawer-body">
-    <p class="help-text">Saisis ton adresse pour situer ton refuge. Le contour initial de 18 × 12 m est une estimation, pas un relevé cadastral. Surface maximale : 500 m².</p>
-    <form id="addressForm" class="address-form"><label for="addressInput">ADRESSE PERSONNELLE</label><input id="addressInput" type="search" maxlength="180" placeholder="Rue, code postal, ville" autocomplete="street-address"><button id="findHome" type="submit" class="pixel-button full">⌖ LOCALISER LE REFUGE</button></form>
-    <div class="action-list"><button id="editSafeZone" class="pixel-button">✎ DESSINER LA ZONE SUR LA CARTE</button><button id="finishSafeZone" class="pixel-button" hidden>✓ TERMINER LE CONTOUR</button><button id="undoSafePoint" class="pixel-button" hidden>↶ ANNULER LE DERNIER POINT</button><button id="cancelSafeZone" class="pixel-button" hidden>ANNULER LE DESSIN</button></div>
+    <p class="help-text">Refuge de 20 × 20 mètres (400 m²). Touche un endroit sur la carte pour y placer le carré, puis confirme. Tu pourras le déplacer <strong>une fois tous les 30 jours</strong>.</p>
+    <button id="editSafeZone" class="pixel-button full" type="button">⌖ PLACER MON REFUGE</button>
     <p id="safeZoneStatus" class="help-text" aria-live="polite">Aucun refuge personnel défini.</p>
+  
   </div>
 </div>
 
