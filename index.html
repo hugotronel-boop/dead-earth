@@ -17,7 +17,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.4 · PIXEL</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.5 · PIXEL</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -73,7 +73,15 @@
     <section id="page-survivor" class="page scroll-page" aria-label="Survivant">
       <h1>◈ SURVIVANT</h1>
       <div class="pixel-frame character-card">
-        <div class="character-profile"><div class="character-image"><img src="assets/survivor.png" alt="Survivant équipé d'un sac et de lunettes orange"></div><div class="character-summary"><b>IDENTITÉ #001</b><span>STATUT : <strong id="survivorStatus">OPÉRATIONNEL</strong></span><div id="survivorStats"></div></div></div>
+        <div class="character-profile"><div class="character-image"><img src="assets/survivor.png" alt="Survivant équipé d'un sac et de lunettes orange"></div><div class="character-summary"><b id="survivorDisplayName">SURVIVANT #001</b><span>STATUT : <strong id="survivorStatus">OPÉRATIONNEL</strong></span><div id="survivorStats"></div></div></div>
+        <form id="survivorNameForm" class="survivor-name-form" autocomplete="off">
+          <label for="survivorNameInput">✎ NOM DU SURVIVANT</label>
+          <div class="survivor-name-controls">
+            <input id="survivorNameInput" name="survivorName" type="text" maxlength="20" placeholder="Choisis un surnom" aria-describedby="survivorNameHint" spellcheck="false" autocomplete="off">
+            <button type="submit" class="pixel-button">VALIDER</button>
+          </div>
+          <p id="survivorNameHint" class="help-text" aria-live="polite">Entre 2 et 20 caractères. Le nom reste enregistré sur ton appareil.</p>
+        </form>
         <div class="pixel-heading">◉ DISCRÉTION / MICROPHONE</div>
         <div class="metric-row"><span>DISCRÉTION ACTUELLE</span><strong id="stealthValue">100%</strong></div><div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
         <p class="help-text" id="micExplanation">Le micro, facultatif, mesure le bruit localement pendant les fouilles et s'arrête ensuite. Aucune voix n'est enregistrée.</p>

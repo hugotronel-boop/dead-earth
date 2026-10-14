@@ -25,3 +25,9 @@ Décompresser puis transférer tous les fichiers et le dossier `assets/` à la r
 - Les positions de refuge et l'état du jeu sont stockés localement dans `localStorage`. Le verrouillage de 30 jours **n'est pas anti-triche** : effacer les données du navigateur ou recommencer la partie le réinitialise. Une règle garantie entre appareils exigerait un serveur / compte joueur.
 - Le GPS et le microphone demandent la permission. Les coordonnées GPS précises du joueur ne sont pas sauvegardées ; le point privé du refuge l'est sur l'appareil. N'entre dans aucun lieu réel pour jouer, ne joue pas en conduisant, et évite les déplacements risqués.
 - En cas de version affichée en cache, recharger la page ou effacer l'ancien cache GitHub Pages / PWA. Le Service Worker est versionné `v4`.
+
+## V0.5 — Page Perso
+- Ligne « Bruit accumulé » remplacée par « Fatigue » (100 − endurance).
+- Nom du survivant personnalisable (2–20 caractères), mémorisé dans la sauvegarde locale existante.
+- Discrétion et calcul du bruit des zombies inchangés.
+- Les autres pages restent identiques à la V0.4.

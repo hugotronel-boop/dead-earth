@@ -50,7 +50,7 @@
     {id:'fighter',name:'Éliminer la menace',desc:'Vaincs deux zombies.',target:2,progress:s=>s.kills,reward:{bandage:2,ammo:4},xp:90}
   ];
   const fresh = () => ({version:1,created:Date.now(),mode:'demo',lat:null,lon:null,hp:100,energy:100,water:86,food:80,xp:0,
-    level:1,baseLevel:1,fort:25,threat:14,noise:0,selected:'market',searchMethod:'quiet',totalSearches:0,totalUpgrades:0,kills:0,
+    level:1,baseLevel:1,fort:25,threat:14,noise:0,survivorName:'',selected:'market',searchMethod:'quiet',totalSearches:0,totalUpgrades:0,kills:0,
     dailyRemote:{day:'',used:0},safeZone:null,micEnabled:false,lastMicLevel:null,
     inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0},
     claimed:[],cooldowns:{},logs:[{time:Date.now(),message:'Transmission reçue. Bienvenue dans DEAD EARTH.'}]});
@@ -391,7 +391,10 @@
     save();renderAll();showCombat(note);
   }
   function renderSurvivor(){
-    const rows=[['Niveau',game.level],['Expérience',`${game.xp} / ${game.level*100}`],['Satiété',`${game.food}%`],['Hydratation',`${game.water}%`],['Bruit accumulé',`${game.noise}%`],['Zombies éliminés',game.kills],['Fouilles terminées',game.totalSearches],['Mode',game.mode==='gps'?'GPS · hybride':'Démo · hybride']];
+    $('survivorDisplayName').textContent=game.survivorName||'SURVIVANT #001';
+    const nameInput=$('survivorNameInput');
+    if(document.activeElement!==nameInput&&nameInput.value!==game.survivorName)nameInput.value=game.survivorName||'';
+    const rows=[['Niveau',game.level],['Expérience',`${game.xp} / ${game.level*100}`],['Satiété',`${game.food}%`],['Hydratation',`${game.water}%`],['Fatigue',`${clamp(100-game.energy)}%`],['Zombies éliminés',game.kills],['Fouilles terminées',game.totalSearches],['Mode',game.mode==='gps'?'GPS · hybride':'Démo · hybride']];
     $('survivorStats').innerHTML=rows.map(([name,value])=>`<div class="info-line"><span>${name}</span><strong>${safe(value)}</strong></div>`).join('');
     $('stealthValue').textContent=`${100-game.noise}%`;
     $('stealthBar').style.width=`${100-game.noise}%`;
@@ -507,6 +510,15 @@
     $('editSafeZone').addEventListener('click',startDrawing);
     $('drawingDone').addEventListener('click',finishDrawing);
     $('drawingCancel').addEventListener('click',cancelDrawing);
+    $('survivorNameForm').addEventListener('submit',event=>{
+      event.preventDefault();
+      const name=$('survivorNameInput').value.trim().replace(/\s+/g,' ');
+      if(name.length<2||name.length>20){$('survivorNameHint').textContent='Le nom doit contenir entre 2 et 20 caractères.';return;}
+      game.survivorName=name;
+      $('survivorNameHint').textContent='Nom enregistré ! Tu peux le modifier quand tu veux.';
+      $('survivorNameInput').blur();
+      commit(`Survivant renommé : ${name}.`);
+    });
     $('micToggle').addEventListener('click',()=>{game.micEnabled=!game.micEnabled;commit(game.micEnabled?'Micro autorisé pour les fouilles (demande iOS à la première utilisation).':'Micro désactivé.');});
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));

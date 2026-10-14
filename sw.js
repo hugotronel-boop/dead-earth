@@ -1,4 +1,4 @@
-const CACHE='dead-earth-pixel-v4-20261014';
+const CACHE='dead-earth-pixel-v05-20261014';
 const CORE=['./','./index.html','./styles.css','./fast-map.css','./fast-map.js','./app.js','./pixel-ui.js','./manifest.webmanifest','./icon.svg',
 './assets/survivor.png','./assets/portrait.png','./assets/floor.jpg','./assets/ruins-backdrop.jpg',
 ...['bandage','ammo','food','parts','wood','cloth','water','metal','medkit'].map(id=>'./assets/item-'+id+'.png')];
