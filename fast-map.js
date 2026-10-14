@@ -159,7 +159,7 @@
       }
       ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#2e2e2a';ctx.globalAlpha=.7;ctx.font='9px monospace';ctx.fillText(this.tileTemplate?'DÉTAILS EN CHARGEMENT...':'CARTE EN MODE TERRAIN',9,14);ctx.globalAlpha=1;
     }
-    drawZone(points,fill,stroke,alpha,open=false){const ctx=this.ctx;ctx.beginPath();points.forEach((p,i)=>{const t=this.position(p[0],p[1]);if(i===0)ctx.moveTo(t.x,t.y);else ctx.lineTo(t.x,t.y)});if(!open)ctx.closePath();ctx.globalAlpha=alpha;ctx.fillStyle=fill;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=3;ctx.strokeStyle=stroke;ctx.stroke();if(open)for(const p of points){const t=this.position(p[0],p[1]);ctx.fillStyle='#ffe6ad';ctx.beginPath();ctx.arc(t.x,t.y,4,0,7);ctx.fill()}}
+    drawZone(points,fill,stroke,alpha,open=false){const ctx=this.ctx;ctx.beginPath();points.forEach((p,i)=>{const t=this.position(p[0],p[1]);if(i===0)ctx.moveTo(t.x,t.y);else ctx.lineTo(t.x,t.y)});ctx.closePath();ctx.globalAlpha=alpha;ctx.fillStyle=fill;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=3;ctx.strokeStyle=stroke;ctx.stroke();if(open)for(const p of points){const t=this.position(p[0],p[1]);ctx.fillStyle='#ffe6ad';ctx.beginPath();ctx.arc(t.x,t.y,4,0,7);ctx.fill()}}
     destroy(){this.destroyed=true;clearInterval(this.animation);this.ro?.disconnect();window.removeEventListener('resize',this.resize)}
   }
   window.DeadEarthFastMap=FastMap;

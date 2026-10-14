@@ -1,48 +1,27 @@
-# DEAD EARTH — Pixel Survival 0.3
+# DEAD EARTH — Pixel Survival v0.4
 
-Jeu mobile GPS de survie zombie en pixel art, avec le personnage illustré de la fiche de survivant originale. Aucun framework / aucune compilation / aucun abonnement requis pour tester cette alpha. Le moteur de terrain utilise un Canvas avec tuiles vectorielles OpenFreeMap (inspiré de Gpsmine). En cas d'indisponibilité du réseau, un terrain pixel art géoréférencé schématique apparaît immédiatement.
+Prototype mobile jouable, **mise à jour limitée à la page Carte**. Les autres pages continuent de fonctionner avec les règles antérieures.
 
-## Installer facilement sur iPhone avec GitHub Pages
+## Nouveautés
+- Suppression de la carte « zone contaminée » en haut et des panneaux Survivant / Inventaire en bas de la carte. Les infos Santé/Endurance/Hydratation/Niveau restent dans le HUD et les pages dédiées.
+- Menu « ⚙ OPTIONS » en haut à droite : GPS, Démo, Centrer, Zoom +/−.
+- Compteur de jours : Jour 1 le jour de la création de la partie, Jour 2 à la date civile locale suivante, et ainsi de suite (pas d'attente de 24h exactes).
+- Refuge : bouton « Refuge » > « Placer mon refuge », puis toucher un endroit sur la carte pour prévisualiser le carré **20 × 20 m**, confirmer. La position est mémorisée uniquement dans le navigateur. Déplacement possible **à nouveau 30 × 24 heures après le dernier placement validé**. Un ancien refuge v0.3 peut être replacé une fois lors de la migration.
+- Fouilles : deux à distance par jour civil local ; les autres demandent d’être réellement près (120 m) d’un commerce référencé OpenStreetMap, avec une précision GPS suffisamment bonne (120 m ou mieux). Détection de commerces à 2,8 km via Overpass : supermarchés, commerces alimentaires, pharmacies, quincailleries, stations-service et autres catégories pertinentes. Les lieux réels s'affichent sans réinventer de commerce si la recherche échoue. Le ravitaillement demeure purement virtuel.
 
-**Méthode recommandée : le fichier unique `index.html`.**
+## Installer (GitHub Pages)
 
-1. Télécharge le fichier `index.html` du dossier `DEAD-EARTH-PIXEL-V3-UN-SEUL-FICHIER` (fourni séparément).
-2. Ouvre https://github.com/hugotronel-boop/dead-earth sur Safari, puis **Add file → Upload files**. Choisis le fichier `index.html` et valide **Commit changes** pour remplacer l'ancien.
-3. Si nécessaire, active **Settings → Pages → Deploy from a branch → main → /(root)**.
-4. Ouvre https://hugotronel-boop.github.io/dead-earth/. Si tu vois encore l'ancienne version, ferme l'onglet puis recharge ; une ancienne installation hors-ligne peut conserver temporairement l'ancien cache.
+### Version simple, 1 fichier
+1. Ouvrir le dossier `DEAD-EARTH-PIXEL-V4-UN-SEUL-FICHIER`.
+2. Envoyer **index.html** à la racine de `hugotronel-boop/dead-earth` sur GitHub (Upload files / Commit changes).
+3. Ouvrir https://hugotronel-boop.github.io/dead-earth/ après la publication.
 
-**Méthode alternative : projet organisé.** Décompresse le ZIP complet et importe `index.html`, `app.js`, `fast-map.js`, `pixel-ui.js`, `styles.css`, `fast-map.css`, `manifest.webmanifest`, `sw.js`, `icon.svg` et **tout le dossier `assets/`**, en préservant le chemin `assets/`. Le fichier `index.html` seul du ZIP complet ne suffit pas sans les autres fichiers.
+### Version modulaire (archive ZIP)
+Décompresser puis transférer tous les fichiers et le dossier `assets/` à la racine du dépôt.
 
-## Gameplay dans cette version
+## Notes importantes
 
-- **La carte est au milieu de l'écran**, avec rendu pixel art, routes et bâtiments réels lorsque les données sont disponibles ; elle se déplace avec le doigt, pincement = zoom, double-tap = zoom.
-- **HUD haut** : vie, endurance, hydratation, niveau/XP.
-- **Personnage au premier plan** : silhouette du survivant dessinée à partir de l'illustration de référence, petites animations de repos, marche, course, fouille, blessure, manger et boire. Les animations de déplacement réagissent au GPS lorsque le navigateur transmet une nouvelle position.
-- **Bas de l'écran** : fiche survivant, inventaire mis à jour et navigation Carte / Perso / Base / Sac / Quêtes.
-- **Fouille** : sélectionner un point de ravitaillement sur la carte (ou ouvrir FOUILLER), choisir discrète, normale ou brutale, lancer la fouille, obtenir du butin et risquer un combat contre un zombie. Les marqueurs de zombies sont aussi touchables pour déclencher un combat.
-- **Deux fouilles à distance par jour local**. Après, il faut être à **120 mètres au maximum d'un commerce public référencé OSM**, avec le GPS activé, pour fouiller. Il n'est jamais nécessaire d'entrer dans un bâtiment. Les marqueurs fictifs ne permettent pas de contourner cette limite.
-- **Zone safe personnelle** : bouton REFUGE, adresse choisie, contour initial fictif de **18 × 12 m**, pouvant être redessiné directement sur la carte ; limite 500 m² et 35 m autour de l'adresse. Il ne s'agit pas d'une détection automatique de la maison.
-- **Discrétion/micro** : facultatif dans Perso. Pendant la fouille, si autorisé, le volume est calculé localement sans stockage ni transfert audio. Le micro s'arrête à la fin ou l'annulation.
-- Inventaire, craft, défense de base, missions, expérience et sauvegarde automatique locale.
-
-## Confidentialité et limites
-
-- Pas de multijoueur ni de serveur de comptes dans cette alpha. La progression se conserve **seulement dans ce navigateur** ; effacer les données du site la supprime. Le GPS précis n'est pas stocké. L'emplacement que tu choisis comme refuge reste stocké localement, uniquement pour délimiter la zone.
-- Le nom de rue/adresse est envoyé à Nominatim au clic sur LOCALISER. OpenFreeMap et Overpass peuvent connaître la zone cartographique et GPS consultée lors des requêtes. Respecter leurs limites d'utilisation avant de diffuser le jeu à grande échelle.
-- Le GPS et l'accès micro sur téléphone nécessitent HTTPS (GitHub Pages) et l'autorisation de l'utilisateur. La carte peut prendre du temps à charger les détails géographiques la première fois ou rester schématique si le fournisseur est indisponible. Les déplacements du personnage sont virtuels et ne demandent jamais de courir réellement.
-- La limite des fouilles utilise l'horloge locale : un backend serait indispensable pour un anti-triche sérieux.
-- L'interface et le graphisme du survivant utilisent une illustration déjà générée pour ce projet ; les animations du corps sont de petites transformations d'image (pas encore un spritesheet image par image).
-
-## Architecture
-
-- `index.html` : écran mobile, 5 onglets, tiroirs de fouille/refuge et HUD.
-- `styles.css` : nouveau style pixel-art et responsive.
-- `app.js` : moteur de jeu conservé et amélioré depuis alpha 0.2.
-- `pixel-ui.js` : mini-inventaire live, panneaux, navigation, animations et contrôles de dessin.
-- `fast-map.js` / `fast-map.css` : géométrie GPS et tuiles vectorielles Canvas optimisées, dessin du terrain schématique immédiat, marqueurs.
-- `assets/` : personnage, portrait et icônes pixel art.
-- `sw.js` / `manifest.webmanifest` : cache du site, installation PWA.
-
-### Test local (ordinateur)
-
-`python3 -m http.server 8000` depuis ce dossier, puis ouvrir `http://localhost:8000`. Le test sur iPhone doit se faire sur GitHub Pages HTTPS pour obtenir les permissions GPS et micro.
+- Les données des commerces et les tuiles graphiques dépendent de la disponibilité des services OpenStreetMap/Overpass et OpenFreeMap et d'une connexion réseau. Le terrain de secours fonctionne hors ligne.
+- Les positions de refuge et l'état du jeu sont stockés localement dans `localStorage`. Le verrouillage de 30 jours **n'est pas anti-triche** : effacer les données du navigateur ou recommencer la partie le réinitialise. Une règle garantie entre appareils exigerait un serveur / compte joueur.
+- Le GPS et le microphone demandent la permission. Les coordonnées GPS précises du joueur ne sont pas sauvegardées ; le point privé du refuge l'est sur l'appareil. N'entre dans aucun lieu réel pour jouer, ne joue pas en conduisant, et évite les déplacements risqués.
+- En cas de version affichée en cache, recharger la page ou effacer l'ancien cache GitHub Pages / PWA. Le Service Worker est versionné `v4`.

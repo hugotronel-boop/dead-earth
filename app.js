@@ -10,8 +10,11 @@
   const STORAGE_KEY = 'dead-earth-alpha-v1';
   const DAILY_REMOTE_LIMIT = 2;
   const GPS_RANGE_METERS = 120;
-  const MAX_SAFE_AREA_M2 = 500;
-  const MAX_SAFE_RADIUS_M = 35;
+  const SAFE_SIDE_M = 20;  // Le refuge est toujours un carré fixe de 400 m².
+  const SAFE_RELOCATION_DAYS = 30;
+  const SAFE_RELOCATION_MS = SAFE_RELOCATION_DAYS * 24 * 60 * 60 * 1000;
+  const POI_RADIUS_M = 2800;
+  const MAX_GPS_ACCURACY_M = 120;
   const ITEMS = {
     water:{label:'Eau potable',icon:'◉',weight:.5},food:{label:'Conserve',icon:'▣',weight:.4},bandage:{label:'Bandage',icon:'✚',weight:.1},
     wood:{label:'Bois',icon:'▥',weight:1.2},metal:{label:'Ferraille',icon:'⚙',weight:.8},cloth:{label:'Tissu',icon:'▤',weight:.2},
@@ -63,11 +66,11 @@
   }
   let game=load();
   window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing});
-  let center=[...DEFAULT_CENTER];
+  let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
-  let scanBusy=false,scanToken=null,safeDrawing=false,safeDraft=[],safePrevious=null;
-  let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0;
+  let scanBusy=false,scanToken=null,safeDrawing=false,safeDraft=[],safeCandidate=null,gpsAccuracy=Infinity;
+  let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0,poiLoading=false,poiError='';
   let selectedMethod='quiet';
   const METHODS={quiet:{name:'Discrète',time:60,risk:0,noise:4,bonus:0,energy:10},normal:{name:'Normale',time:30,risk:12,noise:15,bonus:1,energy:15},fast:{name:'Brutale',time:10,risk:27,noise:32,bonus:2,energy:22}};
   function log(msg){game.logs.unshift({time:Date.now(),message:msg});game.logs=game.logs.slice(0,55);}
@@ -97,89 +100,133 @@
     return R*2*Math.asin(Math.sqrt(x));
   }
   function danger(){const p=pois.find(p=>p.id===game.selected);return clamp(game.threat+(p?p.danger:30)*.47+game.noise*.35)}
+  // Les jours de jeu sont des jours civils locaux, et non des tranches glissantes de 24 h.
+  // En calculant des dates UTC à partir des composants locaux, on évite les décalages d'heure d'été.
+  function dayNumber(now=Date.now()){
+    const start = new Date(game.created), today = new Date(now);
+    if(!Number.isFinite(start.getTime()))return 1;
+    const civil = d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
+    return Math.max(1,1+Math.round((civil(today)-civil(start))/86400000));
+  }
   // Le compteur journalier est fondé sur le jour local du téléphone (alpha hors ligne).
   function localDay(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
   function ensureDaily(){if(!game.dailyRemote || game.dailyRemote.day!==localDay())game.dailyRemote={day:localDay(),used:0}}
   function remoteLeft(){ensureDaily();return Math.max(0,DAILY_REMOTE_LIMIT-game.dailyRemote.used)}
-  function isOnSite(p){return game.mode==='gps'&&game.lat!=null&&p.source==='osm'&&distanceM(game.lat,game.lon,p.lat,p.lon)<=GPS_RANGE_METERS}
+  function isOnSite(p){return game.mode==='gps'&&game.lat!=null&&p.source==='osm'&&gpsAccuracy<=MAX_GPS_ACCURACY_M&&distanceM(game.lat,game.lon,p.lat,p.lon)<=GPS_RANGE_METERS}
   function isRemote(p){return !isOnSite(p)}
   function canSearch(p){return (game.cooldowns[p.id]||0)<=Date.now()&&game.energy>=METHODS[selectedMethod].energy&&game.hp>0&&!scanBusy&&(!isRemote(p)||remoteLeft()>0)}
-  const POI_TYPES={supermarket:{name:'Supermarché',symbol:'▣',loot:['food','water','cloth'],danger:29},convenience:{name:'Épicerie',symbol:'▣',loot:['food','water'],danger:22},hardware:{name:'Quincaillerie',symbol:'⚙',loot:['wood','metal','parts'],danger:44},doityourself:{name:'Bricolage',symbol:'⚙',loot:['wood','metal','parts'],danger:44},pharmacy:{name:'Pharmacie',symbol:'✚',loot:['bandage','cloth','medkit'],danger:39},fuel:{name:'Station-service',symbol:'◈',loot:['water','food','parts'],danger:46}};
+  // Catégories réelles OpenStreetMap : le butin est évidemment virtuel.
+  const POI_TYPES={
+    supermarket:{name:'Supermarché',symbol:'▣',loot:['food','water','cloth'],danger:29},
+    convenience:{name:'Épicerie',symbol:'▣',loot:['food','water'],danger:24},
+    bakery:{name:'Boulangerie',symbol:'▣',loot:['food','water'],danger:22},
+    butcher:{name:'Boucherie',symbol:'▣',loot:['food','cloth'],danger:28},
+    greengrocer:{name:'Primeur',symbol:'▣',loot:['food','water'],danger:25},
+    general:{name:'Commerce général',symbol:'▣',loot:['food','water','cloth'],danger:32},
+    grocery:{name:'Épicerie',symbol:'▣',loot:['food','water'],danger:24},
+    hardware:{name:'Quincaillerie',symbol:'⚙',loot:['wood','metal','parts'],danger:44},
+    doityourself:{name:'Bricolage',symbol:'⚙',loot:['wood','metal','parts'],danger:44},
+    car_parts:{name:'Pièces automobiles',symbol:'⚙',loot:['metal','parts'],danger:46},
+    outdoor:{name:'Équipement outdoor',symbol:'▣',loot:['cloth','parts','bandage'],danger:39},
+    pharmacy:{name:'Pharmacie',symbol:'✚',loot:['bandage','cloth','medkit'],danger:39},
+    chemist:{name:'Parapharmacie',symbol:'✚',loot:['bandage','cloth'],danger:30},
+    fuel:{name:'Station-service',symbol:'◈',loot:['water','food','parts'],danger:46},
+    restaurant:{name:'Restaurant',symbol:'▣',loot:['food','water'],danger:35},
+    cafe:{name:'Café',symbol:'▣',loot:['food','water'],danger:30},
+    fast_food:{name:'Restauration',symbol:'▣',loot:['food','water'],danger:32},
+    hospital:{name:'Hôpital',symbol:'✚',loot:['bandage','medkit','cloth'],danger:64},
+    clinic:{name:'Clinique',symbol:'✚',loot:['bandage','medkit'],danger:50}
+  };
   async function findRealPoi(lat,lon){
-    // Chargement différé (jamais sur le chemin critique du rendu carte).
+    // Overpass est interrogé seulement après l'autorisation GPS, sans bloquer le fond de carte.
     const serial=++poiRequestSerial;
-    const clauses=['nwr(around:2300,'+lat+','+lon+')["shop"~"^(supermarket|convenience|hardware|doityourself)$"];',
-      'nwr(around:2300,'+lat+','+lon+')["amenity"~"^(pharmacy|fuel)$"];'];
-    const query='[out:json][timeout:16];('+clauses.join('')+');out center tags 50;';
+    const around=`around:${POI_RADIUS_M},${lat},${lon}`;
+    const query=`[out:json][timeout:20];(nwr(${around})["shop"~"^(supermarket|convenience|bakery|butcher|greengrocer|general|grocery|hardware|doityourself|car_parts|outdoor|chemist)$"];nwr(${around})["amenity"~"^(pharmacy|fuel|restaurant|cafe|fast_food|hospital|clinic)$"];);out center tags;`;
     const urls=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+    poiLoading=true;poiError='';renderPois();
     for(const server of urls){
       try{
-        const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),11000);
+        const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),13500);
         let response;
         try{response=await fetch(server+'?data='+encodeURIComponent(query),{signal:ctl.signal,headers:{Accept:'application/json'}})}finally{clearTimeout(timer)}
         if(!response.ok)throw Error('Overpass: '+response.status);
         const data=await response.json();if(serial!==poiRequestSerial||game.mode!=='gps')return;
+        const used=new Set();
         const found=(data.elements||[]).map(e=>{
-          const t=e.tags||{},key=POI_TYPES[t.shop] ? t.shop : POI_TYPES[t.amenity]?t.amenity:null;
-          const type=POI_TYPES[key];const p=e.center||e;if(!type||!Number.isFinite(p.lat)||!Number.isFinite(p.lon))return null;
+          const t=e.tags||{},key=POI_TYPES[t.shop]?t.shop:POI_TYPES[t.amenity]?t.amenity:null;
+          const type=POI_TYPES[key],loc=e.center||e;
+          if(!type||!Number.isFinite(loc.lat)||!Number.isFinite(loc.lon))return null;
           const id='osm-'+e.type+'-'+e.id;
-          const danger=clamp(type.danger+(Number(e.id)%13),12,80);
-          return{id,name:(t.name||type.name).slice(0,65),type:type.name,symbol:type.symbol,lat:p.lat,lon:p.lon,danger,loot:type.loot,source:'osm'};
-        }).filter(Boolean).filter(e=>distanceM(lat,lon,e.lat,e.lon)<=2300).sort((a,b)=>distanceM(lat,lon,a.lat,a.lon)-distanceM(lat,lon,b.lat,b.lon)).slice(0,26);
-        pois=found.length?found:getPoiList(lat,lon); // Le repli reste fictif et ne débloque pas la fouille GPS.
+          if(used.has(id))return null;used.add(id);
+          return{id,name:(t.name||type.name).slice(0,65),type:type.name,symbol:type.symbol,lat:loc.lat,lon:loc.lon,
+            danger:clamp(type.danger+(Number(e.id)%13),12,80),loot:type.loot,source:'osm'};
+        }).filter(Boolean).filter(p=>distanceM(lat,lon,p.lat,p.lon)<=POI_RADIUS_M)
+          .sort((a,b)=>distanceM(lat,lon,a.lat,a.lon)-distanceM(lat,lon,b.lat,b.lon)).slice(0,40);
+        pois=found;poiLoading=false;poiError=found.length?'':`Aucun point de ravitaillement répertorié à moins de ${(POI_RADIUS_M/1000).toFixed(1).replace('.',',')} km. Les deux fouilles virtuelles restent disponibles en mode Démo.`;
         game.selected=pois[0]?.id||'';refreshMarkers();renderAll();
-        toast(found.length?`${found.length} lieux réels référencés sur la carte.`:'Aucun commerce trouvé : lieux virtuels, fouilles à distance uniquement.');return;
+        toast(found.length?`${found.length} lieu(x) OpenStreetMap repéré(s) autour de toi.`:poiError);return;
       }catch(e){if(serial!==poiRequestSerial)return}
     }
     if(serial!==poiRequestSerial||game.mode!=='gps')return;
-    pois=getPoiList(lat,lon);game.selected=pois[0]?.id||'';refreshMarkers();renderAll();
-    toast('Recherche des commerces indisponible. Lieux virtuels accessibles avec les 2 fouilles quotidiennes.');
+    pois=[];game.selected='';poiLoading=false;poiError='Service des lieux indisponible. Réessaie dans quelques instants ou joue les fouilles à distance en mode Démo.';
+    lastPOIRequestAt=0;refreshMarkers();renderAll();toast(poiError);
   }
-  function loadPOIsNear(lat,lon){
-    if(lastPOIRequest && Date.now()-lastPOIRequestAt<4*60000 && distanceM(lat,lon,...lastPOIRequest)<500)return;
+  function loadPOIsNear(lat,lon,force=false){
+    if(!force&&lastPOIRequest&&Date.now()-lastPOIRequestAt<45000&&distanceM(lat,lon,...lastPOIRequest)<350)return;
     lastPOIRequest=[lat,lon];lastPOIRequestAt=Date.now();
-    pois=getPoiList(lat,lon);game.selected=pois[0]?.id||'';refreshMarkers();renderAll();
+    ++poiRequestSerial;pois=[];game.selected='';poiLoading=true;poiError='';refreshMarkers();renderAll();
     findRealPoi(lat,lon).catch(()=>{});
   }
-  function metresArea(points,origin){
-    if(!points||points.length<3)return 0;
-    const kLon=111320*Math.cos(origin[0]*Math.PI/180),kLat=111195;
-    return Math.abs(points.reduce((a,p,i)=>{const q=points[(i+1)%points.length];return a+(p[1]-origin[1])*kLon*(q[0]-origin[0])*kLat-(q[1]-origin[1])*kLon*(p[0]-origin[0])*kLat},0)/2);
+  function squareAt(lat,lon){
+    const half=SAFE_SIDE_M/2;
+    const dLat=half/111195,dLon=half/(111320*Math.max(.01,Math.cos(lat*Math.PI/180)));
+    return [[lat-dLat,lon-dLon],[lat-dLat,lon+dLon],[lat+dLat,lon+dLon],[lat+dLat,lon-dLon]];
   }
-  function approximateHome(lat,lon){const dLat=6/111195,dLon=9/(111320*Math.cos(lat*Math.PI/180));return [[lat-dLat,lon-dLon],[lat-dLat,lon+dLon],[lat+dLat,lon+dLon],[lat+dLat,lon-dLon]]}
-  function validHome(points,origin){return points.length<=12&&points.every(p=>distanceM(origin[0],origin[1],p[0],p[1])<=MAX_SAFE_RADIUS_M)&&metresArea(points,origin)<=MAX_SAFE_AREA_M2}
+  function refugeNextMove(){
+    const time=game.safeZone?.placedAt;
+    return Number.isFinite(time)&&time>0?time+SAFE_RELOCATION_MS:0;
+  }
+  function refugeCanMove(){return !game.safeZone || Date.now()>=refugeNextMove()}
   function renderSafe(){
-    const el=$('safeZoneStatus');if(!el)return;
-    const zone=game.safeZone;
-    el.textContent=safeDrawing?`MODE DESSIN : touche les coins sur la carte (${safeDraft.length} point(s)). Minimum 3 points, maximum ${MAX_SAFE_AREA_M2} m². Appuie sur TERMINER pour enregistrer.`:zone?`Refuge privé délimité : ${Math.round(metresArea(zone.points,zone.center))} m². ${zone.manual?'Contour ajusté manuellement.':'Contour provisoire 18 × 12 m : vérifie les dimensions, ce n’est pas le plan exact de la maison.'}`:'Aucun refuge défini. L’adresse est envoyée au service de géocodage seulement au clic sur LOCALISER, puis les coordonnées sont enregistrées sur cet appareil uniquement.';
-    $('editSafeZone').disabled=!zone||safeDrawing;
-    $('finishSafeZone').hidden=!safeDrawing;$('undoSafePoint').hidden=!safeDrawing;$('cancelSafeZone').hidden=!safeDrawing;
-    $('remoteCount').textContent=`${remoteLeft()} / ${DAILY_REMOTE_LIMIT} FOUILLES À DISTANCE DISPONIBLES`;
+    const zone=game.safeZone,el=$('safeZoneStatus');if(!el)return;
+    if(safeDrawing)el.textContent=safeCandidate
+      ?'Carré provisoire de 20 × 20 mètres sur la carte. Confirme pour enregistrer définitivement son emplacement.'
+      :'Touche la carte pour choisir l’emplacement du carré de 20 × 20 mètres. Puis appuie sur VALIDER.';
+    else if(!zone)el.textContent='Aucun refuge posé. Sa position reste privée et est enregistrée sur cet appareil uniquement.';
+    else if(refugeCanMove())el.textContent='Refuge placé (400 m²). Tu peux maintenant le déplacer une fois ; après confirmation, nouveau délai de 30 jours.';
+    else el.textContent='Refuge verrouillé (400 m²). Prochain déplacement possible le '+new Date(refugeNextMove()).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})+'.';
+    $('editSafeZone').disabled=safeDrawing||!refugeCanMove();
+    $('editSafeZone').textContent=zone?'⌖ DÉPLACER MON REFUGE':'⌖ PLACER MON REFUGE';
+    $('drawingControls').hidden=!safeDrawing;$('drawingDone').disabled=!safeCandidate;
+    $('remoteCount').textContent=`${remoteLeft()} / ${DAILY_REMOTE_LIMIT} FOUILLES À DISTANCE`;
     $('micToggle').textContent=game.micEnabled?'🎙 MICRO ACTIVÉ POUR LES FOUILLES · DÉSACTIVER':'🎙 ACTIVER LE MICRO PENDANT LES FOUILLES';
     $('micToggle').setAttribute('aria-pressed',String(!!game.micEnabled));
     $('lastMicReading').textContent=game.lastMicLevel===null?'Dernière fouille : aucun signal mesuré.':`Dernier bruit ambiant mesuré : ${game.lastMicLevel}/100 (échelle de jeu, pas des décibels).`;
   }
-  function startDrawing(){if(!game.safeZone)return toast('Entre d’abord ton adresse.');safePrevious=structuredClone(game.safeZone);safeDraft=[];safeDrawing=true;map?.setView(game.safeZone.center,18);map?.setDrawing(true,safeDraft);renderSafe();toast('Appuie successivement sur les coins de ta maison sur la carte.');}
-  function addHomeVertex(lat,lon){if(!safeDrawing)return;const origin=game.safeZone.center;const next=[...safeDraft,[lat,lon]];
-    if(!validHome(next,origin)){toast(`Contour trop grand : rayon ${MAX_SAFE_RADIUS_M} m, surface ${MAX_SAFE_AREA_M2} m² maximum.`);return;}
-    safeDraft=next;map?.setDrawing(true,safeDraft);renderSafe();
+  function startDrawing(){
+    if(safeDrawing)return;
+    if(!refugeCanMove())return toast('Refuge verrouillé jusqu’au '+new Date(refugeNextMove()).toLocaleDateString('fr-FR')+'.');
+    safeDrawing=true;safeDraft=[];safeCandidate=null;
+    map?.setDrawing(true,[]);if(game.safeZone)map?.setView(game.safeZone.center,18);else if(map){map.zoom=18;map.queueDraw();}
+    renderSafe();toast('Touche la carte pour y placer un carré de 20 × 20 m, puis valide.');
   }
-  function finishDrawing(){if(!safeDrawing)return;if(safeDraft.length<3)return toast('Trace au moins 3 coins.');
-    if(!validHome(safeDraft,game.safeZone.center))return toast('Contour trop grand.');
-    game.safeZone={...game.safeZone,points:safeDraft,manual:true};safeDrawing=false;safeDraft=[];safePrevious=null;map?.setDrawing(false,[]);refreshMarkers();commit('Périmètre du refuge enregistré sur cet appareil.');
+  function addHomeVertex(lat,lon){
+    if(!safeDrawing||!Number.isFinite(lat)||!Number.isFinite(lon))return;
+    safeCandidate=[lat,lon];safeDraft=squareAt(lat,lon);
+    map?.setDrawing(true,safeDraft);renderSafe();
+    $('placementHint').textContent='⌂ REFUGE 20 × 20 M · CHANGE SA POSITION OU VALIDE';
   }
-  function cancelDrawing(){if(!safeDrawing)return;safeDrawing=false;safeDraft=[];game.safeZone=safePrevious||game.safeZone;safePrevious=null;map?.setDrawing(false,[]);refreshMarkers();renderSafe();}
-  async function locateHome(e){e.preventDefault();if(safeDrawing)return toast('Termine d’abord le tracé en cours.');const address=$('addressInput').value.trim();if(address.length<8)return toast('Saisis une adresse complète avec la ville.');
-    const button=$('findHome');button.disabled=true;button.textContent='RECHERCHE…';
-    try{
-      const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=fr&q='+encodeURIComponent(address);
-      const r=await fetch(u,{headers:{Accept:'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);
-      const entries=await r.json();if(!entries?.length)throw Error('Adresse introuvable. Ajoute le code postal et la ville.');
-      const lat=+entries[0].lat,lon=+entries[0].lon;if(!Number.isFinite(lat)||!Number.isFinite(lon))throw Error('Coordonnées non valides.');
-      game.safeZone={center:[lat,lon],points:approximateHome(lat,lon),manual:false};
-      center=[lat,lon];map?.setView(center,18);refreshMarkers();commit('Refuge privé localisé : vérifie le contour proposé.');
-      $('addressInput').value='';
-    }catch(err){toast('Adresse non localisée : '+err.message)}finally{button.disabled=false;button.textContent='LOCALISER';}
+  function finishDrawing(){
+    if(!safeDrawing)return;
+    if(!safeCandidate)return toast('Touche d’abord la carte pour choisir le terrain du refuge.');
+    if(!refugeCanMove()){cancelDrawing();return toast('Déplacement indisponible avant 30 jours.');}
+    const now=Date.now();game.safeZone={center:[...safeCandidate],points:safeDraft.map(p=>[...p]),manual:true,placedAt:now};
+    safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);refreshMarkers();
+    commit('Refuge 20 × 20 m enregistré. Prochain déplacement possible dans 30 jours.');
+  }
+  function cancelDrawing(){
+    if(!safeDrawing)return;
+    safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);refreshMarkers();renderSafe();toast('Placement annulé : refuge précédent conservé.');
   }
   // Mesure RMS locale. Une permission est demandée uniquement après une action de fouille.
   async function scanNoise(duration,token){
@@ -212,11 +259,11 @@
     $('hudWater').textContent=game.water;$('waterBar').style.width=`${game.water}%`;
     $('hudLevel').textContent=String(game.level).padStart(2,'0');
     $('xpBar').style.width=`${game.xp/game.level}%`;
-    $('day').textContent=String(1+Math.floor((Date.now()-game.created)/86400000)).padStart(2,'0');
+    $('day').textContent=String(dayNumber()).padStart(2,'0');
     const t=Math.round(danger());$('sidebarThreat').textContent=`${t}%`;$('sidebarThreatBar').style.width=`${t}%`;
     $('sidebarThreatText').textContent=t>70?'Activité critique : risque élevé de rencontre.':t>40?'Mouvements hostiles détectés dans le secteur.':'Faible activité des infectés.';
     $('connection').textContent=game.mode==='gps'?'GPS ACTIF':'MODE DÉMO';
-    $('mapModeLabel').textContent=game.mode==='gps'?'MODE GPS · POSITION PRIVÉE':'ZONE SIMULÉE · DÉMO';
+    $('mapModeLabel').textContent=game.mode==='gps'?'◎ MODE GPS':'◇ MODE DÉMO';
     $('mapCoords').textContent=game.mode==='gps'?'POSITION MASQUÉE':'SECTEUR FICTIF 01';
     $('survivorStatus').textContent=game.hp>60?'OPÉRATIONNEL':game.hp>25?'BLESSÉ':'CRITIQUE';
     // Le journal est uniquement sur la page Missions.
@@ -233,7 +280,11 @@
       return `<button class="poi-card ${game.selected===p.id?'active':''}" data-poi="${safe(p.id)}"><span class="poi-symbol">${p.symbol}</span><span><b>${safe(p.name)}</b><small>${distance}${cd?`Disponible dans ${cd} min`:status}</small></span><span class="poi-danger">${p.danger}%</span></button>`;
     }).join('');
     const p=pois.find(p=>p.id===game.selected)||pois[0];
-    if(!p){$('targetCard').innerHTML='<p>Aucun lieu référencé à proximité. Reviens en mode démo ou réessaie le GPS.</p>';renderSafe();return;}
+    if(!p){
+      $('targetCard').innerHTML=`<p>${safe(poiLoading?'Recherche des commerces autour de ta position GPS…':poiError||'Aucun lieu disponible ici.')}</p>${game.mode==='gps'&&!poiLoading?'<button id="retryPlaces" class="btn">↻ RECHERCHER LES LIEUX</button>':''}`;
+      $('retryPlaces')?.addEventListener('click',()=>{if(game.lat!==null)loadPOIsNear(game.lat,game.lon,true)});
+      renderSafe();return;
+    }
     const cd=Math.max(0,Math.ceil(((game.cooldowns[p.id]||0)-Date.now())/60000));
     const dist=game.mode==='gps'&&game.lat!==null?Math.round(distanceM(game.lat,game.lon,p.lat,p.lon))+' m':'À distance';
     const onsite=isOnSite(p),remote=isRemote(p),remaining=remoteLeft();
@@ -245,7 +296,7 @@
       <div class="target-info"><span>${onsite?'✓ SUR PLACE · FOUILLE GPS':'◇ À DISTANCE'}</span><span>${remaining}/${DAILY_REMOTE_LIMIT} GRATUITES</span></div>
       <div class="search-options">${Object.entries(METHODS).map(([id,m])=>`<button type="button" data-method="${id}" class="${selectedMethod===id?'active':''}">${m.name}<br><small>⚡ ${m.energy}</small></button>`).join('')}</div>
       <button id="searchBtn" class="btn accent" ${disabled?'disabled':''}>${label}</button>
-      <p class="hint">${onsite?'À moins de 120 m de ce lieu : aucune fouille à distance consommée.':`Fouille à distance : ${remaining} restante(s) aujourd’hui. Au-delà, rapproche-toi à 120 m d'un vrai point de ravitaillement avec le GPS.`}</p>`;
+      <p class="hint">${onsite?'À moins de 120 m de ce lieu : aucune fouille à distance consommée.':`Fouille à distance : ${remaining} restante(s) aujourd’hui. Au-delà, rapproche-toi à 120 m d'un vrai point de ravitaillement avec le GPS.`}${game.mode==='gps'&&gpsAccuracy>MAX_GPS_ACCURACY_M?' · Position trop imprécise pour débloquer une fouille sur place.':''}</p>`;
     $('targetCard').querySelectorAll('[data-method]').forEach(el=>el.addEventListener('click',()=>{selectedMethod=el.dataset.method;renderPois()}));
     $('searchBtn').addEventListener('click',searchPoi);
     $('poiList').querySelectorAll('[data-poi]').forEach(el=>el.addEventListener('click',()=>{
@@ -423,7 +474,7 @@
   }
   function setDemo(){
     if(gpsWatch!==null){navigator.geolocation?.clearWatch(gpsWatch);gpsWatch=null;}
-    poiRequestSerial++;game.mode='demo';game.lat=null;game.lon=null;
+    poiRequestSerial++;poiLoading=false;poiError='';game.mode='demo';game.lat=null;game.lon=null;gpsAccuracy=Infinity;
     center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];pois=getPoiList(...center);
     if(!pois.some(p=>p.id===game.selected))game.selected=pois[0].id;
     if(map){map.setView(center,15);refreshMarkers()};commit('Mode démo activé : deux fouilles à distance par jour.');
@@ -436,7 +487,8 @@
     gpsWatch=navigator.geolocation.watchPosition(pos=>{
       const lat=pos.coords.latitude,lon=pos.coords.longitude;
       if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
-      const previous=game.lat===null?0:distanceM(lat,lon,game.lat,game.lon);const moved=game.lat===null||previous>600;
+      const previous=game.lat===null?0:distanceM(lat,lon,game.lat,game.lon);const moved=game.lat===null||previous>350;
+      gpsAccuracy=Number.isFinite(pos.coords.accuracy)?pos.coords.accuracy:Infinity;
       if(previous>4 && previous<400)window.dispatchEvent(new CustomEvent('de:action',{detail:{type:pos.coords.speed>2.2?'run':'walk'}}));
       const first=game.mode!=='gps';game.mode='gps';game.lat=lat;game.lon=lon;center=[lat,lon];
       if(first&&map)map.setView(center,15);
@@ -452,11 +504,9 @@
     document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));
     $('demoMode').addEventListener('click',setDemo);$('gpsMode').addEventListener('click',setGPS);
     $('recenter').addEventListener('click',()=>{if(map)map.setView(game.safeZone && game.mode==='demo'?game.safeZone.center:center,15);else toast('Carte indisponible. La liste des lieux reste utilisable.')});
-    $('addressForm').addEventListener('submit',locateHome);
     $('editSafeZone').addEventListener('click',startDrawing);
-    $('finishSafeZone').addEventListener('click',finishDrawing);
-    $('undoSafePoint').addEventListener('click',()=>{safeDraft.pop();map?.setDrawing(true,safeDraft);renderSafe()});
-    $('cancelSafeZone').addEventListener('click',cancelDrawing);
+    $('drawingDone').addEventListener('click',finishDrawing);
+    $('drawingCancel').addEventListener('click',cancelDrawing);
     $('micToggle').addEventListener('click',()=>{game.micEnabled=!game.micEnabled;commit(game.micEnabled?'Micro autorisé pour les fouilles (demande iOS à la première utilisation).':'Micro désactivé.');});
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));
@@ -468,6 +518,8 @@
     $('modal').addEventListener('click',e=>{if(e.target===$('modal')&&!combat)closeModal()});
     window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!combat)closeModal()});
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&scanToken)scanToken.stop?.();if(document.visibilityState==='visible')renderAll()});
+    // La page peut rester ouverte pendant le changement de date.
+    setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();}},60000);
     if('serviceWorker' in navigator && window.isSecureContext)navigator.serviceWorker.register('./sw.js').catch(()=>{});
     toast('Transmission ouverte. Prêt pour ta première expédition !');
   }

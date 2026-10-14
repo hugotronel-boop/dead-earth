@@ -34,3 +34,25 @@
 .map-attribution{bottom:229px;opacity:.68}
 @media(max-height:720px){.survivor-figure{bottom:133px;width:min(48vw,185px);height:min(36vh,235px)}}
 .character-image img{transition:transform .2s}.character-image.anim-eat img{animation:avatarNibble .65s steps(2,end) infinite}.character-image.anim-drink img{animation:avatarDrink .7s steps(2,end) infinite}.character-image.anim-walk img{animation:avatarWalk .48s steps(2,end) infinite}.character-image.anim-run img{animation:avatarWalk .22s steps(2,end) infinite}.character-image.anim-scavenge img{animation:avatarScavenge .5s steps(2,end) infinite}.character-image.anim-hurt img{filter:sepia(.6) saturate(1.5)}@keyframes avatarNibble{50%{transform:translateY(6px) rotate(3deg)}}@keyframes avatarDrink{50%{transform:translateY(-7px) rotate(-4deg)}}@keyframes avatarWalk{50%{transform:translateY(-7px)}}@keyframes avatarScavenge{50%{transform:translateY(10px) rotate(6deg)}}@media(prefers-reduced-motion:reduce){.character-image img{animation:none!important}}
+
+/* Version 0.4 : la carte est désormais dégagée, HUD uniquement en haut. */
+.map-top{left:auto;right:10px;top:9px;display:block;z-index:24}
+.map-utilities{display:flex;flex-direction:column;align-items:flex-end;position:relative}
+.map-menu-toggle{min-height:36px!important;min-width:112px;font:10px var(--pixel)!important;line-height:1.5;letter-spacing:.1px}
+.map-tools-panel{width:146px;padding:8px;display:flex;flex-direction:column;align-items:stretch;gap:7px;margin-top:7px;max-width:calc(100vw - 20px);background:#24343bfa;box-shadow:0 8px 0 #0b1014ba}
+.map-tools-panel .pixel-button{min-height:38px;text-align:center;font-size:10px}
+.map-tools-panel .map-zoom{display:flex;gap:7px}
+.map-tools-panel .map-zoom button{flex:1;font-size:18px}
+.menu-mode{font:9px monospace;color:#c5c6ae;text-align:center;margin-top:2px}
+.action-dock{bottom:18px;left:10px;right:10px;z-index:18}
+.survivor-figure{bottom:87px;width:min(41vw,174px);height:min(32vh,262px);z-index:7}
+.hero-target{height:min(155px,21vh)}
+.map-attribution{bottom:91px;left:8px;z-index:2;opacity:.73}
+.remote-chip{font-size:9px}
+.drawing-controls{top:auto;bottom:103px;left:8px;right:8px;max-width:440px;padding:9px;z-index:31;background:#283b3fef}
+.drawing-controls span{font:10px monospace;line-height:1.4}
+.drawing-controls button{min-width:65px;min-height:40px}
+.drawing-controls button:disabled{opacity:.4}
+#safeZoneStatus{line-height:1.65}
+@media(max-height:720px){.action-dock{bottom:15px}.survivor-figure{bottom:81px;width:min(36vw,154px);height:min(28vh,218px)}.map-attribution{bottom:88px}.drawing-controls{bottom:91px}}
+@media(max-width:345px){.map-menu-toggle{min-width:100px}.survivor-figure{width:39vw}.action-dock{left:7px;right:7px}}
