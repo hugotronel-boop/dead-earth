@@ -1,24 +1,30 @@
-# DEAD EARTH — V1.2 | Zones SAFE & coûts réels de construction
+# DEAD EARTH — V1.3 : écosystème de zombies
 
-Installation : remplace uniquement le fichier `index.html` dans la racine du dépôt GitHub `hugotronel-boop/dead-earth`. Aucun autre fichier ne doit être remplacé. Le jeu conserve la clé de sauvegarde locale `dead-earth-alpha-v1`.
+## Nouveautés
 
-## Changements
+- La carte du monde est divisée en cases géographiques d'environ **20 km²** chacune, soit des carrés d'environ **4,47 km de côté** autour des latitudes françaises. Les limites sont légèrement approximatives sur le globe.
+- Chaque case contient une population **déterministe mais aléatoire de 12 à 38 zombies**. Le même joueur retrouve le même nombre dans une même case.
+- Chaque zombie peut choisir des destinations **partout dans sa propre case** et y marche librement. Il ne peut pas franchir une limite de case.
+- Chaque zombie tué disparaît de la carte et déclenche un délai **individuel de 20 heures réelles**. Un remplaçant ne peut apparaître qu'après la fin de ce délai, à une nouvelle position dans la même case.
+- Zombies interdits dans les **zones SAFE** et dans le refuge : interdiction à l'apparition, lors du déplacement et lors de l'agrandissement d'une protection.
+- Le blocage d'une construction SAFE vérifie la **position actuelle** des zombies dans le futur périmètre, pas un point d'apparition ancien.
+- Le menu du village affiche la population et les retours prévus dans la case actuellement regardée.
+- La carte reste rapide : seule la population des cases visibles et nécessaires aux vérifications est instanciée.
 
-- Le cartouche du village (ex. « ☣ CORBENY ») est un bouton compact en haut à gauche. Appuyer dessus ouvre/ferme le menu Reconquête.
-- Le menu indique le pourcentage protégé, les zones existantes, les matériaux nécessaires et le nombre possédé (« 4 / 5 »). Les quantités manquantes apparaissent en orange/rouge.
-- Construire une nouvelle zone SAFE de niveau 1 (100 m de diamètre) nécessite initialement **5 bois, 2 ferrailles et 2 pièces**. Si des zones existent déjà, le coût augmente progressivement avec leur nombre. Maximum 16 zones dans cette alpha.
-- Améliorer une zone coûte également des matériaux, avec un prix croissant de niveau 2 à niveau 10. Les coûts sont affichés avant de confirmer l'amélioration.
-- Une construction est refusée lorsque les matériaux sont insuffisants, lorsque le GPS du joueur est à plus de 35 m du centre de la zone, ou lorsqu'un zombie virtuel se trouve dans le périmètre concerné. Le système vérifie une deuxième fois les conditions à la confirmation et **ne retire les matériaux qu'après validation réussie**.
-- Les améliorations et constructions gardent la limite GPS de 35 m. Les combats à 20 m et les fouilles à 10 m sont inchangés.
-- La carte, le personnage, l'inventaire, la base, les quêtes et les sauvegardes des versions précédentes sont conservés.
+## Fonctionnement conservé
 
-## Exemples d'économie (pour équilibrage)
+- GPS réel pour combattre à 20 mètres maximum d'un zombie et fouiller à 10 mètres maximum d'un lieu réel.
+- Zones SAFE : présence du joueur à 35 mètres du centre, matériaux nécessaires, diamètre de 100 à 1 000 mètres selon le niveau.
+- Refuge au domicile, inventaire, atelier, missions, fabrication, sauvegarde locale.
+- Même interface pixel art, en un seul fichier HTML.
 
-Nouvelle zone 1 : 5 bois / 2 ferrailles / 2 pièces.
-Nouvelle zone 2 : 6 bois / 3 ferrailles / 3 pièces.
-Amélioration niveau 1 → 2 : 5 bois / 2 ferrailles / 2 pièces.
-Les coûts plafonnent pour rester transportables avec un sac de 30 kg ; ils peuvent être rééquilibrés dans le code.
+## Installation GitHub Pages
 
-## Sécurité & limites
+Remplacer **uniquement le fichier `index.html`** à la racine de ton dépôt `dead-earth` par le fichier de ce dossier, puis faire **Commit changes**. Il est autonome pour les éléments du jeu, mais les données de commerces et de rues nécessitent une connexion Internet.
 
-La géolocalisation nécessite HTTPS et l'autorisation du navigateur. Jouer à l'arrêt, sans pénétrer dans les commerces ni propriétés privés pour atteindre un marqueur. Les zombies et zones SAFE sont fictifs. Le jeu est une alpha à sauvegarde locale ; les délais et possessions ne sont pas sécurisés par un serveur. Le nom de la localité peut nécessiter la disponibilité du service de géocodage.
+## Limites actuelles
+
+- Ceci est une **simulation locale solo** : les morts, le délai de retour et les zones SAFE sont sauvegardés **sur cet appareil**, pas synchronisés entre joueurs.
+- Les zombies se déplacent quand leur case est chargée dans le jeu ; les compteurs de réapparition, eux, avancent même quand le jeu est fermé.
+- Les horaires reposent sur l'horloge de l'appareil. Un serveur sera nécessaire plus tard pour empêcher la triche, assurer la même population à tous les joueurs et gérer un monde partagé.
+- Pour des raisons de sécurité, aucune action du jeu ne doit exiger de courir, d'entrer dans des propriétés privées ou de regarder le téléphone en traversant une route.
