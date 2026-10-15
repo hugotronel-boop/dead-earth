@@ -133,6 +133,18 @@
 .base-privacy{padding:0 7px 14px;text-align:center}
 @media(max-width:360px){.base-build-grid{grid-template-columns:1fr}.base-diorama{height:180px}.base-hut{transform:translateX(-50%) scale(.85);transform-origin:bottom center}}
 
+
+/* DEAD EARTH V1.0 — reconquête progressive des villages et secteurs */
+.territory-campaign{position:absolute;z-index:14;top:9px;left:8px;width:min(65%,265px);padding:8px 9px 9px;background:#202d30eF;max-height:200px;overflow:auto;box-shadow:0 3px 0 #0a1418;pointer-events:auto}
+.campaign-head{display:flex;justify-content:space-between;align-items:center;gap:5px;font-family:var(--pixel,'Courier New'),monospace;font-size:8px;color:#fff0c5;line-height:1.5}
+.campaign-head b{min-width:0;overflow-wrap:anywhere}.campaign-head span{background:#714439;color:#ffe0bf;padding:3px;font-size:7px;white-space:nowrap}
+.territory-campaign p,.campaign-base-copy,.territory-quest-card p{font:11px/1.4 'Courier New',monospace;color:#eadab9;margin:5px 0}
+.territory-campaign small,.territory-quest-card small{display:block;color:#b6c2b9;font:9px/1.4 'Courier New',monospace;margin-top:5px}
+.campaign-track{height:10px;background:#11191c;border:2px solid #4b6168;overflow:hidden;margin:6px 0}
+.campaign-track i{display:block;height:100%;background:repeating-linear-gradient(90deg,#c75c4c 0 10px,#eb9570 10px 13px);transition:width .25s}
+.campaign-go{font:10px 'Courier New',monospace;font-weight:900;border:3px solid #e6b97c;background:#735c36;color:#fff5d4;min-height:34px;display:block;width:100%;margin:6px 0 2px;cursor:pointer}
+.territory-base{margin-bottom:12px}.territory-quest-card{border:3px solid #775f46;background:#283536;padding:10px;margin-bottom:12px}.territory-quest-card strong{font:10px/1.5 'Courier New',monospace;color:#f4d594}
+@media(max-width:360px){.territory-campaign{width:67%;max-height:168px;padding:6px}.campaign-head{font-size:7px}.territory-campaign small{font-size:8px}}
 </style>
 <style>
 
@@ -153,7 +165,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 0.6 · PIXEL</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.0 · RECONQUÊTE</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -186,6 +198,7 @@
         </div>
       </div>
       <div class="sr-only" aria-hidden="true"><span id="sidebarThreat"></span><div id="sidebarThreatBar"></div><span id="sidebarThreatText"></span><span id="mapCoords"></span><span id="poiCounter"></span><span id="poiCount"></span></div>
+      <div id="territoryCampaign" class="territory-campaign pixel-frame" aria-live="polite"></div>
       <div class="action-dock">
         <div class="remote-chip">⌕ <span id="remoteCount">2 / 2 FOUILLES</span></div>
         <button id="openLoot" class="pixel-button main-action">▣ FOUILLER <small>POINTS DE RAVITAILLEMENT</small></button>
@@ -230,6 +243,7 @@
     </section>
 
     <section id="page-base" class="page scroll-page" aria-label="Base">
+      <div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div>
       <h1>⌂ MON REFUGE</h1>
       <div class="pixel-frame page-panel base-panel">
         <div class="pixel-heading">ZONE SÉCURISÉE <span class="base-mini-rank" id="baseRank">NIV. 1 / 5</span></div>
@@ -278,7 +292,7 @@
     </section>
 
     <section id="page-missions" class="page scroll-page" aria-label="Quêtes">
-      <h1>✦ MISSIONS</h1><div class="pixel-frame page-panel"><div class="pixel-heading">OBJECTIFS DE SURVIE</div><div id="missionList" class="item-list"></div></div>
+      <h1>✦ MISSIONS</h1><div class="pixel-frame page-panel"><div class="pixel-heading">OBJECTIFS DE SURVIE</div><div id="territoryQuestCard" class="territory-quest-card"></div><div id="missionList" class="item-list"></div></div>
       <div class="pixel-frame page-panel"><div class="pixel-heading">JOURNAL DES ÉVÉNEMENTS</div><div id="journal" class="journal"></div><button id="resetBtn" class="pixel-button full danger-button">↻ RECOMMENCER UNE PARTIE</button></div>
     </section>
   </main>
@@ -417,6 +431,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     invalidateSize(){this.resize()}
     setMarkers(markers){this.markers=markers||[];this.queueDraw()}
     setSafeZone(zone){this.safeZone=zone;this.queueDraw()}
+    setTerritory(territory,safeRadius){this.territory=territory;this.safeRadius=safeRadius||0;this.queueDraw()}
     setDrawing(yes,points=[]){this.isDrawing=!!yes;this.drawing=points||[];this.queueDraw()}
     queueDraw(){if(this.destroyed||this.dirty)return;this.dirty=true;requestAnimationFrame(()=>{this.dirty=false;if(!this.destroyed)this.draw()})}
     async template(){if(this.tileTemplate||this.templatePending)return;this.templatePending=true;try{const r=await fetch('https://tiles.openfreemap.org/planet',{cache:'force-cache'});if(!r.ok)throw Error('TileJSON HTTP '+r.status);const data=await r.json();if(typeof data.tiles?.[0]!=='string')throw Error('TileJSON absent');this.tileTemplate=data.tiles[0];this.pump();this.queueDraw()}catch(e){this.tileTemplate=null;setTimeout(()=>{this.templatePending=false;this.queueDraw()},30000);return}this.templatePending=false}
@@ -466,6 +481,20 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         const p={x:cx+(x*SIZE-this.center.x)*s,y:cy+(y*SIZE-this.center.y)*s};const t=this.tiles.get(k);
         if(t?.state==='ready'){ctx.drawImage(t.image,Math.round(p.x),Math.round(p.y),Math.ceil(sTile)+1,Math.ceil(sTile)+1);t.access=Date.now()}
         else if(!t&&requested<18){this.enqueue(((x%(2**BASE))+(2**BASE))%(2**BASE),y);requested++}
+      }
+      // Territoire virtuel de reconquête : cercle indicatif, sans prétendre suivre les frontières administratives.
+      if(this.territory){
+        const t=this.territory,c=this.position(...t.center),edge=this.position(t.center[0]+t.radius/111195,t.center[1]);
+        const radius=Math.abs(c.y-edge.y);
+        ctx.save();ctx.setLineDash([8,7]);ctx.strokeStyle=t.cleared?'#b1ca8c':'#be6455';ctx.lineWidth=3;
+        ctx.beginPath();ctx.arc(c.x,c.y,radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+        if(this.safeRadius>0){
+          const safeEdge=this.position(t.center[0]+this.safeRadius/111195,t.center[1]);
+          const sr=Math.abs(c.y-safeEdge.y);
+          ctx.fillStyle='rgba(86,174,117,.13)';ctx.strokeStyle='#72d99a';ctx.lineWidth=3;
+          ctx.beginPath();ctx.arc(c.x,c.y,sr,0,Math.PI*2);ctx.fill();ctx.stroke();
+        }
+        ctx.restore();
       }
       // Refuge : zone privée géométrique et visuelle, indépendante du GPS joueur.
       if(this.safeZone?.points?.length>=3)this.drawZone(this.safeZone.points,'#8acf9b','#357348',.21);
@@ -575,7 +604,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   ];
   const fresh = () => ({version:1,created:Date.now(),mode:'demo',lat:null,lon:null,defeatedZombies:[],hp:100,energy:100,water:86,food:80,xp:0,
     level:1,baseLevel:1,fort:25,threat:14,noise:0,survivorName:'',selected:'market',searchMethod:'quiet',totalSearches:0,totalUpgrades:0,kills:0,
-    dailyRemote:{day:'',used:0},safeZone:null,micEnabled:false,lastMicLevel:null,
+    dailyRemote:{day:'',used:0},safeZone:null,territory:null,micEnabled:false,lastMicLevel:null,
     buildings:{collector:false,workbench:false,garden:false,generator:false,infirmary:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',
     weapons:{knife:{owned:true,durability:100},axe:{owned:false,durability:0},rifle:{owned:false,durability:0}},equippedWeapon:'knife',
     inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0},
@@ -593,11 +622,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         workbenchLevel:clamp(Number(obj.workbenchLevel)||0,0,2),
         productionDays:{...base.productionDays,...(obj.productionDays||{})},generatorDay:obj.generatorDay||'',
         claimed:Array.isArray(obj.claimed)?obj.claimed:[],cooldowns:obj.cooldowns||{},logs:obj.logs.slice(0,55),
-        dailyRemote:obj.dailyRemote||base.dailyRemote,defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-500):[],safeZone:obj.safeZone||null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
+        dailyRemote:obj.dailyRemote||base.dailyRemote,defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-500):[],safeZone:obj.safeZone||null,territory:obj.territory&&Array.isArray(obj.territory.center)?{...obj.territory,defeatedIds:Array.isArray(obj.territory.defeatedIds)?obj.territory.defeatedIds:[],expansion:Number(obj.territory.expansion)||0,patrolKills:Number(obj.territory.patrolKills)||0}:null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
         mode:'demo',lat:null,lon:null}; // Coordonnées GPS exactes jamais persistées.
     } catch {return fresh();}
   }
   let game=load();
+  // Les refuges antérieurs à la reconquête sont préservés, sans réinitialiser la partie.
+  if(game.safeZone&&!game.territory){game.territory={id:'ancien-'+Math.round(game.safeZone.center[0]*1000)+'-'+Math.round(game.safeZone.center[1]*1000),name:'Ancien secteur du refuge',kind:'village',center:[...game.safeZone.center],radius:750,target:8,kills:8,cleared:true,patrolKills:0,expansion:0,defeatedIds:[],legacy:true};}
   window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:game.buildings.generator&&game.generatorDay===localDay()});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
@@ -611,7 +642,112 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const zombieTracks=new Map(); // Position et destination mémorisées tant que la page est ouverte.
   function sectorKey(lat,lon){return Math.floor(lat/ZOMBIE_GRID_DEG)+':'+Math.floor(lon/ZOMBIE_GRID_DEG)}
   function seeded(n){let x=n|0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
-  function generateZombies(lat,lon){
+  const CAMPAIGN_PATROL_STEPS=4;
+  const CAMPAIGN_PATROL_PER_STEP=4;
+  const CAMPAIGN_SAFETY_RATIOS=[.12,.30,.55,.76,1];
+  function territoryStage(){
+    const t=game.territory;
+    if(!t)return 'choose';
+    if(!t.cleared)return 'infected';
+    if(!game.safeZone)return 'place';
+    return t.expansion>=CAMPAIGN_PATROL_STEPS?'safe':'fortify';
+  }
+  function territorySafeRadius(){
+    const t=game.territory;
+    return t&&t.cleared&&game.safeZone?t.radius*CAMPAIGN_SAFETY_RATIOS[clamp(t.expansion||0,0,4)]:0;
+  }
+  function territoryRemaining(){const t=game.territory;return t?Math.max(0,t.target-t.kills):0;}
+  function isInCampaign(lat,lon){const t=game.territory;return Boolean(t&&distanceM(lat,lon,...t.center)<=t.radius+220);}
+  function campaignRng(i){const str=game.territory?.id||'x';let h=2166136261;for(const c of str){h=Math.imul(h^c.charCodeAt(0),16777619)}return seeded(h^Math.imul(i+1,2654435761));}
+  function campaignZombies(lat,lon){
+    const t=game.territory;
+    if(!t||!isInCampaign(lat,lon))return null;
+    const phase=territoryStage();
+    if(phase==='place'||phase==='safe')return [];
+    const start=phase==='infected'?0:t.target;
+    const end=phase==='infected'?t.target:t.target+CAMPAIGN_PATROL_PER_STEP*CAMPAIGN_PATROL_STEPS;
+    const list=[];
+    for(let i=start;i<end;i++){
+      if(phase==='fortify'&&i>=t.target+Math.min(4,t.expansion+1)*CAMPAIGN_PATROL_PER_STEP)break;
+      const id='campaign-'+t.id+'-'+i;
+      if((t.defeatedIds||[]).includes(id))continue;
+      const rand=campaignRng(i),angle=rand()*Math.PI*2;
+      const r=phase==='infected'?(75+rand()*140):Math.max(territorySafeRadius()+45,130+rand()*170);
+      const radius=Math.min(t.radius-45,r);
+      const homeLat=t.center[0]+Math.cos(angle)*radius/111195;
+      const homeLon=t.center[1]+Math.sin(angle)*radius/(111320*Math.max(.1,Math.cos(t.center[0]*Math.PI/180)));
+      let z=zombieTracks.get(id);
+      if(!z){z={id,kind:'zombie',symbol:'☣',homeLat,homeLon,lat:homeLat,lon:homeLon,radius:16+rand()*17,speed:.36+rand()*.35,targetLat:homeLat,targetLon:homeLon,restUntil:0,lastTime:performance.now(),rng:rand,campaign:true};zombieTracks.set(id,z);}
+      list.push(z);if(list.length>=MAX_VISIBLE_ZOMBIES)break;
+    }
+    return list;
+  }
+  async function territoryName(lat,lon){
+    try{
+      const control=new AbortController(),timeout=setTimeout(()=>control.abort(),7000);
+      let response;
+      try{response=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=12&accept-language=fr&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lon),{signal:control.signal})}finally{clearTimeout(timeout)}
+      if(!response.ok)throw Error('Reverse '+response.status);
+      const info=await response.json(),a=info.address||{};
+      const locality=a.city||a.town||a.village||a.municipality||a.hamlet||a.suburb||'';
+      const kind=a.city?'city':a.town?'town':'village';
+      return {name:String(locality||'Secteur local').slice(0,42),kind};
+    }catch(e){return {name:'Secteur local',kind:'village'};}
+  }
+  let territoryStarting=false;
+  async function beginTerritory(){
+    if(game.territory||territoryStarting)return;
+    if(!map)return toast('Attends le chargement de la carte.');
+    territoryStarting=true;const place=map.latlon(map.w/2,map.h/2),lat=place.lat,lon=place.lon;
+    toast('Identification du village ou de la ville…');
+    try{
+      const match=await territoryName(lat,lon),town=match.kind==='town',city=match.kind==='city';
+      game.territory={id:'region-'+Math.round(lat*1000)+'-'+Math.round(lon*1000),name:match.name,kind:match.kind,center:[lat,lon],radius:city?1600:town?1150:750,target:city?16:town?12:8,kills:0,cleared:false,patrolKills:0,expansion:0,defeatedIds:[],legacy:false};
+      center=[lat,lon];map.setView([lat,lon],15);roamCenterKey='';updateRoaming(true);commit(`☣ ${match.name} est infesté : élimine ${game.territory.target} infectés pour libérer le secteur !`);
+    }finally{territoryStarting=false;renderTerritory();}
+  }
+  function claimTerritoryKill(id){
+    const t=game.territory;
+    if(!t||!id.startsWith('campaign-'+t.id+'-')||(t.defeatedIds||[]).includes(id))return;
+    t.defeatedIds.push(id);
+    if(!t.cleared){
+      t.kills=Math.min(t.target,t.kills+1);
+      if(t.kills>=t.target){t.cleared=true;t.clearedAt=Date.now();xpGain(120);log(`✓ ${t.name} libéré ! Tu peux maintenant y installer ton refuge.`);toast('SECTEUR LIBÉRÉ ! PLACE TON REFUGE !');}
+    }else if(game.safeZone){
+      t.patrolKills=Math.min(16,t.patrolKills+1);
+      log(`Patrouille éliminée : ${t.patrolKills}/16.`);
+      maybeExpandTerritory();
+    }
+    // Un peu de récupération fictive après chaque combat; le sac limite le butin.
+    const drop=takeLoot({[t.kills%3===0?'parts':t.kills%2?'wood':'metal']:1});
+    if(drop.length)log('Sur l’infecté : '+drop.join(', ')+'.');
+  }
+  function maybeExpandTerritory(){
+    const t=game.territory;if(!t||!t.cleared||!game.safeZone)return;
+    while(t.expansion<4&&game.baseLevel>=t.expansion+2&&t.patrolKills>=CAMPAIGN_PATROL_PER_STEP*(t.expansion+1)){
+      t.expansion++;xpGain(50);log(`✓ Périmètre sécurisé agrandi : niveau ${t.expansion+1}/5.`);
+      if(t.expansion===4){xpGain(200);log(`★ ${t.name} entièrement sécurisé ! Mission de reconquête accomplie.`)}
+    }
+  }
+  function renderTerritory(){
+    const t=game.territory,stage=territoryStage(),card=$('territoryCampaign'),base=$('territoryBaseCard'),quest=$('territoryQuestCard');
+    if(!card)return;
+    let title='',desc='',progress=0,action='',actionId='territoryAction',info='';
+    if(stage==='choose'){title='☣ TON VILLAGE EST INFESTÉ';desc='Active le GPS ou explore la carte, puis lance la reconquête du secteur affiché.';action='⚔ DÉMARRER ICI';info='La zone est un périmètre de jeu, pas une frontière administrative.';}
+    else if(stage==='infected'){title='☣ '+t.name.toLocaleUpperCase('fr');desc=`Élimine les infectés du secteur : ${t.kills} / ${t.target}`;progress=t.kills/t.target*100;info='Touche les zombies ☣ de la carte pour engager un combat. Le refuge se débloque après la libération.';}
+    else if(stage==='place'){title='✓ '+t.name.toLocaleUpperCase('fr')+' LIBÉRÉ';desc='Les infectés principaux ont été éliminés. Choisis où installer ton refuge.';progress=100;action='⌂ INSTALLER LE REFUGE';info='Choisis une position sur la carte, puis confirme le carré de 20 × 20 m.';}
+    else {title=stage==='safe'?'★ '+t.name.toLocaleUpperCase('fr')+' SÉCURISÉ':'⌂ '+t.name.toLocaleUpperCase('fr')+' EN RECONSTRUCTION';desc=stage==='safe'?'Secteur sécurisé ! Continue à améliorer ton équipement et explorer ailleurs.':`Périmètre sécurisé ${t.expansion+1}/5 · Patrouilles ${t.patrolKills}/16`;progress=(t.expansion+1)/5*100;info=stage==='safe'?'Victoire locale ! Les autres secteurs restent dangereux.':`Prochain palier : refuge niv. ${Math.min(5,t.expansion+2)} + ${Math.min(16,(t.expansion+1)*4)} patrouilles éliminées.`;}
+    card.innerHTML=`<div class="campaign-head"><b>${safe(title)}</b><span>${stage==='infected'?'INFESTÉ':stage==='choose'?'MISSION':stage==='place'?'LIBÉRÉ':stage==='safe'?'ZONE SAFE':'RECONQUÊTE'}</span></div><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>${action?`<button class="campaign-go" id="${actionId}">${safe(action)}</button>`:''}<small>${safe(info)}</small>`;
+    $('territoryAction')?.addEventListener('click',()=>stage==='choose'?beginTerritory():stage==='place'?startDrawing():null);
+    if(base){base.innerHTML=`<div class="pixel-heading">RECONQUÊTE DU TERRITOIRE</div><p class="campaign-base-copy">${safe(title)}<br>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><p class="base-section-hint">${safe(info)}</p>${stage==='choose'?'<button class="pixel-button full" id="territoryBaseStart">⌖ CHOISIR UN SECTEUR SUR LA CARTE</button>':stage==='infected'?'<button class="pixel-button full" id="territoryBaseMap">⚔ CHASSER LES INFECTÉS</button>':stage==='place'?'<button class="pixel-button full" id="territoryBasePlace">⌂ PLACER LE REFUGE</button>':''}`;}
+    $('territoryBaseStart')?.addEventListener('click',()=>switchTab('map'));
+    $('territoryBaseMap')?.addEventListener('click',()=>{switchTab('map');map?.setView(t.center,15)});
+    $('territoryBasePlace')?.addEventListener('click',()=>{switchTab('map');startDrawing()});
+    if(quest){quest.innerHTML=`<strong>☣ MISSION PRINCIPALE — ${safe(t?.name||'Choisir un secteur')}</strong><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><small>${safe(info)}</small>`;}
+    if(map){map.setTerritory?.(t,territorySafeRadius());}
+  }
+
+  function ambientZombies(lat,lon){
     const row=Math.floor(lat/ZOMBIE_GRID_DEG),col=Math.floor(lon/ZOMBIE_GRID_DEG),list=[];
     for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){
       const r=row+a,c=col+b,sector=r+':'+c,rand=seeded(Math.imul(r,73856093)^Math.imul(c,19349663));
@@ -619,6 +755,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       const id='zombie-'+sector+':0';
       if(game.defeatedZombies.includes(id))continue;
       const homeLat=(r+.2+rand()*.6)*ZOMBIE_GRID_DEG,homeLon=(c+.2+rand()*.6)*ZOMBIE_GRID_DEG;
+      if(territorySafeRadius()&&distanceM(homeLat,homeLon,...game.territory.center)<territorySafeRadius())continue;
       if(game.safeZone&&distanceM(homeLat,homeLon,...game.safeZone.center)<55)continue;
       let z=zombieTracks.get(id);
       if(!z){
@@ -636,7 +773,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function updateRoaming(force=false){
     if(!map)return;
     const focus=map.latlon(map.w/2,map.h/2),key=sectorKey(focus.lat,focus.lon);
-    if(force||key!==roamCenterKey){roamCenterKey=key;roamingZombies=generateZombies(focus.lat,focus.lon)}
+    if(force||key!==roamCenterKey){roamCenterKey=key;roamingZombies=campaignZombies(focus.lat,focus.lon)??ambientZombies(focus.lat,focus.lon)}
     const now=performance.now();
     for(const z of roamingZombies){
       const dt=Math.max(0,Math.min(2,(now-z.lastTime)/1000));z.lastTime=now;
@@ -900,10 +1037,10 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(safeDrawing)el.textContent=safeCandidate
       ?'Carré provisoire de 20 × 20 mètres sur la carte. Confirme pour enregistrer définitivement son emplacement.'
       :'Touche la carte pour choisir l’emplacement du carré de 20 × 20 mètres. Puis appuie sur VALIDER.';
-    else if(!zone)el.textContent='Aucun refuge posé. Sa position reste privée et est enregistrée sur cet appareil uniquement.';
+    else if(!zone)el.textContent=territoryStage()==='infected'?'Village infesté : élimine les zombies avant de poser le refuge.':territoryStage()==='choose'?'Choisis un secteur à reconquérir sur la carte avant de construire.':'Secteur libéré ! Place maintenant ton refuge : emplacement privé sur cet appareil.';
     else if(refugeCanMove())el.textContent='Refuge placé (400 m²). Tu peux maintenant le déplacer une fois ; après confirmation, nouveau délai de 30 jours.';
     else el.textContent='Refuge verrouillé (400 m²). Prochain déplacement possible le '+new Date(refugeNextMove()).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})+'.';
-    $('editSafeZone').disabled=safeDrawing||!refugeCanMove();
+    $('editSafeZone').disabled=safeDrawing||!refugeCanMove()||(!zone&&territoryStage()!=='place');
     $('editSafeZone').textContent=zone?'⌖ DÉPLACER MON REFUGE':'⌖ PLACER MON REFUGE';
     $('drawingControls').hidden=!safeDrawing;$('drawingDone').disabled=!safeCandidate;
     $('remoteCount').textContent=`${remoteLeft()} / ${DAILY_REMOTE_LIMIT} FOUILLES À DISTANCE`;
@@ -913,6 +1050,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   function startDrawing(){
     if(safeDrawing)return;
+    if(!game.safeZone && territoryStage()!=='place')return toast('Libère d’abord ton village pour débloquer le refuge.');
     if(!refugeCanMove())return toast('Refuge verrouillé jusqu’au '+new Date(refugeNextMove()).toLocaleDateString('fr-FR')+'.');
     safeDrawing=true;safeDraft=[];safeCandidate=null;
     map?.setDrawing(true,[]);if(game.safeZone)map?.setView(game.safeZone.center,18);else if(map){map.zoom=18;map.queueDraw();}
@@ -920,6 +1058,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   function addHomeVertex(lat,lon){
     if(!safeDrawing||!Number.isFinite(lat)||!Number.isFinite(lon))return;
+    if(game.territory&&distanceM(lat,lon,...game.territory.center)>game.territory.radius-20)return toast('Place le refuge à l’intérieur du secteur libéré.');
     safeCandidate=[lat,lon];safeDraft=squareAt(lat,lon);
     map?.setDrawing(true,safeDraft);renderSafe();
     $('placementHint').textContent='⌂ REFUGE 20 × 20 M · CHANGE SA POSITION OU VALIDE';
@@ -927,10 +1066,11 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function finishDrawing(){
     if(!safeDrawing)return;
     if(!safeCandidate)return toast('Touche d’abord la carte pour choisir le terrain du refuge.');
+    if(!game.safeZone&&territoryStage()!=='place'){cancelDrawing();return toast('Libère d’abord le territoire.');}
     if(!refugeCanMove()){cancelDrawing();return toast('Déplacement indisponible avant 30 jours.');}
     const now=Date.now();game.safeZone={center:[...safeCandidate],points:safeDraft.map(p=>[...p]),manual:true,placedAt:now};
     safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);refreshMarkers();
-    commit('Refuge 20 × 20 m enregistré. Prochain déplacement possible dans 30 jours.');
+    maybeExpandTerritory();updateRoaming(true);commit('⌂ Refuge installé ! Sécurise maintenant les environs avec des patrouilles et améliore la base.');
   }
   function cancelDrawing(){
     if(!safeDrawing)return;
@@ -1087,7 +1227,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         game.energy=clamp(game.energy-5);game.threat=clamp(game.threat+3);combat=null;engagedZombieId=null;closeModal();commit('Tu as réussi à fuir le combat.');return;
       }game.energy=clamp(game.energy-5);note='La fuite échoue. Le zombie t’atteint !';
     }
-    if(z.hp<=0){if(engagedZombieId){game.defeatedZombies.push(engagedZombieId);engagedZombieId=null;roamingZombies=roamingZombies.filter(e=>!game.defeatedZombies.includes(e.id));refreshMarkers();}game.kills++;xpGain(z.xp);game.threat=clamp(game.threat-8);combat=null;closeModal();commit(`☠ ${z.name} neutralisé ! +${z.xp} XP.`);return;}
+    if(z.hp<=0){if(engagedZombieId){const id=engagedZombieId;game.defeatedZombies.push(id);claimTerritoryKill(id);engagedZombieId=null;roamingZombies=roamingZombies.filter(e=>e.id!==id);}game.kills++;xpGain(z.xp);game.threat=clamp(game.threat-8);combat=null;closeModal();updateRoaming(true);commit(`☠ ${z.name} neutralisé ! +${z.xp} XP.`);return;}
     combat.round++;
     const raw=random(...z.damage);const hit=combat.guard?Math.ceil(raw*.25):raw;combat.guard=false;
     game.hp=clamp(game.hp-hit);note+=` ${z.name} t’inflige ${hit} dégâts.`;
@@ -1121,6 +1261,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function powered(){return Boolean(game.buildings.generator&&game.generatorDay===localDay())}
   function hasBuilding(id){return Boolean(game.buildings[id])}
   function buildStructure(id){
+    if(!game.safeZone)return toast('Installe d’abord ton refuge après avoir libéré le secteur.');
     const b=BASE_BUILDINGS.find(x=>x.id===id);
     if(!b||hasBuilding(id)||game.baseLevel<b.minLevel)return;
     if(!canPay(b.cost))return toast('Pas assez de ressources pour cette construction.');
@@ -1130,14 +1271,16 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     commit(`${b.name} construit !`);
   }
   function upgradeShelter(){
+    if(!game.safeZone)return toast('Libère ton territoire puis installe ton refuge.');
     if(game.baseLevel>=BASE_TIERS.length)return toast('Ta forteresse a atteint son niveau maximal.');
     const next=BASE_TIERS[game.baseLevel];
     if(!canPay(next.cost))return toast('Il manque des ressources pour améliorer ton refuge.');
     pay(next.cost);game.baseLevel++;game.fort=clamp(Math.max(game.fort+20,Math.floor(maxFort()*.70)),0,maxFort());
-    game.totalUpgrades++;xpGain(55);
+    game.totalUpgrades++;xpGain(55);maybeExpandTerritory();
     commit(`Refuge niveau ${game.baseLevel} : ${next.name}.`);
   }
   function repairShelter(){
+    if(!game.safeZone)return toast('Installe d’abord ton refuge.');
     const cost={wood:2,metal:1};
     if(game.fort>=maxFort())return toast('Barricades déjà en parfait état.');
     if(!canPay(cost))return toast('Il faut 2 bois et 1 ferraille.');
@@ -1244,6 +1387,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('baseWeapons').querySelectorAll('[data-make-weapon]').forEach(b=>b.addEventListener('click',()=>makeWeapon(b.dataset.makeWeapon)));
   }
   function defendBase(){
+    if(!game.safeZone)return toast('Il faut d’abord libérer le territoire et installer le refuge.');
     const horde=random(8,20),power=Math.round(game.fort*.60+game.baseLevel*12+(powered()?20:0)+random(0,30));
     const damage=clamp(Math.round(horde*2.5-power*.24),3,55);
     game.fort=clamp(game.fort-damage,0,maxFort());game.threat=clamp(game.threat+8);game.energy=clamp(game.energy-12);
@@ -1277,13 +1421,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     }));
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
-  function renderAll(){renderHud();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
+  function renderAll(){renderHud();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
   function switchTab(tab){window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
     try{
       map=new window.DeadEarthFastMap($('map'),{center,onTap:addHomeVertex,onTilePOI:onVectorPOI,onMarker:id=>{
-        if(id.startsWith('zombie-')){if(!combat&&!scanBusy){engagedZombieId=id;startCombat({danger:40,name:'secteur infecté'});}return;}
+        if(id.startsWith('zombie-')||id.startsWith('campaign-')){if(!combat&&!scanBusy){engagedZombieId=id;startCombat({danger:40,name:'secteur infecté'});}return;}
         if(!pois.some(p=>p.id===id))return;
         game.selected=id;save();renderPois();renderHud();refreshMarkers();window.dispatchEvent(new CustomEvent('de:poi',{detail:{id}}));
       }});
@@ -1308,7 +1452,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     for(const p of pois)markers.push({id:p.id,kind:'poi',symbol:p.symbol,label:p.name,lat:p.lat,lon:p.lon,selected:p.id===game.selected});
     // Les infectés figurés sont de simples éléments fictionnels sur le terrain.
     for(const z of roamingZombies)markers.push(z);
-    map.setMarkers(markers);map.setSafeZone(game.safeZone);map.setDrawing(safeDrawing,safeDraft);
+    map.setMarkers(markers);map.setSafeZone(game.safeZone);map.setTerritory?.(game.territory,territorySafeRadius());map.setDrawing(safeDrawing,safeDraft);
   }
   function setDemo(){
     if(gpsWatch!==null){navigator.geolocation?.clearWatch(gpsWatch);gpsWatch=null;}
