@@ -1,0 +1,17 @@
+DEAD EARTH V0.7 — Mise à jour de la page Carte
+
+Sur GitHub, remplacer uniquement index.html par ce fichier.
+
+Changements :
+- ambiance sonore synthétisée originale (aucun téléchargement externe), bouton note de musique ;
+- bouton Démo retiré des Options (mode hors GPS conservé en secours) ;
+- personnage miniature dessiné sur son marqueur de carte ;
+- zombies par secteurs, déplacements périodiques, suppression définitive locale après victoire ;
+- déplacement libre de la carte, découverte de nouveaux secteurs et recherche de POI en mode GPS ;
+- rayon de fouille GPS sans déplacement : 300 m (précision GPS requise).
+
+Notes :
+- Les lieux OpenStreetMap sont des lieux publics référencés, pas des lieux réellement abandonnés ; ne pas entrer dans des propriétés privées.
+- Le navigateur doit autoriser le GPS, et les sons démarrent après un clic.
+- Le jeu sauvegarde localement ; supprimer les données du site peut réinitialiser les zombies éliminés.
+- Vérification de syntaxe JS effectuée ; test navigateur iPhone non réalisé dans cet environnement.
