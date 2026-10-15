@@ -169,6 +169,31 @@
 
 </style>
 <style id="v08-map-design">#page-map .survivor-figure{display:none!important}</style>
+
+<style id="dead-earth-v12-zone-ui">
+/* V1.2 : le village est désormais un bouton ouvrant le menu de reconquête. */
+.territory-campaign{position:absolute;z-index:14;top:10px;left:8px;width:clamp(155px,calc(100% - 132px),265px);padding:0;max-height:min(72%,470px);overflow:visible;background:rgba(22,35,37,.95);border:3px solid #819185;box-shadow:0 4px 0 #0a1418;pointer-events:auto}
+.territory-campaign.is-open{overflow:visible}
+.village-toggle{appearance:none;display:flex;align-items:center;justify-content:space-between;width:100%;min-height:40px;gap:8px;padding:8px 10px;background:#23343a;color:#f7ddb0;border:0;text-align:left;cursor:pointer;font:bold 11px/1.45 'Courier New',monospace;letter-spacing:.15px}
+.village-toggle:focus-visible{outline:2px solid #f2cc8e;outline-offset:2px}
+.village-title{min-width:0;overflow-wrap:anywhere;text-transform:uppercase}
+.village-arrow{color:#ffd18c;flex-shrink:0}
+.village-panel{max-height:min(61vh,400px);overflow-y:auto;overscroll-behavior:contain;border-top:2px solid #586c65;padding:10px 9px 12px;scrollbar-width:thin;scrollbar-color:#7a8c79 #223135}
+.village-panel[hidden]{display:none!important}
+.village-panel .campaign-head{font-size:9px}
+.zone-section-label{margin:13px 0 6px;font:bold 10px/1.4 'Courier New',monospace;color:#ffdc98}
+.zone-requirements{display:grid;grid-template-columns:1fr;gap:5px;margin:7px 0}
+.zone-resource{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:26px;padding:5px 7px;border:1px solid #4a665c;background:#122920;color:#eff6d8;font:10px/1.3 'Courier New',monospace}
+.zone-resource span{white-space:nowrap;font-weight:bold}
+.zone-resource.enough span{color:#8de4a7}.zone-resource.missing{border-color:#9d564e;background:#3a2927}.zone-resource.missing span,.zone-hint.missing,.zone-blocked{color:#ffc0a0!important}
+.zone-hint{color:#a9dfbb;font:10px/1.5 'Courier New',monospace;margin:7px 0}
+.zone-safe-line .zone-requirements{grid-column:1/-1}
+.zone-safe-line .zone-resource{font-size:10px}
+.zone-safe-line{border-color:#57785f}
+.zone-modal-subtitle{display:block;margin:12px 0 7px;color:#ffe3ab;font:bold 11px 'Courier New',monospace}
+.territory-base .zone-requirements{max-width:390px}
+@media(max-width:360px){.territory-campaign{width:clamp(155px,calc(100% - 132px),230px)}.village-toggle{font-size:10px;padding:7px}.village-panel{max-height:58vh}}
+</style>
 </head>
 <body>
 <div id="app">
@@ -666,6 +691,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
   let scanBusy=false,scanToken=null,safeDrawing=false,safeDraft=[],safeCandidate=null,gpsAccuracy=Infinity;
   let gpsLastFixAt=0,zoneDraftMode=false,zoneCandidate=null,territoryStarting=false;
+  // Seul le petit bouton du village est visible par défaut sur la carte.
+  let villagePanelOpen=false;
   let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0,poiLoading=false,poiError='';
   let selectedMethod='quiet';
   let engagedZombieId=null, roamingZombies=[],roamCenterKey='',exploreTimer=null,ambience=null;
@@ -758,7 +785,29 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(d>range)return {ok:false,msg:`${label} : approche-toi à ${range} m maximum (actuellement ${Math.round(d)} m).`};
     return {ok:true,d};
   }
-  function zoneCost(level){return {wood:1+level*2,metal:Math.max(1,Math.ceil(level/2)),parts:Math.max(1,Math.floor(level/3))}}
+  // Une zone SAFE n'est jamais gratuite : chaque nouvelle zone coûte davantage.
+  // Les coûts restent transportables dans le sac de 30 kg, même aux derniers niveaux.
+  function zoneBuildCost(){
+    const placed=(game.protectedZones||[]).length;
+    return {wood:5+Math.min(5,placed),metal:2+Math.min(5,Math.ceil(placed/2)),parts:2+Math.min(3,Math.ceil(placed/3))};
+  }
+  // level = niveau que la zone va atteindre après l'amélioration (2 à 10).
+  function zoneUpgradeCost(level){
+    const next=clamp(Math.floor(level),2,ZONE_MAX_LEVEL);
+    return {wood:4+Math.min(6,Math.ceil((next-1)/2)),metal:1+Math.ceil(next/2),parts:1+Math.ceil(next/3)};
+  }
+  function zoneRequirements(cost){
+    return `<div class="zone-requirements" aria-label="Matériaux nécessaires">${Object.entries(cost).map(([id,needed])=>{
+      const have=quantity(id),enough=have>=needed;
+      return `<div class="zone-resource ${enough?'enough':'missing'}"><b>${safe(ITEMS[id]?.label||id)}</b><span>${have} / ${needed} ${enough?'✓':'✕'}</span></div>`;
+    }).join('')}</div>`;
+  }
+  function zoneMissingText(cost){
+    return Object.entries(cost).filter(([id,n])=>quantity(id)<n).map(([id,n])=>`${ITEMS[id].label} : ${quantity(id)}/${n}`).join(' · ');
+  }
+  function showMissingZoneMaterials(cost){
+    modal({tag:'⚒ MATÉRIAUX INSUFFISANTS',title:'CONSTRUCTION BLOQUÉE',text:'Fouille des lieux réels à moins de 10 m pour récupérer les ressources manquantes. Aucune ressource n’a été consommée.',content:zoneRequirements(cost),actions:[{name:'FERMER',fn:closeModal,alt:true},{name:'VOIR MON SAC',fn:()=>{closeModal();switchTab('inventory')}}]});
+  }
   function zoneStatus(z){const blocking=zoneBlockers(z.center,Math.min(10,z.level+1));return blocking.length;}
   function focusBlockingZombie(blockers,message){
     // Quitter le mode de placement est indispensable : dans ce mode, un toucher
@@ -778,8 +827,11 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(!game.safeZone)return toast('Installe d’abord ton refuge à ton domicile.');
     if((game.protectedZones||[]).length>=ZONE_MAX_COUNT)return toast('Maximum de 16 zones pour cette partie.');
     if(safeDrawing)return toast('Termine le placement du refuge avant.');
-    zoneDraftMode=true;zoneCandidate=null;map?.setDrawing(true,[]);map?.setView(game.mode==='gps'?[game.lat,game.lon]:game.safeZone.center,17);
-    renderSafe();renderTerritory();toast('Touche la carte près de toi pour choisir la zone de protection de 100 m de diamètre.');
+    // Sans matériaux on ne peut pas poser un brouillon, même si les zombies sont absents.
+    const cost=zoneBuildCost();if(!canPay(cost))return showMissingZoneMaterials(cost);
+    zoneDraftMode=true;zoneCandidate=null;villagePanelOpen=true;
+    map?.setDrawing(true,[]);map?.setView(game.mode==='gps'?[game.lat,game.lon]:game.safeZone.center,17);
+    renderSafe();renderTerritory();toast('Touche la carte à moins de 35 m de toi pour choisir une zone de 100 m de diamètre.');
   }
   function candidateProtection(lat,lon){
     if(!zoneDraftMode)return;
@@ -789,64 +841,112 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   function cancelProtection(){zoneDraftMode=false;zoneCandidate=null;map?.setDrawing(false,[]);refreshMarkers();renderSafe();renderTerritory();}
   function deployProtection(){
-    if(!zoneCandidate)return toast('Touche d’abord la carte pour placer la zone.');
-    const check=actionGPS(ZONE_DEPLOY_RANGE_M,...zoneCandidate,'Construction');if(!check.ok)return toast(check.msg);
-    const blockers=zoneBlockers(zoneCandidate,1);
-    if(blockers.length)return focusBlockingZombie(blockers,`${blockers.length} infecté(s) bloquent la zone. Un zombie bloquant est affiché sur la carte : rapproche-toi à 20 m pour combattre.`);
-    if(!canPay(zoneCost(1)))return toast('Matériaux insuffisants : '+costText(zoneCost(1)));
-    modal({tag:'🛡 TERRITOIRE LIBÉRÉ',title:'DÉPLOYER CETTE ZONE ?',text:'Niveau 1 : cercle sécurisé de 100 m de diamètre. Les matériaux seront consommés.',actions:[
+    if(!zoneDraftMode||!zoneCandidate)return toast('Touche d’abord la carte pour choisir une zone.');
+    const location=[...zoneCandidate];
+    const check=actionGPS(ZONE_DEPLOY_RANGE_M,...location,'Construction');if(!check.ok)return toast(check.msg);
+    if((game.protectedZones||[]).length>=ZONE_MAX_COUNT)return toast('Limite de zones atteinte.');
+    const blockers=zoneBlockers(location,1);
+    if(blockers.length)return focusBlockingZombie(blockers,`${blockers.length} infecté(s) bloquent la zone. Rapproche-toi à 20 m pour combattre.`);
+    const cost=zoneBuildCost();
+    if(!canPay(cost))return showMissingZoneMaterials(cost);
+    modal({tag:'⚒ CHANTIER DE PROTECTION',title:'CONSTRUIRE LA ZONE SAFE ?',
+      text:'Diamètre : 100 m (niveau 1). Distance GPS maximale : 35 m. Les matériaux ci-dessous seront retirés du sac après confirmation.',
+      content:zoneRequirements(cost),actions:[
       {name:'ANNULER',alt:true,fn:closeModal},
-      {name:'CONSTRUIRE LA ZONE',fn:()=>{
-        closeModal();const check=actionGPS(ZONE_DEPLOY_RANGE_M,...zoneCandidate,'Construction');if(!check.ok)return toast(check.msg);
-        if(zoneBlockers(zoneCandidate,1).length)return toast('Un zombie est entré dans le périmètre.');
-        if(!pay(zoneCost(1)))return toast('Ressources insuffisantes.');
+      {name:'✓ CONSTRUIRE',fn:()=>{
+        // Les trois conditions sont vérifiées de nouveau au moment du paiement.
+        const valid=actionGPS(ZONE_DEPLOY_RANGE_M,...location,'Construction');
+        if(!valid.ok){closeModal();return toast(valid.msg)}
+        if((game.protectedZones||[]).length>=ZONE_MAX_COUNT){closeModal();return toast('Limite de zones atteinte.')}
+        const hostile=zoneBlockers(location,1);
+        if(hostile.length){closeModal();return focusBlockingZombie(hostile,'Un zombie est entré dans ce périmètre.')}
+        const liveCost=zoneBuildCost();
+        if(!pay(liveCost)){closeModal();return showMissingZoneMaterials(liveCost)}
         const id='zone-'+Date.now()+'-'+Math.floor(Math.random()*100000);
-        game.protectedZones.push({id,center:[...zoneCandidate],level:1,createdAt:Date.now()});
-        zoneDraftMode=false;zoneCandidate=null;map?.setDrawing(false,[]);refreshMarkers();xpGain(40);
-        commit('🛡 Nouvelle zone SAFE de 100 m de diamètre déployée !');
+        game.protectedZones.push({id,center:location,level:1,createdAt:Date.now()});
+        zoneDraftMode=false;zoneCandidate=null;villagePanelOpen=false;
+        map?.setDrawing(false,[]);closeModal();refreshMarkers();xpGain(40);
+        commit('🛡 Nouvelle zone SAFE construite (100 m). Coût : '+costText(liveCost)+'.');
       }}
     ]});
   }
   function upgradeProtection(id){
     const z=game.protectedZones?.find(z=>z.id===id);if(!z)return;
     if(z.level>=ZONE_MAX_LEVEL)return toast('Cette zone est déjà au niveau 10.');
+    const next=z.level+1,cost=zoneUpgradeCost(next);
     const check=actionGPS(ZONE_DEPLOY_RANGE_M,...z.center,'Amélioration');if(!check.ok)return toast(check.msg);
-    const blockers=zoneBlockers(z.center,z.level+1);
-    if(blockers.length)return focusBlockingZombie(blockers,`Extension impossible : ${blockers.length} infecté(s) dans le futur périmètre de ${100*(z.level+1)} m. Le plus proche s’affiche sur la carte.`);
-    const cost=zoneCost(z.level+1);if(!canPay(cost))return toast('Matériaux insuffisants : '+costText(cost));
-    if(!pay(cost))return;z.level++;xpGain(30);refreshMarkers();commit(`🛡 Zone améliorée au niveau ${z.level} : diamètre ${z.level*100} m.`);
+    const blockers=zoneBlockers(z.center,next);
+    if(blockers.length)return focusBlockingZombie(blockers,`Extension impossible : ${blockers.length} infecté(s) dans les futurs ${next*100} m. Un infecté est affiché sur la carte.`);
+    if(!canPay(cost))return showMissingZoneMaterials(cost);
+    modal({tag:'⚒ AGRANDIR LA ZONE',title:`PASSER AU NIVEAU ${next}/10 ?`,
+      text:`Nouveau diamètre : ${next*100} m. Tu dois être à moins de 35 m de son centre. Les matériaux seront consommés.`,content:zoneRequirements(cost),actions:[
+      {name:'ANNULER',alt:true,fn:closeModal},
+      {name:'✓ AMÉLIORER',fn:()=>{
+        const live=game.protectedZones?.find(v=>v.id===id);
+        if(!live||live.level!==next-1){closeModal();return toast('Cette zone a changé, ouvre à nouveau son menu.')}
+        const valid=actionGPS(ZONE_DEPLOY_RANGE_M,...live.center,'Amélioration');if(!valid.ok){closeModal();return toast(valid.msg)}
+        const hostile=zoneBlockers(live.center,next);
+        if(hostile.length){closeModal();return focusBlockingZombie(hostile,'Un zombie est entré dans le futur périmètre.')}
+        if(!pay(cost)){closeModal();return showMissingZoneMaterials(cost)}
+        live.level=next;closeModal();xpGain(30);refreshMarkers();
+        commit(`🛡 Zone améliorée au niveau ${next} (${next*100} m). Coût : ${costText(cost)}.`);
+      }}
+    ]});
   }
   function showProtection(id){
     const z=game.protectedZones?.find(z=>z.id===id);if(!z)return;
-    const blockers=z.level<10?zoneStatus(z):0;
-    modal({tag:'🛡 POSTE DE PROTECTION',title:`ZONE SAFE — NIVEAU ${z.level}/10`,text:`Diamètre protégé : ${z.level*100} m. ${z.level===10?'Niveau maximal.':`Extension à ${100*(z.level+1)} m : ${blockers} zombie(s) à neutraliser.`}`,actions:[
-      {name:'FERMER',alt:true,fn:closeModal},...(z.level===10?[]:[{name:'AMÉLIORER',fn:()=>{closeModal();upgradeProtection(id)}}])
-    ]});
+    const max=z.level>=ZONE_MAX_LEVEL,blockers=max?0:zoneStatus(z),cost=max?null:zoneUpgradeCost(z.level+1),enough=cost&&canPay(cost);
+    const status=max?'ZONE AU NIVEAU MAXIMAL':blockers?`${blockers} ZOMBIE(S) DANS LA FUTURE ZONE`:enough?'MATÉRIAUX DISPONIBLES':'MATÉRIAUX À RÉCUPÉRER';
+    modal({tag:'🛡 POSTE DE PROTECTION',title:`ZONE SAFE — NIVEAU ${z.level}/10`,
+      text:`Diamètre actuel : ${z.level*100} m. ${max?'Niveau maximal atteint.':`Prochain diamètre : ${(z.level+1)*100} m · statut : ${status}.`} Distance requise pour améliorer : 35 m.`,
+      content:cost?`<strong class="zone-modal-subtitle">COÛT DE L’AMÉLIORATION</strong>${zoneRequirements(cost)}`:'',
+      actions:[{name:'FERMER',alt:true,fn:closeModal},...(max?[]:[{name:enough?'AMÉLIORER':'MATÉRIAUX MANQUANTS',fn:()=>{closeModal();upgradeProtection(id)}}])]
+    });
   }
   function renderTerritory(){
     const t=game.territory,stage=territoryStage(),card=$('territoryCampaign'),base=$('territoryBaseCard'),quest=$('territoryQuestCard');
     if(!card)return;
     let title='',desc='',progress=0,info='',action='';
     if(stage==='place'){
-      title='⌂ ÉTABLIS TON REFUGE';desc='Commence par placer ton refuge à ton logement. Active le GPS, touche la carte près de toi, puis confirme que c’est chez toi.';
-      action=game.safeZone?'⌖ CONFIRMER / CORRIGER LE REFUGE':'⌖ PLACER MON REFUGE';info=game.safeZone?'Ancienne sauvegarde détectée : une correction gratuite avant le verrouillage de 30 jours.':'Un logement est privé : son emplacement reste sur cet appareil. Aucun zombie à éliminer avant cette étape.';
-    }else if(stage==='identify'){title='⌛ IDENTIFICATION DU VILLAGE';desc='Refuge confirmé. Recherche du nom de la commune et activation de la reconquête…';action='ATTENDS UN INSTANT';info='Aucune action n’est requise pendant le chargement.';
+      title='⌂ ÉTABLIS TON REFUGE';desc='Commence par placer ton refuge à ton logement. Active le GPS, touche la carte près de toi puis confirme que c’est chez toi.';
+      action=game.safeZone?'⌖ CONFIRMER / CORRIGER LE REFUGE':'⌖ PLACER MON REFUGE';info='Aucune zone SAFE ne peut être construite avant le refuge.';
+    }else if(stage==='identify'){
+      title='⌛ IDENTIFICATION DU VILLAGE';desc='Refuge confirmé. Recherche du nom de la commune…';action='ATTENDS UN INSTANT';info='Identification en cours.';
     }else{
       progress=villageCoverage();title=stage==='safe'?`★ ${t.name.toUpperCase()} PROTÉGÉ`:`☣ ${t.name.toUpperCase()} À RECONQUÉRIR`;
-      desc=`${progress}% du secteur protégé · ${game.protectedZones.length} zone(s) SAFE. Chaque zone commence à 100 m de diamètre et grandit de 100 m par niveau (10 niveaux).`;
-      action='⊕ CONSTRUIRE UNE ZONE SAFE';info=stage==='safe'?'Village protégé ! Toutes les zones restent visibles sur la carte.':'Combats possibles à 20 m, fouilles à 10 m, avec un GPS précis. Déplace-toi uniquement dans les espaces autorisés et arrête-toi pour jouer.';
+      desc=`${progress}% du secteur protégé · ${game.protectedZones.length} zone(s) SAFE. Construis puis améliore tes zones du niveau 1 (100 m) au niveau 10 (1 000 m).`;
+      action='⊕ CONSTRUIRE UNE ZONE SAFE';
+      info='Il faut des matériaux, aucun zombie dans le futur cercle, et ton GPS à moins de 35 m du centre de la zone.';
     }
+    const buildCost=zoneBuildCost(),canBuild=canPay(buildCost),count=game.protectedZones?.length||0;
+    const atCap=count>=ZONE_MAX_COUNT;
+    const buildResources=(stage==='place'||stage==='identify')?'':`<div class="zone-section-label">CONSTRUIRE UNE NOUVELLE ZONE · ${count}/${ZONE_MAX_COUNT}</div>${zoneRequirements(buildCost)}<p class="zone-hint ${canBuild?'':'missing'}">${atCap?'Nombre maximal de zones atteint.':canBuild?'✓ Tous les matériaux sont disponibles.':'⚠ Il te manque : '+safe(zoneMissingText(buildCost))}</p>`;
     const list=(game.protectedZones||[]).map(z=>{
-      const blockers=z.level<10?zoneStatus(z):0,cost=z.level<10?costText(zoneCost(z.level+1)):'MAX';
-      return `<div class="zone-safe-line"><b>🛡 ZONE ${safe(z.id.slice(-5))} · NIV. ${z.level}/10</b><span>${z.level*100} m diamètre</span><button data-zone="${safe(z.id)}" class="zone-safe-btn">${z.level>=10?'VOIR':'GÉRER / AMÉLIORER'}</button>${blockers?`<small>⚠ ${blockers} zombie(s) dans la future extension</small>`:''}<small>${safe(cost)}</small></div>`;
+      const max=z.level>=ZONE_MAX_LEVEL;
+      const blockers=max?0:zoneStatus(z),cost=max?null:zoneUpgradeCost(z.level+1),enough=cost&&canPay(cost);
+      return `<div class="zone-safe-line"><b>🛡 ZONE ${safe(z.id.slice(-5))} · NIV. ${z.level}/10</b><span>${z.level*100} m</span><small>${max?'✓ NIVEAU MAXIMUM':`Niv. ${z.level+1} : ${safe(costText(cost))}`}</small>${max?'':zoneRequirements(cost)}${blockers?`<small class="zone-blocked">⚠ ${blockers} zombie(s) à éliminer pour agrandir</small>`:''}<button data-zone="${safe(z.id)}" class="zone-safe-btn">${max?'VOIR':'GÉRER / AMÉLIORER'} ${!max&&!enough?'· ⚠ STOCK INSUFFISANT':''}</button></div>`;
     }).join('');
-    const form=zoneDraftMode?`<p class="zone-help">${zoneCandidate?'Point sélectionné.':'Touche la carte pour choisir le centre de protection.'} ${zoneCandidate?`Infectés dans le cercle : ${zoneBlockers(zoneCandidate,1).length}`:''}</p><button id="zoneConfirm" class="campaign-go" ${!zoneCandidate?'disabled':''}>✓ VALIDER CETTE ZONE (100 M)</button><button id="zoneCancel" class="zone-safe-btn">ANNULER</button>`:'';
-    card.innerHTML=`<div class="campaign-head"><b>${safe(title)}</b><span>${stage==='place'?'DÉPART':stage==='safe'?'ZONE SAFE':'RECONQUÊTE'}</span></div><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>${!zoneDraftMode?`<button class="campaign-go" id="territoryAction" ${stage==='identify'?'disabled':''}>${action}</button>`:''}${form}<small>${safe(info)}</small><div class="zone-list">${list}</div>`;
+    const form=zoneDraftMode?`<p class="zone-help">${zoneCandidate?'Emplacement sélectionné.':'Touche la carte pour choisir le centre (à moins de 35 m de ta position GPS).'}</p>${zoneCandidate?`<p class="zone-hint">Zombies dans le futur cercle : ${zoneBlockers(zoneCandidate,1).length} · Distance de construction limitée à 35 m.</p>`:''}<button id="zoneConfirm" class="campaign-go" ${!zoneCandidate||!canBuild?'disabled':''}>✓ CONSTRUIRE · 100 M</button><button id="zoneCancel" class="zone-safe-btn">ANNULER LE PLACEMENT</button>`:'';
+    const activeAction=stage==='identify'||atCap;
+    const panel=`<div class="village-panel" id="villagePanel" ${villagePanelOpen?'':'hidden'}>
+      <div class="campaign-head"><b>${safe(title)}</b><span>${stage==='place'?'DÉPART':stage==='safe'?'PROTÉGÉ':'RECONQUÊTE'}</span></div>
+      <p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>
+      ${buildResources}
+      ${!zoneDraftMode?`<button class="campaign-go" id="territoryAction" ${activeAction?'disabled':''}>${safe(action)}</button>`:''}${form}
+      <small>${safe(info)}</small>
+      ${count?`<div class="zone-section-label">MES ZONES SÉCURISÉES</div><div class="zone-list">${list}</div>`:''}
+    </div>`;
+    const name=stage==='place'?'MON REFUGE':stage==='identify'?'MON VILLAGE':t?.name||'MON VILLAGE';
+    card.classList.toggle('is-open',villagePanelOpen);
+    card.innerHTML=`<button type="button" id="villageToggle" class="village-toggle" aria-controls="villagePanel" aria-expanded="${villagePanelOpen}"><span class="village-title">${stage==='safe'?'★':stage==='place'?'⌂':'☣'} ${safe(name)}</span><span class="village-arrow">${villagePanelOpen?'▲':'▼'}</span></button>${panel}`;
+    $('villageToggle')?.addEventListener('click',()=>{villagePanelOpen=!villagePanelOpen;renderTerritory()});
     $('territoryAction')?.addEventListener('click',()=>stage==='place'?startDrawing():startProtectionPlacement());
-    $('zoneConfirm')?.addEventListener('click',deployProtection);$('zoneCancel')?.addEventListener('click',cancelProtection);
+    $('zoneConfirm')?.addEventListener('click',deployProtection);
+    $('zoneCancel')?.addEventListener('click',cancelProtection);
     card.querySelectorAll('[data-zone]').forEach(el=>el.addEventListener('click',()=>showProtection(el.dataset.zone)));
-    if(base){base.innerHTML=`<div class="pixel-heading">PROTECTION DU VILLAGE</div><p class="campaign-base-copy">${safe(title)}<br>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><p class="base-section-hint">${safe(info)}</p><button class="pixel-button full" id="baseZoneAction" ${stage==='identify'?'disabled':''}>${action}</button><div class="zone-list">${list}</div>`;
-      $('baseZoneAction')?.addEventListener('click',()=>{switchTab('map');stage==='place'?startDrawing():startProtectionPlacement()});
+    if(base){
+      base.innerHTML=`<div class="pixel-heading">PROTECTION DU VILLAGE</div><p class="campaign-base-copy">${safe(title)}<br>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>${buildResources}<button class="pixel-button full" id="baseZoneAction" ${activeAction?'disabled':''}>${safe(action)}</button><p class="base-section-hint">${safe(info)}</p><div class="zone-list">${list}</div>`;
+      $('baseZoneAction')?.addEventListener('click',()=>{switchTab('map');villagePanelOpen=true;renderTerritory();stage==='place'?startDrawing():startProtectionPlacement()});
       base.querySelectorAll('[data-zone]').forEach(el=>el.addEventListener('click',()=>showProtection(el.dataset.zone)));
     }
     if(quest)quest.innerHTML=`<strong>☣ OBJECTIF — ${safe(t?.name||'Mon refuge')}</strong><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><small>${safe(info)}</small>`;

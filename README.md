@@ -1,34 +1,24 @@
-# DEAD EARTH — Alpha 1.1.1 : reconquête GPS
+# DEAD EARTH — V1.2 | Zones SAFE & coûts réels de construction
 
-Version **fichier unique `index.html`** pour GitHub Pages, conçue pour être jouée sur téléphone. Le design pixel art et les menus Personnage, Base, Sac et Quêtes ont été conservés.
+Installation : remplace uniquement le fichier `index.html` dans la racine du dépôt GitHub `hugotronel-boop/dead-earth`. Aucun autre fichier ne doit être remplacé. Le jeu conserve la clé de sauvegarde locale `dead-earth-alpha-v1`.
 
-## Nouvelle boucle de jeu
+## Changements
 
-1. Active le GPS depuis les options. Place le carré de refuge de **20 × 20 m**, près de ton logement (au plus 40 m de ta position GPS). Une confirmation « C’est bien chez toi ? » est obligatoire. Le refuge ne pourra ensuite être déplacé qu'après **30 jours**. En cas de migration depuis une ancienne version, le refuge non encore confirmé peut être corrigé avant de commencer.
-2. La commune est représentée par un **secteur de jeu approximatif**, dont les frontières ne reproduisent pas les limites administratives. Des zombies virtuels patrouillent à des positions déterministes dans les secteurs non protégés. Il n'y a **pas de quota global de zombies à tuer**.
-3. Pour lancer un combat, tu dois sélectionner le zombie visible sur la carte et être à **20 m ou moins** de sa position, avec un GPS récent et suffisamment précis. Chaque attaque vérifie à nouveau la portée. Un zombie vaincu ne réapparaît pas dans cette partie.
-4. Pour fouiller, sélectionne un **véritable commerce ou lieu référencé** depuis les données OpenStreetMap, puis sois à **10 m ou moins**. Le jeu vérifie la distance au début et à la fin de la fouille ; **aucune fouille à distance** n'est autorisée.
-5. Tu peux poser une **zone SAFE** quand tu te trouves à moins de 35 m de son centre et que **tous les zombies susceptibles de passer dans le périmètre** ont été éliminés. Le niveau 1 couvre **100 m de diamètre**. Chaque niveau augmente le diamètre de **100 m**, jusqu'au **niveau 10 = 1 000 m de diamètre**. Chaque amélioration demande des matériaux de survie et que l'extension soit libre de zombies.
-6. Le but est de **couvrir tout le secteur** avec des zones SAFE. Un indicateur de surface protégée suit la reconquête. Les zones non sécurisées peuvent encore contenir des infectés.
+- Le cartouche du village (ex. « ☣ CORBENY ») est un bouton compact en haut à gauche. Appuyer dessus ouvre/ferme le menu Reconquête.
+- Le menu indique le pourcentage protégé, les zones existantes, les matériaux nécessaires et le nombre possédé (« 4 / 5 »). Les quantités manquantes apparaissent en orange/rouge.
+- Construire une nouvelle zone SAFE de niveau 1 (100 m de diamètre) nécessite initialement **5 bois, 2 ferrailles et 2 pièces**. Si des zones existent déjà, le coût augmente progressivement avec leur nombre. Maximum 16 zones dans cette alpha.
+- Améliorer une zone coûte également des matériaux, avec un prix croissant de niveau 2 à niveau 10. Les coûts sont affichés avant de confirmer l'amélioration.
+- Une construction est refusée lorsque les matériaux sont insuffisants, lorsque le GPS du joueur est à plus de 35 m du centre de la zone, ou lorsqu'un zombie virtuel se trouve dans le périmètre concerné. Le système vérifie une deuxième fois les conditions à la confirmation et **ne retire les matériaux qu'après validation réussie**.
+- Les améliorations et constructions gardent la limite GPS de 35 m. Les combats à 20 m et les fouilles à 10 m sont inchangés.
+- La carte, le personnage, l'inventaire, la base, les quêtes et les sauvegardes des versions précédentes sont conservés.
 
-## Contraintes réelles
+## Exemples d'économie (pour équilibrage)
 
-- Le GPS mobile présente une **marge d'erreur**. Pour éviter les validations à distance par erreur, le prototype exige une précision de localisation compatible avec l'action (jusqu'à ±17 m pour une fouille à 10 m, ±27 m pour un combat à 20 m, au maximum ±35 m pour une construction).
-- Il faut être **à l'arrêt** pour interagir avec la carte. Ne regarde pas l'écran en conduisant ou en traversant. Ne cours pas après les zombies virtuels, n'entre pas sur une propriété ou dans un commerce sans autorisation. Si un marqueur est inaccessible depuis un lieu public, ne tente pas de l'atteindre.
-- Le jeu n'est pas multijoueur. La progression et le placement du refuge sont conservés dans le stockage local de l'appareil ; ils peuvent être perdus en effaçant les données du navigateur. Les coordonnées GPS exactes ne sont pas sauvegardées comme position courante, mais la position choisie du refuge est enregistrée **localement**. Les services cartographiques peuvent recevoir des coordonnées **approximatives** des secteurs explorés pour fournir carte, noms de communes et points d'intérêt.
-- Les limites administratives réelles des communes ne sont **pas encore intégrées**. La reconquête concerne pour le moment un périmètre circulaire de jeu.
+Nouvelle zone 1 : 5 bois / 2 ferrailles / 2 pièces.
+Nouvelle zone 2 : 6 bois / 3 ferrailles / 3 pièces.
+Amélioration niveau 1 → 2 : 5 bois / 2 ferrailles / 2 pièces.
+Les coûts plafonnent pour rester transportables avec un sac de 30 kg ; ils peuvent être rééquilibrés dans le code.
 
-## Mise à jour GitHub Pages
+## Sécurité & limites
 
-Dans le dépôt `hugotronel-boop/dead-earth`, remplace l'ancien `index.html` par celui de ce dossier. Les autres fichiers peuvent rester inchangés ; cette édition embarque ses scripts, styles et images dans le seul HTML.
-
-L'application doit être servie en **HTTPS** pour les fonctions de géolocalisation et de micro.
-
-## Tests effectués
-
-- Validation du refuge et confirmation explicite.
-- Vérification de l'accès à 10 m et à 20 m, avec refus à 11 m / 21 m dans un scénario de test géolocalisé.
-- Test d'une zone bloquée par un zombie puis construite après élimination.
-- Vérification de l'absence d'erreurs JavaScript dans un navigateur de test avec coordonnées simulées.
-
-Les fonctionnalités devront encore être vérifiées sur un véritable iPhone avec GPS actif et données OpenStreetMap disponibles.
+La géolocalisation nécessite HTTPS et l'autorisation du navigateur. Jouer à l'arrêt, sans pénétrer dans les commerces ni propriétés privés pour atteindre un marqueur. Les zombies et zones SAFE sont fictifs. Le jeu est une alpha à sauvegarde locale ; les délais et possessions ne sont pas sécurisés par un serveur. Le nom de la localité peut nécessiter la disponibilité du service de géocodage.
