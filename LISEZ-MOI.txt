@@ -1,13 +1,11 @@
-DEAD EARTH V0.8 — CARTE / INFECTÉS / LIEUX RÉELS
+DEAD EARTH V0.9 — Retour des commerces et lieux réels
 
-Installation simple depuis iPhone : remplace uniquement index.html à la racine de ton dépôt GitHub Pages.
+Pour mettre à jour depuis iPhone, remplace seulement index.html dans ton dépôt GitHub Pages.
 
-Carte : carré jaune = position GPS si GPS activé, position fictive autrement. Le grand personnage n'est plus affiché sur la carte ; la page Perso conserve son portrait.
+Correction : les lieux réels ne dépendent plus uniquement du service Overpass, parfois lent ou indisponible. Les tuiles vectorielles de la carte fournissent aussi les POI nommés. Les vrais points répertoriés apparaissent progressivement, puis la liste Overpass les complète. Ce sont des données cartographiques, jamais des magasins inventés.
 
-Zombies : jusqu'à 3 visibles à proximité du secteur affiché ; chaque infecté est rattaché à un point d'origine fixe et patrouille aléatoirement sur 12–37 m. Toucher un zombie lance le combat. Un infecté abattu est supprimé et son ID mémorisé localement.
+Appuie sur ⚙ OPTIONS > GPS pour voir les commerces autour de toi, ou déplace la carte pour explorer une autre ville. S'il n'y a pas de lieu répertorié, utilise RECHERCHER DES COMMERCES. En cas de réseau indisponible, le jeu indique clairement que la recherche ne fonctionne pas.
 
-Exploration : on déplace la carte au doigt ; le jeu demande les véritables points d'intérêt OpenStreetMap autour du centre de la vue et les affiche. Les catégories comprennent magasins, boulangeries, pharmacies, garages, espaces publics, etc. Aucun lieu n'est inventé. Les ressources et zombies sont fictifs. La recherche peut être temporairement indisponible (service Overpass public).
+Les fouilles à moins de 300 m et les deux fouilles à distance quotidiennes restent identiques. Les autres menus et sauvegardes ne sont pas modifiés.
 
-Fouilles : 2 fouilles à distance par jour, puis l'exploration GPS dans les 300 m de lieux OSM donne des fouilles sur place ; la géolocalisation doit être suffisamment précise. Pas de conduite ni visite de propriétés privées pour jouer.
-
-Sauvegarde : locale au navigateur ; coordonnées GPS exactes non conservées. Les autres onglets et la progression précédente sont préservés.
+⚠ Les commerces sont réels mais les ressources et zombies sont fictifs : ne pénètre dans aucun lieu privé et ne regarde pas l'écran en te déplaçant.
