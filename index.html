@@ -147,6 +147,7 @@
 #survivorDisplayName{display:block;overflow-wrap:anywhere}
 
 </style>
+<style id="v08-map-design">#page-map .survivor-figure{display:none!important}</style>
 </head>
 <body>
 <div id="app">
@@ -456,6 +457,9 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       if(this.drawing.length){this.drawZone(this.drawing,'#ffd28b','#d5ae76',.18,true)}
       const visible=[];
       for(const m of this.markers){const p=this.position(m.lat,m.lon);if(p.x<-35||p.x>W+35||p.y<-35||p.y>H+35)continue;visible.push({...m,...p})}
+      // Garder le carré jaune du joueur visible même si un POI ou le refuge est au même endroit.
+      const layer={home:0,poi:1,zombie:2,player:3};
+      visible.sort((a,b)=>(layer[a.kind]??1)-(layer[b.kind]??1));
       for(const m of visible){
         const col=m.kind==='home'?'#9cd69a':m.kind==='player'?'#f5dfad':m.kind==='zombie'?'#dc6a57':m.selected?'#f5ce8d':'#bbc7ac';
         const wobble=m.kind==='zombie'?Math.sin(Date.now()/950+m.lat*531)*3:0;
@@ -467,12 +471,10 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
           ctx.fillStyle='#3f4a46';ctx.fillRect(px-8,py-9,16,15);ctx.fillStyle='#f66051';ctx.fillRect(px-7,py-6,5,5);ctx.fillRect(px+3,py-6,5,5);ctx.fillStyle='#a5a69a';ctx.fillRect(px-4,py+3,8,3);
           ctx.fillStyle='#a32825';ctx.fillRect(px-15,py-19,26,2);ctx.fillStyle='#d65d4e';ctx.fillRect(px-15,py-19,16,2);
         }else if(m.kind==='player'){
-          // Survivant miniature dessiné directement sur son carré jaune GPS.
-          ctx.fillStyle='#2b3e43';ctx.fillRect(px-7,py-2,14,12);
-          ctx.fillStyle='#b9a58b';ctx.fillRect(px-7,py+10,5,5);ctx.fillRect(px+2,py+10,5,5);
-          ctx.fillStyle='#d4ad87';ctx.fillRect(px-6,py-12,12,11);
-          ctx.fillStyle='#ef913a';ctx.fillRect(px-5,py-9,4,4);ctx.fillRect(px+2,py-9,4,4);
-          ctx.fillStyle='#25383b';ctx.fillRect(px-11,py,4,10);ctx.fillRect(px+7,py,4,10);
+          // Marqueur GPS carré jaune : aucun personnage sur la carte.
+          ctx.fillStyle='#ffe16c';ctx.fillRect(px-10,py-10,20,20);
+          ctx.fillStyle='#fff5a6';ctx.fillRect(px-8,py-8,16,5);
+          ctx.fillStyle='#8d641f';ctx.fillRect(px-2,py-2,4,4);
         }else{
           ctx.fillStyle=col;ctx.font='bold 18px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(m.symbol||'◎',px,py+2);
         }
@@ -504,6 +506,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const SAFE_RELOCATION_DAYS = 30;
   const SAFE_RELOCATION_MS = SAFE_RELOCATION_DAYS * 24 * 60 * 60 * 1000;
   const POI_RADIUS_M = 2800;
+  const POI_CACHE_MS = 12 * 60 * 1000;
   const MAX_GPS_ACCURACY_M = 120;
   const ITEMS = {
     water:{label:'Eau potable',icon:'◉',weight:.5},food:{label:'Conserve',icon:'▣',weight:.4},bandage:{label:'Bandage',icon:'✚',weight:.1},
@@ -588,36 +591,54 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0,poiLoading=false,poiError='';
   let selectedMethod='quiet';
   let engagedZombieId=null, roamingZombies=[],roamCenterKey='',exploreTimer=null,ambience=null;
-  const ZOMBIE_GRID_DEG=.004; // Environ 300-450 m par secteur, selon latitude.
+  const ZOMBIE_GRID_DEG=.009; // Secteurs fixes approximatifs, chacun a au plus un infecté.
+  const MAX_VISIBLE_ZOMBIES=3;
+  const zombieTracks=new Map(); // Position et destination mémorisées tant que la page est ouverte.
   function sectorKey(lat,lon){return Math.floor(lat/ZOMBIE_GRID_DEG)+':'+Math.floor(lon/ZOMBIE_GRID_DEG)}
   function seeded(n){let x=n|0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
   function generateZombies(lat,lon){
     const row=Math.floor(lat/ZOMBIE_GRID_DEG),col=Math.floor(lon/ZOMBIE_GRID_DEG),list=[];
     for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){
-      const r=row+a,c=col+b,key=r+':'+c,seededRand=seeded(Math.imul(r,73856093)^Math.imul(c,19349663));
-      const count=1+Math.floor(seededRand()*3);
-      for(let i=0;i<count;i++){
-        const id='zombie-'+key+':'+i;
-        if(game.defeatedZombies.includes(id))continue;
-        const homeLat=(r+.15+seededRand()*.7)*ZOMBIE_GRID_DEG;
-        const homeLon=(c+.15+seededRand()*.7)*ZOMBIE_GRID_DEG;
-        list.push({id,kind:'zombie',symbol:'☣',homeLat,homeLon,lat:homeLat,lon:homeLon,phase:seededRand()*6.283,speed:.4+seededRand()*.9});
+      const r=row+a,c=col+b,sector=r+':'+c,rand=seeded(Math.imul(r,73856093)^Math.imul(c,19349663));
+      if(rand()<.62)continue; // Certains secteurs restent entièrement calmes.
+      const id='zombie-'+sector+':0';
+      if(game.defeatedZombies.includes(id))continue;
+      const homeLat=(r+.2+rand()*.6)*ZOMBIE_GRID_DEG,homeLon=(c+.2+rand()*.6)*ZOMBIE_GRID_DEG;
+      if(game.safeZone&&distanceM(homeLat,homeLon,...game.safeZone.center)<55)continue;
+      let z=zombieTracks.get(id);
+      if(!z){
+        const radius=12+rand()*25; // Patrouille entre 12 et 37 mètres autour du point fixe.
+        z={id,kind:'zombie',symbol:'☣',homeLat,homeLon,lat:homeLat,lon:homeLon,
+          radius,speed:.35+rand()*.40,targetLat:homeLat,targetLon:homeLon,restUntil:0,lastTime:performance.now(),rng:rand};
+        zombieTracks.set(id,z);
       }
+      list.push(z);
     }
-    return list;
+    list.sort((u,v)=>distanceM(lat,lon,u.homeLat,u.homeLon)-distanceM(lat,lon,v.homeLat,v.homeLon));
+    // Maximum de trois zombies, sans réapparition d'un zombie abattu.
+    return list.slice(0,MAX_VISIBLE_ZOMBIES);
   }
   function updateRoaming(force=false){
     if(!map)return;
     const focus=map.latlon(map.w/2,map.h/2),key=sectorKey(focus.lat,focus.lon);
     if(force||key!==roamCenterKey){roamCenterKey=key;roamingZombies=generateZombies(focus.lat,focus.lon)}
-    const t=Date.now()/1000;
+    const now=performance.now();
     for(const z of roamingZombies){
-      // Oscillations en mètres, pas de téléportation aléatoire à chaque dessin.
-      z.lat=z.homeLat+Math.sin(t*z.speed/20+z.phase)*.00012;
-      z.lon=z.homeLon+Math.cos(t*z.speed/24+z.phase)*.00016;
+      const dt=Math.max(0,Math.min(2,(now-z.lastTime)/1000));z.lastTime=now;
+      if(now<z.restUntil)continue;
+      let remaining=distanceM(z.lat,z.lon,z.targetLat,z.targetLon);
+      if(remaining<1.3){
+        // Nouveau point aléatoire, toujours dans le même petit périmètre.
+        const angle=z.rng()*Math.PI*2,radius=z.rng()*z.radius;
+        z.targetLat=z.homeLat+Math.sin(angle)*radius/111195;
+        z.targetLon=z.homeLon+Math.cos(angle)*radius/(111320*Math.max(.1,Math.cos(z.homeLat*Math.PI/180)));
+        z.restUntil=now+z.rng()*2500;
+        continue;
+      }
+      const ratio=Math.min(1,z.speed*dt/remaining);
+      z.lat+=(z.targetLat-z.lat)*ratio;z.lon+=(z.targetLon-z.lon)*ratio;
     }
-    refreshMarkers();
-    if(sound)updateAmbience();
+    refreshMarkers();if(sound)updateAmbience();
   }
   function nearestZombieDistance(){
     if(!map)return Infinity;
@@ -707,47 +728,89 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     cafe:{name:'Café',symbol:'▣',loot:['food','water'],danger:30},
     fast_food:{name:'Restauration',symbol:'▣',loot:['food','water'],danger:32},
     hospital:{name:'Hôpital',symbol:'✚',loot:['bandage','medkit','cloth'],danger:64},
-    clinic:{name:'Clinique',symbol:'✚',loot:['bandage','medkit'],danger:50}
+    clinic:{name:'Clinique',symbol:'✚',loot:['bandage','medkit'],danger:50},
+    doctors:{name:'Cabinet médical',symbol:'✚',loot:['bandage','cloth'],danger:35},
+    department_store:{name:'Grand magasin',symbol:'▣',loot:['food','cloth','parts'],danger:42},
+    clothes:{name:'Magasin de vêtements',symbol:'▤',loot:['cloth','bandage'],danger:30},
+    shoes:{name:'Magasin de chaussures',symbol:'▤',loot:['cloth','parts'],danger:31},
+    electronics:{name:'Électronique',symbol:'⚙',loot:['parts','metal'],danger:46},
+    mobile_phone:{name:'Téléphonie',symbol:'⚙',loot:['parts','metal'],danger:42},
+    bicycle:{name:'Magasin de vélos',symbol:'⚙',loot:['parts','metal'],danger:39},
+    car_repair:{name:'Garage',symbol:'⚙',loot:['parts','metal','fuel'],danger:48},
+    second_hand:{name:'Brocante',symbol:'▣',loot:['cloth','parts','wood'],danger:28},
+    stationery:{name:'Papeterie',symbol:'▤',loot:['cloth','parts'],danger:28},
+    books:{name:'Librairie',symbol:'▤',loot:['cloth','wood'],danger:28},
+    florist:{name:'Fleuriste',symbol:'♣',loot:['wood','water'],danger:23},
+    library:{name:'Bibliothèque',symbol:'▤',loot:['cloth','wood'],danger:32},
+    community_centre:{name:'Centre communautaire',symbol:'▣',loot:['food','cloth','parts'],danger:39},
+    townhall:{name:'Mairie',symbol:'▣',loot:['cloth','parts'],danger:35},
+    school:{name:'École',symbol:'▤',loot:['cloth','water'],danger:43},
+    fire_station:{name:'Caserne de pompiers',symbol:'✚',loot:['water','parts','bandage'],danger:50},
+    police:{name:'Poste de police',symbol:'▣',loot:['parts','cloth'],danger:56},
+    hotel:{name:'Hôtel',symbol:'▣',loot:['food','water','cloth'],danger:42},
+    hostel:{name:'Auberge',symbol:'▣',loot:['food','water','cloth'],danger:36},
+    guest_house:{name:'Maison d’hôtes',symbol:'▣',loot:['food','water','cloth'],danger:32},
+    museum:{name:'Musée',symbol:'▤',loot:['cloth','parts'],danger:34},
+    park:{name:'Parc',symbol:'♣',loot:['wood','water'],danger:25},
+    garden:{name:'Jardin public',symbol:'♣',loot:['wood','water'],danger:22},
+    playground:{name:'Aire de jeux',symbol:'♣',loot:['wood','cloth'],danger:22}
   };
+  const poiCache=new Map();
+  function applyPoiList(list,lat,lon){
+    pois=list;
+    if(!pois.some(p=>p.id===game.selected))game.selected=pois[0]?.id||'';
+    poiLoading=false;
+    poiError=pois.length?'':`Aucun lieu OpenStreetMap référencé à moins de ${(POI_RADIUS_M/1000).toFixed(1).replace('.',',')} km dans ce secteur.`;
+    refreshMarkers();renderAll();
+  }
   async function findRealPoi(lat,lon){
-    // Overpass est interrogé seulement après l'autorisation GPS, sans bloquer le fond de carte.
     const serial=++poiRequestSerial;
     const around=`around:${POI_RADIUS_M},${lat},${lon}`;
-    const query=`[out:json][timeout:20];(nwr(${around})["shop"~"^(supermarket|convenience|bakery|butcher|greengrocer|general|grocery|hardware|doityourself|car_parts|outdoor|chemist)$"];nwr(${around})["amenity"~"^(pharmacy|fuel|restaurant|cafe|fast_food|hospital|clinic)$"];);out center tags;`;
-    const urls=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+    const query=`[out:json][timeout:20];(nwr(${around})["shop"~"^(supermarket|convenience|bakery|butcher|greengrocer|general|grocery|hardware|doityourself|car_parts|outdoor|chemist|department_store|clothes|shoes|electronics|mobile_phone|bicycle|car_repair|second_hand|stationery|books|florist)$"];nwr(${around})["amenity"~"^(pharmacy|fuel|restaurant|cafe|fast_food|hospital|clinic|doctors|library|community_centre|townhall|school|fire_station|police)$"];nwr(${around})["tourism"~"^(hotel|hostel|guest_house|museum)$"];nwr(${around})["leisure"~"^(park|garden|playground)$"];);out center tags;`;
+    const servers=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
     poiLoading=true;poiError='';renderPois();
-    for(const server of urls){
+    for(const server of servers){
       try{
-        const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),13500);
+        const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),14500);
         let response;
         try{response=await fetch(server+'?data='+encodeURIComponent(query),{signal:ctl.signal,headers:{Accept:'application/json'}})}finally{clearTimeout(timer)}
-        if(!response.ok)throw Error('Overpass: '+response.status);
-        const data=await response.json();if(serial!==poiRequestSerial||game.mode!=='gps')return;
-        const used=new Set();
-        const found=(data.elements||[]).map(e=>{
-          const t=e.tags||{},key=POI_TYPES[t.shop]?t.shop:POI_TYPES[t.amenity]?t.amenity:null;
+        if(!response.ok)throw Error('Overpass HTTP '+response.status);
+        const data=await response.json();if(serial!==poiRequestSerial)return;
+        const used=new Set(),found=(data.elements||[]).map(e=>{
+          const t=e.tags||{},key=[t.shop,t.amenity,t.tourism,t.leisure].find(k=>POI_TYPES[k]);
           const type=POI_TYPES[key],loc=e.center||e;
           if(!type||!Number.isFinite(loc.lat)||!Number.isFinite(loc.lon))return null;
-          const id='osm-'+e.type+'-'+e.id;
-          if(used.has(id))return null;used.add(id);
-          return{id,name:(t.name||type.name).slice(0,65),type:type.name,symbol:type.symbol,lat:loc.lat,lon:loc.lon,
-            danger:clamp(type.danger+(Number(e.id)%13),12,80),loot:type.loot,source:'osm'};
+          const id='osm-'+e.type+'-'+e.id;if(used.has(id))return null;used.add(id);
+          return {id,name:String(t.name||type.name).slice(0,65),type:type.name,symbol:type.symbol,
+            lat:loc.lat,lon:loc.lon,danger:clamp(type.danger+(Number(e.id)%13),12,80),loot:type.loot,source:'osm'};
         }).filter(Boolean).filter(p=>distanceM(lat,lon,p.lat,p.lon)<=POI_RADIUS_M)
-          .sort((a,b)=>distanceM(lat,lon,a.lat,a.lon)-distanceM(lat,lon,b.lat,b.lon)).slice(0,40);
-        pois=found;poiLoading=false;poiError=found.length?'':`Aucun point de ravitaillement répertorié à moins de ${(POI_RADIUS_M/1000).toFixed(1).replace('.',',')} km. Deux fouilles à distance restent possibles par jour.`;
-        game.selected=pois[0]?.id||'';refreshMarkers();renderAll();
-        toast(found.length?`${found.length} lieu(x) OpenStreetMap repéré(s) autour de toi.`:poiError);return;
-      }catch(e){if(serial!==poiRequestSerial)return}
+          .sort((a,b)=>distanceM(lat,lon,a.lat,a.lon)-distanceM(lat,lon,b.lat,b.lon)).slice(0,70);
+        poiCache.set(sectorKey(lat,lon)+':'+Math.round(lat*1000)+':'+Math.round(lon*1000),{lat,lon,at:Date.now(),places:found});
+        if(poiCache.size>14)poiCache.delete(poiCache.keys().next().value);
+        applyPoiList(found,lat,lon);
+        return;
+      }catch(e){if(serial!==poiRequestSerial)return;console.warn('Recherche OSM indisponible :',String(e))}
     }
-    if(serial!==poiRequestSerial||game.mode!=='gps')return;
-    pois=[];game.selected='';poiLoading=false;poiError='Service des lieux indisponible. Réessaie dans quelques instants ou utilise les deux fouilles à distance.';
-    lastPOIRequestAt=0;refreshMarkers();renderAll();toast(poiError);
+    if(serial!==poiRequestSerial)return;
+    poiLoading=false;poiError='Service OpenStreetMap indisponible. Aucun commerce fictif ajouté. Réessaie plus tard.';
+    if(!pois.length)applyPoiList([],lat,lon);else{renderAll();}
+    lastPOIRequestAt=0;toast(poiError);
   }
   function loadPOIsNear(lat,lon,force=false){
-    if(!force&&lastPOIRequest&&Date.now()-lastPOIRequestAt<45000&&distanceM(lat,lon,...lastPOIRequest)<350)return;
+    if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+    // Une vue éloignée doit charger ses propres vrais lieux, pas recycler ceux du GPS.
+    if(!force&&lastPOIRequest&&Date.now()-lastPOIRequestAt<45000&&distanceM(lat,lon,...lastPOIRequest)<950)return;
     lastPOIRequest=[lat,lon];lastPOIRequestAt=Date.now();
-    ++poiRequestSerial;pois=[];game.selected='';poiLoading=true;poiError='';refreshMarkers();renderAll();
-    findRealPoi(lat,lon).catch(()=>{});
+    if(!force){
+      for(const cached of [...poiCache.values()].reverse()){
+        if(Date.now()-cached.at<POI_CACHE_MS&&distanceM(lat,lon,cached.lat,cached.lon)<950){
+          poiRequestSerial++;applyPoiList(cached.places,lat,lon);return;
+        }
+      }
+    }
+    // Un ancien lieu ne se transforme jamais en commerce voisin de la nouvelle zone.
+    pois=[];game.selected='';poiLoading=true;poiError='';refreshMarkers();renderAll();
+    findRealPoi(lat,lon).catch(err=>{poiLoading=false;poiError='Erreur de recherche OpenStreetMap.';renderAll();console.warn(err)});
   }
   function squareAt(lat,lon){
     const half=SAFE_SIDE_M/2;
@@ -848,13 +911,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('poiList').innerHTML=pois.map(p=>{
       const cd=Math.max(0,Math.ceil(((game.cooldowns[p.id]||0)-Date.now())/60000));
       const distance=game.mode==='gps'&&game.lat!==null?`${Math.round(distanceM(game.lat,game.lon,p.lat,p.lon))} m · `:'';
-      const status=p.source==='osm'?'◉ LIEU RÉFÉRENCÉ':'◇ FICTIF';
+      const status='◉ OPENSTREETMAP';
       return `<button class="poi-card ${game.selected===p.id?'active':''}" data-poi="${safe(p.id)}"><span class="poi-symbol">${p.symbol}</span><span><b>${safe(p.name)}</b><small>${distance}${cd?`Disponible dans ${cd} min`:status}</small></span><span class="poi-danger">${p.danger}%</span></button>`;
     }).join('');
     const p=pois.find(p=>p.id===game.selected)||pois[0];
     if(!p){
-      $('targetCard').innerHTML=`<p>${safe(poiLoading?'Recherche des commerces autour de ta position GPS…':poiError||'Aucun lieu disponible ici.')}</p>${game.mode==='gps'&&!poiLoading?'<button id="retryPlaces" class="btn">↻ RECHERCHER LES LIEUX</button>':''}`;
-      $('retryPlaces')?.addEventListener('click',()=>{if(game.lat!==null)loadPOIsNear(game.lat,game.lon,true)});
+      $('targetCard').innerHTML=`<p>${safe(poiLoading?'Chargement des vrais lieux OpenStreetMap de ce secteur…':poiError||'Aucun lieu disponible ici.')}</p>${!poiLoading?'<button id="retryPlaces" class="btn">↻ RECHERCHER LES LIEUX</button>':''}`;
+      $('retryPlaces')?.addEventListener('click',()=>{const p=map?.latlon(map.w/2,map.h/2);loadPOIsNear(p?.lat??center[0],p?.lon??center[1],true)});
       renderSafe();return;
     }
     const cd=Math.max(0,Math.ceil(((game.cooldowns[p.id]||0)-Date.now())/60000));
@@ -863,7 +926,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const disabled=!canSearch(p);
     const label=cd?`↻ RAVITAILLEMENT · ${cd} MIN`:scanBusy?'FOUILLE EN COURS…':remote&&remaining===0?'2/2 FOUILLES À DISTANCE UTILISÉES':'⌕ LANCER LA FOUILLE';
     $('targetCard').innerHTML=`<div class="target-eyebrow">/ LIEU SÉLECTIONNÉ · ${safe(p.type)}</div>
-      <h3>${safe(p.name)}</h3><p>${p.source==='osm'?'Point d’intérêt réel référencé sur OpenStreetMap. Le ravitaillement est fictif, sans entrée dans le bâtiment.':'Lieu fictif. Pour fouiller en te déplaçant, active le GPS et attends les vrais lieux référencés.'}</p>
+      <h3>${safe(p.name)}</h3><p>${'Lieu réellement référencé sur OpenStreetMap. Le butin est virtuel : ne pénètre pas dans un bâtiment pour jouer.'}</p>
       <div class="target-info"><span>MENACE : ${p.danger}%</span><span>${dist}</span></div>
       <div class="target-info"><span>${onsite?'✓ SUR PLACE · FOUILLE GPS':'◇ À DISTANCE'}</span><span>${remaining}/${DAILY_REMOTE_LIMIT} GRATUITES</span></div>
       <div class="search-options">${Object.entries(METHODS).map(([id,m])=>`<button type="button" data-method="${id}" class="${selectedMethod===id?'active':''}">${m.name}<br><small>⚡ ${m.energy}</small></button>`).join('')}</div>
@@ -883,7 +946,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if((game.cooldowns[p.id]||0)>Date.now())return toast('Ce lieu a besoin de se ravitailler.');
     const m=METHODS[selectedMethod];if(game.energy<m.energy)return toast('Endurance insuffisante : repose-toi.');
     if(game.hp===0)return toast('Récupère d’abord au refuge.');
-    if(isRemote(p)&&remoteLeft()===0)return toast('Tes deux fouilles à distance sont utilisées : approche-toi à 120 m d’un vrai lieu GPS.');
+    if(isRemote(p)&&remoteLeft()===0)return toast('Tes deux fouilles à distance sont utilisées : approche-toi à 300 m d’un lieu OpenStreetMap avec le GPS.');
     scanBusy=true;const token={cancelled:false};scanToken=token;renderPois();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'scavenge'}}));
     const duration=selectedMethod==='quiet'?9000:selectedMethod==='normal'?7000:5000;
     modal({tag:'⌕ FOUILLE EN COURS',title:'RESTE DISCRET',text:game.micEnabled?'Le bruit ambiant est analysé localement pendant la fouille. Aucun enregistrement.':'Micro désactivé : la discrétion dépend de ta méthode de fouille.',
@@ -905,7 +968,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const found=takeLoot(loot);xpGain(12+(p.danger>>3));
     const risk=clamp(8+p.danger*.45+m.risk+game.noise*.16+soundLevel*.40,0,92);
     log(`Fouille ${m.name.toLowerCase()} · ${p.name} : ${found.length?found.join(', '):'sac plein'}${mic.hasMic?` · bruit ${soundLevel}/100`:''}.`);
-    if(Math.random()*100<risk){save();renderAll();startCombat(p)}
+    if(Math.random()*100<risk){engagedZombieId=null;save();renderAll();startCombat(p)}
     else{game.threat=clamp(game.threat-4);commit(`Fouille réussie ! ${found.length?found.join(', '):'Sac à dos plein.'}`)}
     if(mic.denied)toast('Micro non disponible : fouille jouée normalement.');
   }
@@ -1158,7 +1221,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         if(safeDrawing||scanBusy)return;
         const p=map.latlon(map.w/2,map.h/2);
         updateRoaming(true);
-        if(game.mode==='gps'&&game.lat!==null&&distanceM(p.lat,p.lon,game.lat,game.lon)>450)loadPOIsNear(p.lat,p.lon);else if(game.mode!=='gps'){pois=getPoiList(p.lat,p.lon);game.selected=pois[0]?.id||'';refreshMarkers();renderPois();}
+        // Le centre de la vue est la référence de découverte, même loin du GPS.
+        loadPOIsNear(p.lat,p.lon);
       },650)};
       
     }catch(e){$('mapFallback').hidden=false;console.warn('Carte Canvas indisponible',e)}
@@ -1166,9 +1230,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function refreshMarkers(){
     if(!map)return;
     const markers=[];
-    if(game.mode==='gps'&&game.lat!==null){markers.push({id:'player',kind:'player',symbol:'◎',label:'SURVIVANT',lat:game.lat,lon:game.lon})}else{markers.push({id:'player',kind:'player',symbol:'◎',label:'SURVIVANT',lat:center[0],lon:center[1]})}
+    if(game.mode==='gps'&&game.lat!==null){markers.push({id:'player',kind:'player',symbol:'■',label:'MA POSITION',lat:game.lat,lon:game.lon})}else{markers.push({id:'player',kind:'player',symbol:'□',label:'POSITION FICTIVE',lat:center[0],lon:center[1]})}
     if(game.safeZone)markers.push({id:'safe',kind:'home',symbol:'⌂',label:'REFUGE',lat:game.safeZone.center[0],lon:game.safeZone.center[1]});
-    else if(game.mode==='demo')markers.push({id:'base-demo',kind:'home',symbol:'⌂',label:'REFUGE DÉMO',lat:center[0],lon:center[1]});
     for(const p of pois)markers.push({id:p.id,kind:'poi',symbol:p.symbol,label:p.name,lat:p.lat,lon:p.lon,selected:p.id===game.selected});
     // Les infectés figurés sont de simples éléments fictionnels sur le terrain.
     for(const z of roamingZombies)markers.push(z);
@@ -1177,9 +1240,10 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function setDemo(){
     if(gpsWatch!==null){navigator.geolocation?.clearWatch(gpsWatch);gpsWatch=null;}
     poiRequestSerial++;poiLoading=false;poiError='';game.mode='demo';game.lat=null;game.lon=null;gpsAccuracy=Infinity;
-    center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];pois=getPoiList(...center);
-    if(!pois.some(p=>p.id===game.selected))game.selected=pois[0].id;
-    if(map){map.setView(center,15);refreshMarkers()};commit('Mode hors GPS activé : deux fouilles à distance par jour.');
+    center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];pois=[];game.selected='';
+    if(map){map.setView(center,15);refreshMarkers()}
+    commit('Mode sans GPS : exploration des lieux réels de la carte, fouilles à distance limitées.');
+    loadPOIsNear(...center,true);
   }
   function setGPS(){
     if(!navigator.geolocation){toast('GPS indisponible dans ce navigateur.');return;}
@@ -1194,15 +1258,15 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       if(previous>4 && previous<400)window.dispatchEvent(new CustomEvent('de:action',{detail:{type:pos.coords.speed>2.2?'run':'walk'}}));
       const first=game.mode!=='gps';game.mode='gps';game.lat=lat;game.lon=lon;center=[lat,lon];
       if(first&&map)map.setView(center,15);
-      if(first||moved)loadPOIsNear(lat,lon);
+      if(first||moved){const shown=map?.latlon(map.w/2,map.h/2);if(!shown||first||distanceM(shown.lat,shown.lon,lat,lon)<500)loadPOIsNear(lat,lon)}
       refreshMarkers();save();renderAll();
     },err=>{const msg=err.code===1?'Autorisation GPS refusée.':'Position GPS indisponible.';toast(`${msg} Mode démo conservé.`);setDemo();},
     {enableHighAccuracy:false,maximumAge:30000,timeout:12000});
   }
   function beep(freq,duration){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sawtooth';osc.frequency.value=freq;gain.gain.setValueAtTime(.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);osc.connect(gain).connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration);osc.onended=()=>ctx.close();}catch{}}
   function init(){
-    pois=getPoiList(...center);if(!pois.some(p=>p.id===game.selected))game.selected=pois[0].id;
-    renderAll();createMap();
+    pois=[];game.selected=''; // Aucune fausse supérette au démarrage.
+    renderAll();createMap();loadPOIsNear(...center);
     document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));
     $('gpsMode').addEventListener('click',setGPS);
     $('recenter').addEventListener('click',()=>{if(map)map.setView(game.safeZone && game.mode==='demo'?game.safeZone.center:center,15);else toast('Carte indisponible. La liste des lieux reste utilisable.')});
@@ -1298,7 +1362,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('editSafeZone').addEventListener('click',closeDrawer);
     $('mapMenuToggle').addEventListener('click',toggleTools);
     document.addEventListener('pointerdown',ev=>{if(!$('mapTools').contains(ev.target))closeTools()});
-    for(const id of ['gpsMode','demoMode','recenter','zoomIn','zoomOut'])$(id).addEventListener('click',closeTools);
+    for(const id of ['gpsMode','recenter','zoomIn','zoomOut'])$(id)?.addEventListener('click',closeTools);
     $('zoomIn').addEventListener('click',()=>{let m=window.DEAD_EARTH_MAP;if(m){m.zoom=Math.min(18,m.zoom+.7);m.queueDraw()}});
     $('zoomOut').addEventListener('click',()=>{let m=window.DEAD_EARTH_MAP;if(m){m.zoom=Math.max(13.5,m.zoom-.7);m.queueDraw()}});
     window.addEventListener('de:render',e=>renderMini(e.detail));

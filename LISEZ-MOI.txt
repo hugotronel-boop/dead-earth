@@ -1,17 +1,13 @@
-DEAD EARTH V0.7 — Mise à jour de la page Carte
+DEAD EARTH V0.8 — CARTE / INFECTÉS / LIEUX RÉELS
 
-Sur GitHub, remplacer uniquement index.html par ce fichier.
+Installation simple depuis iPhone : remplace uniquement index.html à la racine de ton dépôt GitHub Pages.
 
-Changements :
-- ambiance sonore synthétisée originale (aucun téléchargement externe), bouton note de musique ;
-- bouton Démo retiré des Options (mode hors GPS conservé en secours) ;
-- personnage miniature dessiné sur son marqueur de carte ;
-- zombies par secteurs, déplacements périodiques, suppression définitive locale après victoire ;
-- déplacement libre de la carte, découverte de nouveaux secteurs et recherche de POI en mode GPS ;
-- rayon de fouille GPS sans déplacement : 300 m (précision GPS requise).
+Carte : carré jaune = position GPS si GPS activé, position fictive autrement. Le grand personnage n'est plus affiché sur la carte ; la page Perso conserve son portrait.
 
-Notes :
-- Les lieux OpenStreetMap sont des lieux publics référencés, pas des lieux réellement abandonnés ; ne pas entrer dans des propriétés privées.
-- Le navigateur doit autoriser le GPS, et les sons démarrent après un clic.
-- Le jeu sauvegarde localement ; supprimer les données du site peut réinitialiser les zombies éliminés.
-- Vérification de syntaxe JS effectuée ; test navigateur iPhone non réalisé dans cet environnement.
+Zombies : jusqu'à 3 visibles à proximité du secteur affiché ; chaque infecté est rattaché à un point d'origine fixe et patrouille aléatoirement sur 12–37 m. Toucher un zombie lance le combat. Un infecté abattu est supprimé et son ID mémorisé localement.
+
+Exploration : on déplace la carte au doigt ; le jeu demande les véritables points d'intérêt OpenStreetMap autour du centre de la vue et les affiche. Les catégories comprennent magasins, boulangeries, pharmacies, garages, espaces publics, etc. Aucun lieu n'est inventé. Les ressources et zombies sont fictifs. La recherche peut être temporairement indisponible (service Overpass public).
+
+Fouilles : 2 fouilles à distance par jour, puis l'exploration GPS dans les 300 m de lieux OSM donne des fouilles sur place ; la géolocalisation doit être suffisamment précise. Pas de conduite ni visite de propriétés privées pour jouer.
+
+Sauvegarde : locale au navigateur ; coordonnées GPS exactes non conservées. Les autres onglets et la progression précédente sont préservés.
