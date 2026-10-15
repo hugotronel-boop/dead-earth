@@ -1,30 +1,23 @@
-# DEAD EARTH — V1.3 : écosystème de zombies
+# DEAD EARTH V1.4 — Errance libre des zombies
 
-## Nouveautés
+Cette version se base sur la V1.3 et ne modifie que le moteur de déplacement des zombies.
 
-- La carte du monde est divisée en cases géographiques d'environ **20 km²** chacune, soit des carrés d'environ **4,47 km de côté** autour des latitudes françaises. Les limites sont légèrement approximatives sur le globe.
-- Chaque case contient une population **déterministe mais aléatoire de 12 à 38 zombies**. Le même joueur retrouve le même nombre dans une même case.
-- Chaque zombie peut choisir des destinations **partout dans sa propre case** et y marche librement. Il ne peut pas franchir une limite de case.
-- Chaque zombie tué disparaît de la carte et déclenche un délai **individuel de 20 heures réelles**. Un remplaçant ne peut apparaître qu'après la fin de ce délai, à une nouvelle position dans la même case.
-- Zombies interdits dans les **zones SAFE** et dans le refuge : interdiction à l'apparition, lors du déplacement et lors de l'agrandissement d'une protection.
-- Le blocage d'une construction SAFE vérifie la **position actuelle** des zombies dans le futur périmètre, pas un point d'apparition ancien.
-- Le menu du village affiche la population et les retours prévus dans la case actuellement regardée.
-- La carte reste rapide : seule la population des cases visibles et nécessaires aux vérifications est instanciée.
+## Changements
 
-## Fonctionnement conservé
+- Chaque cellule du quadrillage mondial conserve sa surface d'environ **20 km²** et sa population de **12 à 38 infectés**.
+- Chaque infecté tire des destinations aléatoires **dans toute sa cellule**, sans être limité à un rayon autour de son point de départ.
+- Les mouvements sont fluides, progressifs et visibles sur la carte. Les vitesses ont été légèrement rehaussées pour améliorer le ressenti du jeu.
+- Les positions, destinations et états aléatoires des zombies consultés sont sauvegardés localement. Au retour dans un secteur, les positions sont recalculées d'après le temps écoulé (jusqu'à 48 h d'un coup) : le jeu n'a pas besoin de rester ouvert.
+- Les zombies restent dans leur propre cellule et ne peuvent ni traverser ni apparaître dans une zone SAFE ou dans le refuge.
+- Chaque élimination conserve son compte à rebours indépendant de **20 heures** avant le retour d'un remplaçant.
+- Le cache limite l'utilisation mémoire / stockage afin que la carte reste utilisable sur mobile.
 
-- GPS réel pour combattre à 20 mètres maximum d'un zombie et fouiller à 10 mètres maximum d'un lieu réel.
-- Zones SAFE : présence du joueur à 35 mètres du centre, matériaux nécessaires, diamètre de 100 à 1 000 mètres selon le niveau.
-- Refuge au domicile, inventaire, atelier, missions, fabrication, sauvegarde locale.
-- Même interface pixel art, en un seul fichier HTML.
+## Installation sur GitHub Pages
 
-## Installation GitHub Pages
+Si tu utilises déjà la version **un seul fichier**, remplace **uniquement `index.html`** à la racine du dépôt `dead-earth`, puis valide `Commit changes`. La sauvegarde existante est conservée dans le stockage local du navigateur, tant que ce stockage n'est pas effacé.
 
-Remplacer **uniquement le fichier `index.html`** à la racine de ton dépôt `dead-earth` par le fichier de ce dossier, puis faire **Commit changes**. Il est autonome pour les éléments du jeu, mais les données de commerces et de rues nécessitent une connexion Internet.
+## Limites techniques
 
-## Limites actuelles
+Le déplacement est calculé **au moment où les secteurs sont chargés** et non par un serveur qui fait tourner le jeu 24 h/24. Les zombies non consultés évoluent lors de leur prochain affichage. Le monde est encore solo, dépend de l'horloge du téléphone et n'est pas synchronisé entre les joueurs.
 
-- Ceci est une **simulation locale solo** : les morts, le délai de retour et les zones SAFE sont sauvegardés **sur cet appareil**, pas synchronisés entre joueurs.
-- Les zombies se déplacent quand leur case est chargée dans le jeu ; les compteurs de réapparition, eux, avancent même quand le jeu est fermé.
-- Les horaires reposent sur l'horloge de l'appareil. Un serveur sera nécessaire plus tard pour empêcher la triche, assurer la même population à tous les joueurs et gérer un monde partagé.
-- Pour des raisons de sécurité, aucune action du jeu ne doit exiger de courir, d'entrer dans des propriétés privées ou de regarder le téléphone en traversant une route.
+Pour vérifier le déplacement, observe les zombies en zoomant sur une zone où des infectés sont visibles, puis reviens après quelques minutes : leur position aura changé.

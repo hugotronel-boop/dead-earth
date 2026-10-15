@@ -729,6 +729,43 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const METERS_PER_LAT_DEG=111195;
   const zombieTracks=new Map();
   const zombieCellsCache=new Map();
+  const ZOMBIE_MOTION_KEY='dead-earth-zombie-roaming-v14';
+  const ZOMBIE_MOTION_CACHE_LIMIT=1400;
+  const ZOMBIE_CATCHUP_MAX_MS=48*60*60*1000;
+  let motionCache=new Map(),lastMotionSave=0;
+  try{
+    const saved=JSON.parse(localStorage.getItem(ZOMBIE_MOTION_KEY)||'null');
+    if(saved?.version===1&&Array.isArray(saved.tracks))
+      for(const [id,data] of saved.tracks.slice(-ZOMBIE_MOTION_CACHE_LIMIT))
+        if(/^zw--?\d+:-?\d+:\d+$/.test(id)&&Array.isArray(data))motionCache.set(id,data);
+  }catch(e){ /* Navigateur privé : la session reste jouable. */ }
+  function persistZombieMotion(force=false){
+    const now=Date.now();if(!force&&now-lastMotionSave<16000)return;
+    lastMotionSave=now;
+    for(const [id,z] of zombieTracks){
+      if((game.zombieRespawns[id]?.until||0)>now){motionCache.delete(id);continue;}
+      motionCache.set(id,[z.cycle,z.lat,z.lon,z.targetLat,z.targetLon,z.speed,z.lastTime,z.restUntil,z.rng.getState(),z.lastSeen||now]);
+    }
+    if(motionCache.size>ZOMBIE_MOTION_CACHE_LIMIT){
+      const sorted=[...motionCache].sort((a,b)=>(b[1][9]||0)-(a[1][9]||0));
+      motionCache=new Map(sorted.slice(0,ZOMBIE_MOTION_CACHE_LIMIT));
+    }
+    try{localStorage.setItem(ZOMBIE_MOTION_KEY,JSON.stringify({version:1,tracks:[...motionCache]}))}catch(e){}
+  }
+  function restoreZombieMotion(z,cell){
+    const m=motionCache.get(z.id);
+    if(!m||m[0]!==z.cycle||m.length<10)return z;
+    const [cycle,lat,lon,toLat,toLon,speed,lastTime,restUntil,randomState,lastSeen]=m;
+    const valid=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&a>cell.south&&a<cell.north&&b>cell.west&&b<cell.east;
+    if(!valid(lat,lon)||!valid(toLat,toLon)||isProtected(lat,lon,2))return z;
+    Object.assign(z,{lat,lon,targetLat:toLat,targetLon:toLon,
+      speed:Number.isFinite(speed)?clamp(speed,1.5,4.2):z.speed,
+      lastTime:Number.isFinite(lastTime)?Math.min(lastTime,Date.now()):Date.now(),
+      restUntil:Number.isFinite(restUntil)?restUntil:0,
+      lastSeen:Number.isFinite(lastSeen)?lastSeen:Date.now()});
+    z.rng.setState(randomState);
+    return z;
+  }
   // La grille utilise des rangées de latitude avec largeur ajustée à leur latitude.
   function rowBounds(row){
     const south=row*ZOMBIE_CELL_SIDE_M/METERS_PER_LAT_DEG;
@@ -743,7 +780,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   function zombieCellId(row,col){return row+':'+col;}
   function sectorKey(lat,lon){const q=zombieCellAt(lat,lon);return zombieCellId(q.row,q.col)}
-  function seeded(n){let x=n|0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
+  function seeded(n){
+    let x=(n|0)||0x6a09e667;
+    const fn=()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296};
+    fn.getState=()=>x|0;
+    fn.setState=v=>{if(Number.isFinite(v))x=(v|0)||0x6a09e667};
+    return fn;
+  }
   function hashZombie(a,b,c=0){let h=2166136261;for(const x of [a,b,c]){h=Math.imul(h^(x|0),16777619);h^=h>>>13}return h|0}
   function cellInfo(row,col){
     const key=zombieCellId(row,col);
@@ -815,7 +858,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const id=`zw-${cell.row}:${cell.col}:${slot}`;
     return {id,kind:'zombie',symbol:'☣',cellKey:cell.key,cellRow:cell.row,cellCol:cell.col,
       lat:location[0],lon:location[1],homeLat:location[0],homeLon:location[1],targetLat:location[0],targetLon:location[1],
-      speed:.7+rng()*1.1,rng,lastTime:Date.now(),restUntil:0,cycle};
+      speed:1.6+rng()*2.4,rng,lastTime:Date.now(),restUntil:0,lastSeen:Date.now(),cycle};
   }
   function getCellZombies(cell){
     const all=[];
@@ -827,11 +870,12 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       if(!z||z.cycle!==(status.cycle||0)){
         z=newZombie(cell,i,status.cycle||0);
         if(!z)continue;
+        z=restoreZombieMotion(z,cell);
         zombieTracks.set(id,z);
       }
       // Une zone SAFE construite depuis la dernière visite expulse l'infecté.
       if(isProtected(z.lat,z.lon,1)){
-        zombieTracks.delete(id);
+        zombieTracks.delete(id);motionCache.delete(id);
         z=newZombie(cell,i,status.cycle||0);
         if(!z)continue;
         zombieTracks.set(id,z);
@@ -842,8 +886,12 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   function chooseZombieTarget(z){
     const c=cellInfo(z.cellRow,z.cellCol),rng=z.rng;
-    for(let attempt=0;attempt<28;attempt++){
+    // Aucun point d'origine à respecter : tirage uniforme sur TOUS les 20 km².
+    // Une destination qui couperait une zone SAFE n'est pas retenue : le prochain
+    // tronçon change donc de direction pour contourner la protection.
+    for(let attempt=0;attempt<65;attempt++){
       const next=randomCellPoint(c,rng);
+      if(distanceM(z.lat,z.lon,...next)<25)continue;
       if(!isProtected(...next,2)&&!crossesSafe(z.lat,z.lon,...next)){
         z.targetLat=next[0];z.targetLon=next[1];return true;
       }
@@ -852,18 +900,46 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     return false;
   }
   function moveZombie(z,now){
-    const dt=Math.min(15,Math.max(0,(now-z.lastTime)/1000));z.lastTime=now;
-    if(now<z.restUntil)return;
-    const remaining=distanceM(z.lat,z.lon,z.targetLat,z.targetLon);
-    if(remaining<2){chooseZombieTarget(z);z.restUntil=now+z.rng()*2400;return;}
-    const ratio=Math.min(1,z.speed*dt/Math.max(remaining,.01));
-    const lat=z.lat+(z.targetLat-z.lat)*ratio,lon=z.lon+(z.targetLon-z.lon)*ratio;
-    const cell=cellInfo(z.cellRow,z.cellCol);
-    const inside=lat>cell.south&&lat<cell.north&&lon>cell.west&&lon<cell.east;
-    if(!inside||isProtected(lat,lon,1)||crossesSafe(z.lat,z.lon,lat,lon)){
-      chooseZombieTarget(z);z.restUntil=now+1100;return;
+    // La simulation est paresseuse : seules les cases consultées sont traitées.
+    // En revenant dans une case, on calcule le chemin parcouru durant l'absence,
+    // au lieu de figer le zombie à sa dernière position ou de le téléporter.
+    if(!Number.isFinite(z.lastTime)||z.lastTime>now)z.lastTime=now;
+    let virtualTime=Math.max(z.lastTime,now-ZOMBIE_CATCHUP_MAX_MS);
+    const c=cellInfo(z.cellRow,z.cellCol);
+    let routeChanges=0;
+    while(virtualTime<now&&routeChanges<240){
+      if(z.restUntil>virtualTime){virtualTime=Math.min(now,z.restUntil);continue;}
+      const dist=distanceM(z.lat,z.lon,z.targetLat,z.targetLon);
+      if(dist<2||isProtected(z.targetLat,z.targetLon,2)||crossesSafe(z.lat,z.lon,z.targetLat,z.targetLon)){
+        if(!chooseZombieTarget(z)){
+          z.restUntil=virtualTime+60000;
+          virtualTime=Math.min(now,z.restUntil);
+        }
+        routeChanges++;
+        continue;
+      }
+      const travelMs=1000*dist/z.speed;
+      const stepMs=Math.min(now-virtualTime,travelMs);
+      const ratio=Math.min(1,stepMs/travelMs);
+      const lat=z.lat+(z.targetLat-z.lat)*ratio,lon=z.lon+(z.targetLon-z.lon)*ratio;
+      if(lat<=c.south||lat>=c.north||lon<=c.west||lon>=c.east||
+         isProtected(lat,lon,1)||crossesSafe(z.lat,z.lon,lat,lon)){
+        z.targetLat=z.lat;z.targetLon=z.lon;
+        z.restUntil=virtualTime+4000;
+        virtualTime=Math.min(now,z.restUntil);
+        routeChanges++;continue;
+      }
+      z.lat=lat;z.lon=lon;
+      virtualTime+=stepMs;
+      if(ratio>=1){
+        z.targetLat=z.lat;z.targetLon=z.lon;
+        z.restUntil=virtualTime+800+z.rng()*4000;
+        routeChanges++;
+      }
     }
-    z.lat=lat;z.lon=lon;
+    // Sur une très longue absence, on garde la dernière position valide
+    // plutôt que d'effectuer une boucle infinie de destinations.
+    z.lastTime=now;z.lastSeen=now;
   }
   function zombiesNear(lat,lon,radius){
     const now=Date.now(),list=[];
@@ -1110,7 +1186,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         if(until>Date.now())next.push(until);
       }
       const waitLabel=next.length?` · prochain retour dans ${Math.ceil((Math.min(...next)-Date.now())/3600000)} h`:'';
-      gridStatus=`<div class="zombie-sector-info"><b>☣ CASE DE 20 KM²</b><span>${present} infecté(s) · ${waiting} en attente${waitLabel}</span><small>Déplacements libres dans la case · remplacement 20 h après élimination · aucune intrusion dans les zones SAFE.</small></div>`;
+      gridStatus=`<div class="zombie-sector-info"><b>☣ CASE DE 20 KM²</b><span>${present} infecté(s) · ${waiting} en attente${waitLabel}</span><small>Errance libre dans toute la case · positions conservées · retour 20 h après élimination · zones SAFE interdites.</small></div>`;
     }
     const panel=`<div class="village-panel" id="villagePanel" ${villagePanelOpen?'':'hidden'}>
       <div class="campaign-head"><b>${safe(title)}</b><span>${stage==='place'?'DÉPART':stage==='safe'?'PROTÉGÉ':'RECONQUÊTE'}</span></div>
@@ -1152,6 +1228,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     roamingZombies=visible.slice(0,MAX_RENDERED_ZOMBIES);
     map.setZombieCells?.(cells);
     refreshMarkers();if(sound)updateAmbience();
+    persistZombieMotion();
   }
   function nearestZombieDistance(){
     if(!map)return Infinity;
@@ -1619,7 +1696,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       if(engagedZombieId){
         const id=engagedZombieId,old=game.zombieRespawns[id]||{},previousCycle=Number(old.cycle)||0;
         game.zombieRespawns[id]={until:Date.now()+ZOMBIE_RESPAWN_MS,cycle:previousCycle+1};
-        zombieTracks.delete(id);claimTerritoryKill(id);engagedZombieId=null;
+        zombieTracks.delete(id);motionCache.delete(id);persistZombieMotion(true);claimTerritoryKill(id);engagedZombieId=null;
         roamingZombies=roamingZombies.filter(e=>e.id!==id);
         log('☣ Un remplaçant de ce zombie pourra apparaître dans sa case dans 20 heures, hors des zones SAFE.');
       }
@@ -1838,7 +1915,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         game.selected=id;save();renderPois();renderHud();refreshMarkers();window.dispatchEvent(new CustomEvent('de:poi',{detail:{id}}));
       }});
       window.DEAD_EARTH_MAP=map;refreshMarkers();updateRoaming(true);
-      setInterval(()=>{if(document.visibilityState==='visible'&&currentTab==='map')updateRoaming()},1200);
+      setInterval(()=>{if(document.visibilityState==='visible'&&currentTab==='map')updateRoaming()},850);
       // Déplacement libre de la carte : découvrir les secteurs et leurs points réels.
       map.onExplore=()=>{clearTimeout(exploreTimer);exploreTimer=setTimeout(()=>{
         if(safeDrawing||zoneDraftMode||scanBusy)return;
@@ -1917,7 +1994,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('resetBtn').addEventListener('click',()=>modal({tag:'RÉINITIALISATION',title:'RECOMMENCER ?',text:'Cette action efface ta progression locale. Tu pourras continuer à jouer en mode démo.',actions:[{name:'ANNULER',fn:closeModal,alt:true},{name:'EFFACER LA PARTIE',fn:()=>{closeModal();game=fresh();selectedMethod='quiet';setDemo();switchTab('map');}}]}));
     $('modal').addEventListener('click',e=>{if(e.target===$('modal')&&!combat)closeModal()});
     window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!combat)closeModal()});
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(scanToken)scanToken.stop?.();if(ambience)ambience.ctx.suspend().catch(()=>{});}if(document.visibilityState==='visible'){renderAll();if(ambience)ambience.ctx.resume().catch(()=>{});}});
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){persistZombieMotion(true);if(scanToken)scanToken.stop?.();if(ambience)ambience.ctx.suspend().catch(()=>{});}if(document.visibilityState==='visible'){renderAll();updateRoaming(true);if(ambience)ambience.ctx.resume().catch(()=>{});}});
+    window.addEventListener('pagehide',()=>persistZombieMotion(true));
     // La page peut rester ouverte pendant le changement de date.
     setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();}},60000);
     /* Single-file edition: service worker deliberately not registered. */
