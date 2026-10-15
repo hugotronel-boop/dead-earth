@@ -199,12 +199,35 @@
 .territory-base .zone-requirements{max-width:390px}
 @media(max-width:360px){.territory-campaign{width:clamp(155px,calc(100% - 132px),230px)}.village-toggle{font-size:10px;padding:7px}.village-panel{max-height:58vh}}
 </style>
+
+<style id="v15-detection-style">
+  /* Une seule commande dans le menu Options, avec un HUD discret en jeu. */
+  #mapToolsPanel{width:min(246px,calc(100vw - 22px));max-height:min(74dvh,550px);overflow-y:auto;overscroll-behavior:contain}
+  .detection-options{margin-top:3px;padding:9px 7px;background:#15252ada;border:2px solid #5a786d;display:flex;flex-direction:column;gap:7px;min-width:0}
+  .detection-options strong{font:8px var(--pixel,monospace);color:#f0d5a0;line-height:1.7}
+  .detection-options .pixel-button{min-height:42px!important;font:9px monospace!important}
+  .detection-mode-text{font:11px monospace;color:#b6ddba;line-height:1.5}
+  .detection-options label{display:flex;align-items:center;justify-content:space-between;gap:6px;font:bold 10px monospace}
+  .detection-options input[type="range"]{accent-color:#d3ad73;width:100%;height:24px;cursor:pointer}
+  .detection-options p{margin:0;font:10px/1.6 monospace;color:#adbdb5}
+  .detection-hud{position:absolute;z-index:17;top:66px;right:9px;width:clamp(112px,36%,159px);min-height:71px;padding:7px 8px;background:#19282edc;pointer-events:none;text-align:left}
+  .detection-hud strong{display:block;font:8px/1.7 var(--pixel,monospace);color:#e4d5a2}
+  .detection-hud span{display:block;margin-top:4px;font:10px monospace;color:#ccdcce;line-height:1.4}
+  .detection-hud small{display:block;margin-top:4px;font:9px/1.3 monospace;color:#b9d1c1}
+  .detection-meter{width:100%;height:7px;margin-top:7px;background:#0b191e;border:1px solid #668177}
+  .detection-meter i{display:block;height:100%;width:0;background:#81c78f;transition:width .2s linear}
+  .detection-hud.alert{border-color:#c57d5e #321c17 #321c17 #c57d5e;box-shadow:0 0 12px #c85c4c77}
+  .detection-hud.alert strong,.detection-hud.alert small{color:#ffa581}
+  .detection-hud.alert .detection-meter i{background:#f17558}
+  @media(max-height:690px){.detection-hud{top:51px;min-height:57px;padding:5px 7px}.detection-hud strong{font-size:7px}.detection-hud small{font-size:8px}}
+  @media(max-width:355px){.detection-hud{width:126px}.detection-hud strong{font-size:7px}}
+</style>
 </head>
 <body>
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.3 · RECONQUÊTE GPS</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.5 · DÉTECTION ZOMBIE</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -232,9 +255,23 @@
             
             <button id="recenter" class="pixel-button utility" type="button">⌖ CENTRER</button>
             <div class="map-zoom"><button id="zoomIn" class="pixel-button utility" type="button" aria-label="Zoom avant">＋</button><button id="zoomOut" class="pixel-button utility" type="button" aria-label="Zoom arrière">－</button></div>
+            <div class="detection-options">
+              <strong>☣ DÉTECTION ZOMBIE</strong>
+              <button id="detectionToggle" class="pixel-button utility" type="button" aria-pressed="false">🎙 ACTIVER LE MICRO</button>
+              <div class="detection-mode-text" id="detectionModeStatus">SANS MICRO · DÉTECTION À 35 M</div>
+              <label for="micSensitivity">SENSIBILITÉ <output id="micSensitivityValue" for="micSensitivity">5/10</output></label>
+              <input type="range" id="micSensitivity" min="1" max="10" step="1" value="5" aria-label="Sensibilité du microphone">
+              <p>Micro facultatif, actif seulement lorsque le jeu reste à l'écran. Analyse locale, aucun son enregistré. Reste en sécurité : ne cours jamais pour échapper à un zombie virtuel.</p>
+            </div>
             <span class="menu-mode" id="mapModeLabel">MODE DÉMO</span>
           </div>
         </div>
+      </div>
+      <div id="detectionHud" class="detection-hud pixel-frame" role="status" aria-live="off">
+        <strong id="detectionHudTitle">◉ MODE PASSIF</strong>
+        <span id="detectionHudInfo">Active le GPS pour être détecté</span>
+        <div class="detection-meter"><i id="detectionMeterFill"></i></div>
+        <small id="detectionAlert">Aucun zombie en chasse</small>
       </div>
       <div class="sr-only" aria-hidden="true"><span id="sidebarThreat"></span><div id="sidebarThreatBar"></div><span id="sidebarThreatText"></span><span id="mapCoords"></span><span id="poiCounter"></span><span id="poiCount"></span></div>
       <div id="territoryCampaign" class="territory-campaign pixel-frame" aria-live="polite"></div>
@@ -272,9 +309,9 @@
         </form>
         <div class="pixel-heading">◉ DISCRÉTION / MICROPHONE</div>
         <div class="metric-row"><span>DISCRÉTION ACTUELLE</span><strong id="stealthValue">100%</strong></div><div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
-        <p class="help-text" id="micExplanation">Le micro, facultatif, mesure le bruit localement pendant les fouilles et s'arrête ensuite. Aucune voix n'est enregistrée.</p>
-        <button id="micToggle" class="pixel-button full" aria-pressed="false">🎙 ACTIVER LE MICRO PENDANT LES FOUILLES</button>
-        <p class="help-text" id="lastMicReading">Dernière fouille : aucun bruit mesuré.</p>
+        <p class="help-text" id="micExplanation">Deux modes : sans micro, les zombies te détectent à 35 m ; avec le micro activé, ils peuvent entendre les bruits autour de toi jusqu’à environ 120 m selon la sensibilité. Le micro reste actif pendant la session visible, jamais en arrière-plan. Aucun audio n’est enregistré ni envoyé.</p>
+        <button id="micToggle" class="pixel-button full" aria-pressed="false">🎙 ACTIVER LA DÉTECTION AU MICRO</button>
+        <p class="help-text" id="lastMicReading">Micro coupé : détection automatique de proximité.</p>
       </div>
       <div class="pixel-frame page-panel"><div class="pixel-heading">ACTIONS DE SURVIE</div>
         <div class="action-list"><button id="eatBtn" class="pixel-button">▣ MANGER UNE CONSERVE</button><button id="drinkBtn" class="pixel-button">◉ BOIRE DE L'EAU</button><button id="healBtn" class="pixel-button">✚ UTILISER UN BANDAGE</button><button id="restBtn" class="pixel-button">☾ SE REPOSER AU REFUGE</button></div>
@@ -571,6 +608,12 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         ctx.fillStyle=m.kind==='zombie'?'#5b5149':'#334249';ctx.fillRect(px-15,py-14,30,29);
         ctx.lineWidth=2;ctx.strokeStyle=col;ctx.strokeRect(px-16,py-15,32,31);
         if(m.kind==='zombie'){
+          if(m.alertedUntil>Date.now()){
+            const pulse=23+Math.sin(Date.now()/260)*3;
+            ctx.beginPath();ctx.arc(px,py,pulse,0,Math.PI*2);ctx.lineWidth=3;
+            ctx.strokeStyle='#ff944d';ctx.stroke();
+            ctx.fillStyle='#ffad67';ctx.font='bold 15px monospace';ctx.textAlign='center';ctx.fillText('!',px+21,py-18);
+          }
           ctx.fillStyle='#3f4a46';ctx.fillRect(px-8,py-9,16,15);ctx.fillStyle='#f66051';ctx.fillRect(px-7,py-6,5,5);ctx.fillRect(px+3,py-6,5,5);ctx.fillStyle='#a5a69a';ctx.fillRect(px-4,py+3,8,3);
           ctx.fillStyle='#a32825';ctx.fillRect(px-15,py-19,26,2);ctx.fillStyle='#d65d4e';ctx.fillRect(px-15,py-19,16,2);
         }else if(m.kind==='player'){
@@ -695,6 +738,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     } catch {return fresh();}
   }
   let game=load();
+  game.micEnabled=false; // Chaque session demande un geste explicite avant toute capture audio.
+  game.micSensitivity=clamp(Number(game.micSensitivity)||5,1,10);
   // Conserver le logement déjà posé dans une ancienne sauvegarde, mais remplacer la campagne à quotas.
   if(game.safeZone){
     const previous=game.territory;
@@ -715,6 +760,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0,poiLoading=false,poiError='';
   let selectedMethod='quiet';
   let engagedZombieId=null, roamingZombies=[],roamCenterKey='',exploreTimer=null,ambience=null;
+  // Analyse sonore uniquement en mémoire : aucun flux ni échantillon n'est sauvegardé.
+  let detectionStream=null,detectionCtx=null,detectionAnalyser=null,detectionBuffer=null,detectionTimer=null;
+  let detectionLevel=0,detectedCount=0,lastDetectionNoticeAt=0,micStarting=false,micRequestToken=0;
+  const DETECTION_PASSIVE_METERS=35;
+  const DETECTION_MIC_MIN_METERS=12;
+  const DETECTION_MIC_MAX_METERS=120;
+  const DETECTION_CHASE_MEMORY_MS=16000;
   /* ZOMBIES MONDIAUX V1.3
      Quadrillage physique d'environ 20 km² : carrés de 4,472 km de côté.
      Chaque case a un nombre de zombies fixe mais aléatoire entre 12 et 38.
@@ -941,6 +993,131 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     // plutôt que d'effectuer une boucle infinie de destinations.
     z.lastTime=now;z.lastSeen=now;
   }
+  // --- DÉTECTION DYNAMIQUE V1.5 : microphone facultatif / proximité automatique ---
+  function microphoneRunning(){return !!(game.micEnabled&&detectionStream&&detectionAnalyser);}
+  function zombieHearingRadius(){
+    return microphoneRunning()
+      ?DETECTION_MIC_MIN_METERS+(DETECTION_MIC_MAX_METERS-DETECTION_MIC_MIN_METERS)*detectionLevel/100
+      :DETECTION_PASSIVE_METERS;
+  }
+  function detectionReady(){
+    return game.mode==='gps'&&Number.isFinite(game.lat)&&Number.isFinite(game.lon)
+      &&Number.isFinite(gpsAccuracy)&&gpsAccuracy<=40
+      &&Date.now()-gpsLastFixAt<GPS_FIX_MAX_AGE_MS;
+  }
+  function renderDetectionUI(){
+    const hearing=Math.round(zombieHearingRadius()),running=microphoneRunning();
+    const gpsOk=detectionReady(),label=running?'🎙 MICRO ACTIF':'◉ MODE PASSIF';
+    const title=$('detectionHudTitle');if(!title)return;
+    title.textContent=label;
+    $('detectionHudInfo').textContent=!gpsOk?'GPS précis nécessaire':running?`BRUIT ${Math.round(detectionLevel)}/100 · ${hearing} M`:`DÉTECTION AUTO · ${hearing} M`;
+    $('detectionMeterFill').style.width=(running?detectionLevel:Math.round(hearing/DETECTION_MIC_MAX_METERS*100))+'%';
+    $('detectionAlert').textContent=detectedCount?`☣ ${detectedCount} INFECTÉ(S) EN CHASSE`:'Aucun infecté en chasse';
+    $('detectionHud').classList.toggle('alert',detectedCount>0&&gpsOk);
+    $('detectionToggle').textContent=micStarting?'🎙 AUTORISATION EN COURS…':running?'🎙 COUPER LE MICRO':'🎙 ACTIVER LE MICRO';
+    $('detectionToggle').disabled=micStarting;
+    $('detectionToggle').setAttribute('aria-pressed',String(running));
+    $('micToggle').textContent=running?'🎙 COUPER LA DÉTECTION AU MICRO':'🎙 ACTIVER LA DÉTECTION AU MICRO';
+    $('micToggle').setAttribute('aria-pressed',String(running));
+    $('detectionModeStatus').textContent=running?`MICRO · PORTÉE ${hearing} M`:'SANS MICRO · DÉTECTION À 35 M';
+    $('micSensitivityValue').textContent=game.micSensitivity+'/10';
+    $('micSensitivity').value=String(game.micSensitivity);
+    $('lastMicReading').textContent=running?`Bruit mesuré en direct : ${Math.round(detectionLevel)}/100 · rayon ${hearing} m.`:'Micro arrêté : les zombies détectent ta présence à 35 m.';
+  }
+  function stopDetectionMic(notice=false){
+    micRequestToken++;micStarting=false;
+    if(detectionTimer){clearInterval(detectionTimer);detectionTimer=null;}
+    const stream=detectionStream,ctx=detectionCtx;
+    detectionStream=null;detectionCtx=null;detectionAnalyser=null;detectionBuffer=null;
+    stream?.getTracks().forEach(track=>track.stop());
+    if(ctx&&ctx.state!=='closed')ctx.close().catch(()=>{});
+    game.micEnabled=false;detectionLevel=0;
+    renderDetectionUI();
+    if(notice)toast('Micro coupé. Détection automatique à 35 m.');
+  }
+  async function startDetectionMic(){
+    if(micStarting||microphoneRunning())return;
+    if(game.mode!=='gps'||!detectionReady())return toast('Active d’abord un GPS précis pour utiliser le micro zombie.');
+    if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)return toast('Micro indisponible : utilise le jeu en HTTPS.');
+    micStarting=true;const token=++micRequestToken;renderDetectionUI();
+    let stream=null,ctx=null;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:false,autoGainControl:false}});
+      if(token!==micRequestToken||document.visibilityState!=='visible'||game.mode!=='gps'){
+        stream.getTracks().forEach(t=>t.stop());return;
+      }
+      const Ctx=window.AudioContext||window.webkitAudioContext;
+      if(!Ctx)throw Error('Web Audio indisponible');
+      ctx=new Ctx();const source=ctx.createMediaStreamSource(stream),analyser=ctx.createAnalyser();
+      analyser.fftSize=1024;analyser.smoothingTimeConstant=.35;source.connect(analyser);
+      // Chaîne de rendu silencieuse : Safari doit continuer à traiter le signal.
+      const silent=ctx.createGain();silent.gain.value=0;analyser.connect(silent);silent.connect(ctx.destination);
+      await ctx.resume();
+      if(token!==micRequestToken||document.visibilityState!=='visible'){
+        stream.getTracks().forEach(t=>t.stop());await ctx.close();return;
+      }
+      detectionStream=stream;detectionCtx=ctx;detectionAnalyser=analyser;detectionBuffer=new Float32Array(analyser.fftSize);
+      game.micEnabled=true;micStarting=false;
+      // Les limites de micro dépendent du navigateur/appareil ; la sensibilité ajuste le seuil RMS.
+      detectionTimer=setInterval(()=>{
+        if(!microphoneRunning()||document.visibilityState!=='visible')return;
+        try{
+          detectionAnalyser.getFloatTimeDomainData(detectionBuffer);
+          let power=0;for(const sample of detectionBuffer)power+=sample*sample;
+          const rms=Math.sqrt(power/detectionBuffer.length);
+          const raw=clamp((rms-.012)*1800*game.micSensitivity/5);
+          detectionLevel=detectionLevel*.55+raw*.45;
+          renderDetectionUI();
+        }catch{stopDetectionMic();}
+      },150);
+      stream.getAudioTracks().forEach(track=>track.addEventListener('ended',()=>{if(detectionStream===stream)stopDetectionMic();}));
+      renderDetectionUI();toast('Micro actif. Les infectés peuvent entendre ton environnement.');
+    }catch(e){
+      stream?.getTracks().forEach(t=>t.stop());if(ctx&&ctx.state!=='closed')ctx.close().catch(()=>{});
+      micStarting=false;game.micEnabled=false;
+      renderDetectionUI();toast('Micro non autorisé ou indisponible. Mode sans micro conservé.');
+    }finally{if(token===micRequestToken){micStarting=false;renderDetectionUI();}}
+  }
+  function toggleDetectionMic(){if(microphoneRunning()||micStarting)stopDetectionMic(true);else startDetectionMic();}
+  function setDetectionSensitivity(value){game.micSensitivity=clamp(Number(value)||5,1,10);save();renderDetectionUI();}
+  // Une poursuite ne sort jamais de la case d'origine et ne franchit aucune zone SAFE.
+  function chaseZombieToward(z,lat,lon,now){
+    const cell=cellInfo(z.cellRow,z.cellCol),dist=distanceM(z.lat,z.lon,lat,lon);
+    if(dist<=2)return false;
+    for(const stepFactor of [1,.7,.45,.25,.12]){
+      const step=Math.min(28,dist)*stepFactor;
+      const ratio=step/dist;
+      const y=z.lat+(lat-z.lat)*ratio,x=z.lon+(lon-z.lon)*ratio;
+      if(y<=cell.south||y>=cell.north||x<=cell.west||x>=cell.east)continue;
+      if(isProtected(y,x,2)||crossesSafe(z.lat,z.lon,y,x))continue;
+      z.targetLat=y;z.targetLon=x;z.restUntil=0; // La mémoire de la détection expire réellement si le joueur n'est plus entendu.
+      return true;
+    }
+    return false;
+  }
+  function processZombieDetection(now=Date.now()){
+    detectedCount=0;
+    if(document.visibilityState!=='visible'||!detectionReady()||combat){renderDetectionUI();return;}
+    const hearing=zombieHearingRadius(),playerLat=game.lat,playerLon=game.lon;
+    const nearby=zombiesNear(playerLat,playerLon,Math.max(hearing+65,155));
+    for(const z of nearby){
+      const distance=distanceM(playerLat,playerLon,z.lat,z.lon);
+      if(distance<=hearing){
+        z.lastKnownLat=playerLat;z.lastKnownLon=playerLon;z.alertedUntil=now+DETECTION_CHASE_MEMORY_MS;
+      }
+      if(z.alertedUntil>now){
+        detectedCount++;
+        chaseZombieToward(z,z.lastKnownLat??playerLat,z.lastKnownLon??playerLon,now);
+      }
+    }
+    if(detectedCount&&now-lastDetectionNoticeAt>45000){
+      lastDetectionNoticeAt=now;
+      if(navigator.vibrate)navigator.vibrate([75,45,75]);
+      toast(`☣ ${detectedCount} infecté(s) t'ont détecté !`);
+    }
+    renderDetectionUI();
+  }
+
   function zombiesNear(lat,lon,radius){
     const now=Date.now(),list=[];
     for(const cell of cellsAround(lat,lon,radius+20))for(const z of getCellZombies(cell)){
@@ -1259,7 +1436,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const METHODS={quiet:{name:'Discrète',time:60,risk:0,noise:4,bonus:0,energy:10},normal:{name:'Normale',time:30,risk:12,noise:15,bonus:1,energy:15},fast:{name:'Brutale',time:10,risk:27,noise:32,bonus:2,energy:22}};
   function log(msg){game.logs.unshift({time:Date.now(),message:msg});game.logs=game.logs.slice(0,55);}
   function save(){
-    try{const copy={...game,lat:null,lon:null,mode:'demo'}; localStorage.setItem(STORAGE_KEY,JSON.stringify(copy));}catch{ /* Local storage disabled: session still playable. */ }
+    try{const copy={...game,lat:null,lon:null,mode:'demo',micEnabled:false,lastMicLevel:null}; localStorage.setItem(STORAGE_KEY,JSON.stringify(copy));}catch{ /* Local storage disabled: session still playable. */ }
   }
   function commit(msg){if(msg)log(msg);save();renderAll();if(msg)toast(msg);if(msg)window.dispatchEvent(new CustomEvent('de:message',{detail:{message:msg}}));}
   function toast(msg){const node=$('toast');node.textContent=msg;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),3900);}
@@ -1486,9 +1663,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('editSafeZone').textContent=zone?(game.homeConfirmed?'⌖ DÉPLACER MON REFUGE':'⌖ CONFIRMER MON REFUGE'):'⌖ PLACER MON REFUGE';
     $('drawingControls').hidden=!safeDrawing;$('drawingDone').disabled=!safeCandidate;
     $('remoteCount').textContent='FOUILLE GPS UNIQUEMENT · ≤ 10 M';
-    $('micToggle').textContent=game.micEnabled?'🎙 MICRO ACTIVÉ POUR LES FOUILLES · DÉSACTIVER':'🎙 ACTIVER LE MICRO PENDANT LES FOUILLES';
-    $('micToggle').setAttribute('aria-pressed',String(!!game.micEnabled));
-    $('lastMicReading').textContent=game.lastMicLevel===null?'Dernière fouille : aucun signal mesuré.':`Dernier bruit ambiant mesuré : ${game.lastMicLevel}/100 (échelle de jeu, pas des décibels).`;
+    renderDetectionUI();
   }
   function startDrawing(){
     if(zoneDraftMode)return toast('Annule d’abord le placement de zone SAFE.');
@@ -1529,30 +1704,23 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(!safeDrawing)return;
     safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);refreshMarkers();renderSafe();toast('Placement annulé : refuge précédent conservé.');
   }
-  // Mesure RMS locale. Une permission est demandée uniquement après une action de fouille.
+  // Les fouilles réutilisent la mesure sonore active : aucun second accès micro.
   async function scanNoise(duration,token){
-    let stream=null,audio=null,analyser=null,levelTotal=0,peak=0,count=0,hasMic=false,denied=false;
-    token.stop=()=>{token.cancelled=true;stream?.getTracks().forEach(t=>t.stop());if(audio&&audio.state!=='closed')audio.close().catch(()=>{})};
-    try{
-      if(game.micEnabled && navigator.mediaDevices?.getUserMedia && window.isSecureContext){
-        try{
-          stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-          if(token.cancelled)return null;
-          token.stop=()=>{token.cancelled=true;stream?.getTracks().forEach(t=>t.stop());};
-          const Ctx=window.AudioContext||window.webkitAudioContext;if(Ctx){audio=new Ctx();await audio.resume();const src=audio.createMediaStreamSource(stream);analyser=audio.createAnalyser();analyser.fftSize=1024;src.connect(analyser);hasMic=true;}
-        }catch(e){denied=true;}
-      }
-      const begin=Date.now(),bins=new Float32Array(1024);
-      return await new Promise(resolve=>{
-        const timer=setInterval(()=>{
-          if(token.cancelled){clearInterval(timer);resolve(null);return;}
-          const progress=clamp((Date.now()-begin)/duration,0,1);let loud=0;
-          if(analyser){analyser.getFloatTimeDomainData(bins);let power=0;for(const v of bins)power+=v*v;const rms=Math.sqrt(power/bins.length);loud=Math.round(clamp(25*Math.log10(1+rms/0.001),0,100));levelTotal+=loud;peak=Math.max(peak,loud);count++;}
-          const b=$('scanNoiseBar'),txt=$('scanCountdown');if(b)b.style.width=(hasMic?loud:Math.round(progress*100))+'%';if(txt)txt.textContent=Math.max(0,Math.ceil((duration-(Date.now()-begin))/1000))+' s';
-          if(progress>=1){clearInterval(timer);resolve({level:hasMic?Math.round(levelTotal/Math.max(1,count)*.6+peak*.4):0,hasMic,denied})}
-        },120);
-      });
-    }finally{stream?.getTracks().forEach(t=>t.stop());if(audio&&audio.state!=='closed')audio.close().catch(()=>{});}
+    let total=0,peak=0,count=0;
+    token.stop=()=>{token.cancelled=true;};
+    const begin=Date.now();
+    return await new Promise(resolve=>{
+      const timer=setInterval(()=>{
+        if(token.cancelled||document.visibilityState==='hidden'){clearInterval(timer);resolve(null);return;}
+        const active=microphoneRunning(),loud=active?Math.round(detectionLevel):0;
+        if(active){total+=loud;peak=Math.max(peak,loud);count++;}
+        const progress=clamp((Date.now()-begin)/duration,0,1);
+        const b=$('scanNoiseBar'),txt=$('scanCountdown');
+        if(b)b.style.width=(active?loud:Math.round(progress*100))+'%';
+        if(txt)txt.textContent=Math.max(0,Math.ceil((duration-(Date.now()-begin))/1000))+' s';
+        if(progress>=1){clearInterval(timer);resolve({level:active?Math.round(total/Math.max(1,count)*.6+peak*.4):0,hasMic:active,denied:false});}
+      },120);
+    });
   }
   function renderHud(){
     $('hudHp').textContent=game.hp;$('hpBar').style.width=`${game.hp}%`;
@@ -1615,8 +1783,8 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const siteCheck=actionGPS(10,p.lat,p.lon,'Fouille');if(!siteCheck.ok)return toast(siteCheck.msg);
     scanBusy=true;const token={cancelled:false};scanToken=token;renderPois();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'scavenge'}}));
     const duration=selectedMethod==='quiet'?9000:selectedMethod==='normal'?7000:5000;
-    modal({tag:'⌕ FOUILLE EN COURS',title:'RESTE DISCRET',text:game.micEnabled?'Le bruit ambiant est analysé localement pendant la fouille. Aucun enregistrement.':'Micro désactivé : la discrétion dépend de ta méthode de fouille.',
-      content:'<div class="scan-counter" id="scanCountdown">…</div><div class="scan-meter"><div id="scanNoiseBar"></div></div><p class="hint">Le micro et la fouille s’arrêtent si tu annules.</p>',
+    modal({tag:'⌕ FOUILLE EN COURS',title:'RESTE DISCRET',text:microphoneRunning()?'Le micro actif mesure le bruit localement sans enregistrer de voix.':'Sans micro : la discrétion dépend de ta méthode de fouille.',
+      content:'<div class="scan-counter" id="scanCountdown">…</div><div class="scan-meter"><div id="scanNoiseBar"></div></div><p class="hint">Annuler arrête la fouille ; tu peux couper le micro à tout moment dans les options.</p>',
       actions:[{name:'ANNULER LA FOUILLE',alt:true,fn:()=>token.stop?.()}]});
     let mic=null;
     try{mic=await scanNoise(duration,token)}catch(e){mic={level:0,hasMic:false,denied:true}}
@@ -1915,7 +2083,11 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         game.selected=id;save();renderPois();renderHud();refreshMarkers();window.dispatchEvent(new CustomEvent('de:poi',{detail:{id}}));
       }});
       window.DEAD_EARTH_MAP=map;refreshMarkers();updateRoaming(true);
-      setInterval(()=>{if(document.visibilityState==='visible'&&currentTab==='map')updateRoaming()},850);
+      setInterval(()=>{
+        if(document.visibilityState!=='visible')return;
+        processZombieDetection(Date.now());
+        if(currentTab==='map')updateRoaming();
+      },850);
       // Déplacement libre de la carte : découvrir les secteurs et leurs points réels.
       map.onExplore=()=>{clearTimeout(exploreTimer);exploreTimer=setTimeout(()=>{
         if(safeDrawing||zoneDraftMode||scanBusy)return;
@@ -1940,6 +2112,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     map.setMarkers(markers);map.setSafeZone(game.safeZone);map.setTerritory?.(game.territory,0);map.setProtectionZones?.(game.protectedZones,zoneCandidate?{center:zoneCandidate,level:1}:null);map.setDrawing(safeDrawing||zoneDraftMode,safeDraft);
   }
   function setDemo(){
+    stopDetectionMic();
     if(gpsWatch!==null){navigator.geolocation?.clearWatch(gpsWatch);gpsWatch=null;}
     poiRequestSerial++;poiLoading=false;poiError='';game.mode='demo';game.lat=null;game.lon=null;gpsAccuracy=Infinity;
     center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];pois=[];game.selected='';
@@ -1961,7 +2134,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       const first=game.mode!=='gps';game.mode='gps';game.lat=lat;game.lon=lon;center=[lat,lon];
       if(first&&map)map.setView(center,15);
       if(first||moved){const shown=map?.latlon(map.w/2,map.h/2);if(!shown||first||distanceM(shown.lat,shown.lon,lat,lon)<500)loadPOIsNear(lat,lon)}
-      refreshMarkers();save();renderAll();
+      refreshMarkers();save();renderAll();processZombieDetection(Date.now());
     },err=>{const msg=err.code===1?'Autorisation GPS refusée.':'Position GPS indisponible.';toast(`${msg} Mode exploration sans action conservé.`);setDemo();},
     {enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   }
@@ -1984,7 +2157,9 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       $('survivorNameInput').blur();
       commit(`Survivant renommé : ${name}.`);
     });
-    $('micToggle').addEventListener('click',()=>{game.micEnabled=!game.micEnabled;commit(game.micEnabled?'Micro autorisé pour les fouilles (demande iOS à la première utilisation).':'Micro désactivé.');});
+    $('micToggle').addEventListener('click',toggleDetectionMic);
+    $('detectionToggle').addEventListener('click',toggleDetectionMic);
+    $('micSensitivity').addEventListener('input',event=>setDetectionSensitivity(event.target.value));
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));
     $('healBtn').addEventListener('click',()=>useItem('bandage','hp',30,'Bandage utilisé. +30 santé.'));
@@ -1994,8 +2169,17 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('resetBtn').addEventListener('click',()=>modal({tag:'RÉINITIALISATION',title:'RECOMMENCER ?',text:'Cette action efface ta progression locale. Tu pourras continuer à jouer en mode démo.',actions:[{name:'ANNULER',fn:closeModal,alt:true},{name:'EFFACER LA PARTIE',fn:()=>{closeModal();game=fresh();selectedMethod='quiet';setDemo();switchTab('map');}}]}));
     $('modal').addEventListener('click',e=>{if(e.target===$('modal')&&!combat)closeModal()});
     window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!combat)closeModal()});
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){persistZombieMotion(true);if(scanToken)scanToken.stop?.();if(ambience)ambience.ctx.suspend().catch(()=>{});}if(document.visibilityState==='visible'){renderAll();updateRoaming(true);if(ambience)ambience.ctx.resume().catch(()=>{});}});
-    window.addEventListener('pagehide',()=>persistZombieMotion(true));
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden'){
+        stopDetectionMic();persistZombieMotion(true);
+        if(scanToken)scanToken.stop?.();if(ambience)ambience.ctx.suspend().catch(()=>{});
+      }
+      if(document.visibilityState==='visible'){
+        renderAll();updateRoaming(true);
+        if(ambience)ambience.ctx.resume().catch(()=>{});
+      }
+    });
+    window.addEventListener('pagehide',()=>{stopDetectionMic();persistZombieMotion(true);});
     // La page peut rester ouverte pendant le changement de date.
     setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();}},60000);
     /* Single-file edition: service worker deliberately not registered. */
