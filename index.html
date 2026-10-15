@@ -145,6 +145,15 @@
 .campaign-go{font:10px 'Courier New',monospace;font-weight:900;border:3px solid #e6b97c;background:#735c36;color:#fff5d4;min-height:34px;display:block;width:100%;margin:6px 0 2px;cursor:pointer}
 .territory-base{margin-bottom:12px}.territory-quest-card{border:3px solid #775f46;background:#283536;padding:10px;margin-bottom:12px}.territory-quest-card strong{font:10px/1.5 'Courier New',monospace;color:#f4d594}
 @media(max-width:360px){.territory-campaign{width:67%;max-height:168px;padding:6px}.campaign-head{font-size:7px}.territory-campaign small{font-size:8px}}
+
+/* V1.1 : progression territoriale par cercles réels */
+.zone-list{display:grid;gap:8px;margin-top:10px;max-height:160px;overflow-y:auto}
+.zone-safe-line{display:grid;grid-template-columns:1fr auto;gap:3px 8px;align-items:center;background:rgba(10,26,23,.62);border:2px solid #486b57;padding:7px;color:#e9ebc9;font:11px monospace}
+.zone-safe-line span{color:#a8eaba;font-size:10px}.zone-safe-line small{grid-column:1/-1;color:#d2bda2}
+.zone-safe-btn{border:2px solid #81a795;background:#30473e;color:#fff4cd;padding:6px 9px;cursor:pointer;font:11px monospace}
+.zone-safe-line .zone-safe-btn{grid-column:1/-1;text-align:center}
+.zone-help{font-size:11px;color:#f5dfab}
+#zoneConfirm:disabled{opacity:.45}
 </style>
 <style>
 
@@ -165,7 +174,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.0 · RECONQUÊTE</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.1.1 · RECONQUÊTE GPS</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -243,8 +252,8 @@
     </section>
 
     <section id="page-base" class="page scroll-page" aria-label="Base">
-      <div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div>
       <h1>⌂ MON REFUGE</h1>
+      <div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div>
       <div class="pixel-frame page-panel base-panel">
         <div class="pixel-heading">ZONE SÉCURISÉE <span class="base-mini-rank" id="baseRank">NIV. 1 / 5</span></div>
         <div class="base-diorama tier-1" id="baseDiorama" role="img" aria-label="Refuge : abri de branchages">
@@ -310,14 +319,14 @@
 <div id="drawerScrim" class="drawer-scrim" hidden></div>
 <div class="drawer pixel-frame" id="lootDrawer" role="dialog" aria-modal="true" aria-labelledby="lootTitle" hidden>
   <div class="drawer-head"><h2 id="lootTitle">⌕ RAVITAILLEMENT</h2><button class="close-button" data-close-drawer aria-label="Fermer">×</button></div>
-  <div class="drawer-body"><div class="pixel-heading">LIEUX À PROXIMITÉ</div><div id="poiList" class="poi-list"></div><div id="targetCard" class="target-card"></div><p id="remoteInfo" class="help-text">Deux fouilles à distance par jour. Les suivantes exigent le GPS et la proximité d'un lieu réel.</p></div>
+  <div class="drawer-body"><div class="pixel-heading">LIEUX À PROXIMITÉ</div><div id="poiList" class="poi-list"></div><div id="targetCard" class="target-card"></div><p id="remoteInfo" class="help-text">Fouilles uniquement sur place : utilise le GPS et approche-toi à 10 mètres d’un vrai point référencé. Aucun pillage réel.</p></div>
 </div>
 <div class="drawer pixel-frame" id="refugeDrawer" role="dialog" aria-modal="true" aria-labelledby="refugeTitle" hidden>
   <div class="drawer-head"><h2 id="refugeTitle">⌂ ZONE SAFE</h2><button class="close-button" data-close-drawer aria-label="Fermer">×</button></div>
   <div class="drawer-body">
-    <p class="help-text">Refuge de 20 × 20 mètres (400 m²). Touche un endroit sur la carte pour y placer le carré, puis confirme. Tu pourras le déplacer <strong>une fois tous les 30 jours</strong>.</p>
+    <p class="help-text">Commence par placer ton refuge à ton logement, avec le GPS actif. Une confirmation sera demandée (« C’est bien chez toi ? »). Le carré privé mesure 20 × 20 mètres, et son déplacement sera bloqué 30 jours. Ensuite, tu pourras construire des zones SAFE de 100 à 1 000 m de diamètre.</p>
     <button id="editSafeZone" class="pixel-button full" type="button">⌖ PLACER MON REFUGE</button>
-    <p id="safeZoneStatus" class="help-text" aria-live="polite">Aucun refuge personnel défini.</p>
+    <p id="safeZoneStatus" class="help-text" aria-live="polite">Aucun refuge personnel défini.</p><p class="help-text">Les zones SAFE sont à construire et améliorer depuis la carte ou le menu Base, après avoir éliminé tous les zombies dans le périmètre proposé.</p>
   
   </div>
 </div>
@@ -404,7 +413,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     constructor(node,config={}){
       this.node=node;this.canvas=document.createElement('canvas');this.canvas.className='fast-map-canvas';this.canvas.setAttribute('role','img');this.canvas.setAttribute('aria-label','Carte tactique Canvas : rues, zones et points de ravitaillement');node.appendChild(this.canvas);
       this.ctx=this.canvas.getContext('2d',{alpha:false});this.center=xy(config.center?.[0]??48.8566,config.center?.[1]??2.3522);this.zoom=14;
-      this.markers=[];this.onTilePOI=config.onTilePOI||null;this.safeZone=null;this.drawing=[];this.isDrawing=false;this.onTap=config.onTap||null;this.onMarker=config.onMarker||null;
+      this.markers=[];this.onTilePOI=config.onTilePOI||null;this.safeZone=null;this.protectedZones=[];this.draftCircle=null;this.drawing=[];this.isDrawing=false;this.onTap=config.onTap||null;this.onMarker=config.onMarker||null;
       this.tiles=new Map();this.pending=[];this.active=0;this.maxLoads=3;this.tileTemplate=null;this.templatePending=false;
       this.ground=new Image();this.ground.onload=()=>{this.groundTexture=document.createElement('canvas');this.groundTexture.width=143;this.groundTexture.height=113;const tc=this.groundTexture.getContext('2d');tc.imageSmoothingEnabled=false;tc.drawImage(this.ground,0,0,143,113);this.queueDraw()};this.ground.src="data:image/jpeg;base64,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";
       this.ready=true;this.pointer=new Map();this.lastDistance=null;this.dragging=false;this.dirty=false;this.destroyed=false;
@@ -425,12 +434,13 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     }
     position(lat,lon){const p=xy(lat,lon),s=2**(this.zoom-BASE);return{x:this.w/2+(p.x-this.center.x)*s,y:this.h/2+(p.y-this.center.y)*s}}
     latlon(x,y){const s=2**(this.zoom-BASE),p=ll(this.center.x+(x-this.w/2)/s,this.center.y+(y-this.h/2)/s);return p}
-    handleTap(x,y){if(this.isDrawing){const p=this.latlon(x,y);this.onTap?.(p.lat,p.lon);return}for(const m of [...this.markers].reverse()){const p=this.position(m.lat,m.lon);if(Math.hypot(p.x-x,p.y-y)<24){this.onMarker?.(m.id);return}}}
+    handleTap(x,y){if(this.isDrawing){for(const m of [...this.markers].reverse()){if(m.kind!=='zombie')continue;const q=this.position(m.lat,m.lon);if(Math.hypot(q.x-x,q.y-y)<20){this.onMarker?.(m.id);return}}const p=this.latlon(x,y);this.onTap?.(p.lat,p.lon);return}for(const m of [...this.markers].reverse()){const p=this.position(m.lat,m.lon);if(Math.hypot(p.x-x,p.y-y)<24){this.onMarker?.(m.id);return}}}
     setView(latlon,zoom){if(point(latlon[0],latlon[1]))this.center=xy(latlon[0],latlon[1]);if(zoom!==undefined)this.zoom=clamp(zoom,13.5,18);this.queueDraw()}
     panTo(latlon){this.setView(latlon)}
     invalidateSize(){this.resize()}
     setMarkers(markers){this.markers=markers||[];this.queueDraw()}
     setSafeZone(zone){this.safeZone=zone;this.queueDraw()}
+    setProtectionZones(zones,draft){this.protectedZones=Array.isArray(zones)?zones:[];this.draftCircle=draft||null;this.queueDraw()}
     setTerritory(territory,safeRadius){this.territory=territory;this.safeRadius=safeRadius||0;this.queueDraw()}
     setDrawing(yes,points=[]){this.isDrawing=!!yes;this.drawing=points||[];this.queueDraw()}
     queueDraw(){if(this.destroyed||this.dirty)return;this.dirty=true;requestAnimationFrame(()=>{this.dirty=false;if(!this.destroyed)this.draw()})}
@@ -482,19 +492,24 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         if(t?.state==='ready'){ctx.drawImage(t.image,Math.round(p.x),Math.round(p.y),Math.ceil(sTile)+1,Math.ceil(sTile)+1);t.access=Date.now()}
         else if(!t&&requested<18){this.enqueue(((x%(2**BASE))+(2**BASE))%(2**BASE),y);requested++}
       }
-      // Territoire virtuel de reconquête : cercle indicatif, sans prétendre suivre les frontières administratives.
+      // Zone de jeu approximative : la frontière réelle de la commune n'est pas connue.
       if(this.territory){
-        const t=this.territory,c=this.position(...t.center),edge=this.position(t.center[0]+t.radius/111195,t.center[1]);
-        const radius=Math.abs(c.y-edge.y);
-        ctx.save();ctx.setLineDash([8,7]);ctx.strokeStyle=t.cleared?'#b1ca8c':'#be6455';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(c.x,c.y,radius,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
-        if(this.safeRadius>0){
-          const safeEdge=this.position(t.center[0]+this.safeRadius/111195,t.center[1]);
-          const sr=Math.abs(c.y-safeEdge.y);
-          ctx.fillStyle='rgba(86,174,117,.13)';ctx.strokeStyle='#72d99a';ctx.lineWidth=3;
-          ctx.beginPath();ctx.arc(c.x,c.y,sr,0,Math.PI*2);ctx.fill();ctx.stroke();
-        }
-        ctx.restore();
+        const t=this.territory,p=this.position(...t.center),north=this.position(t.center[0]+t.radius/111195,t.center[1]);
+        ctx.save();ctx.setLineDash([6,8]);ctx.strokeStyle='#bb6557';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(p.x,p.y,Math.abs(p.y-north.y),0,Math.PI*2);ctx.stroke();ctx.restore();
+      }
+      // Protection déployée : diamètres réels en mètres, niveaux 1 à 10.
+      for(const z of this.protectedZones){
+        const p=this.position(...z.center),r=50*z.level,edge=this.position(z.center[0]+r/111195,z.center[1]);
+        const pixels=Math.abs(p.y-edge.y);if(pixels<1)continue;
+        ctx.save();ctx.fillStyle='rgba(75,184,115,.16)';ctx.strokeStyle='#70e9a4';ctx.lineWidth=2;
+        ctx.beginPath();ctx.arc(p.x,p.y,pixels,0,Math.PI*2);ctx.fill();ctx.stroke();
+        ctx.fillStyle='#e1ffe5';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText('SAFE '+z.level,p.x,p.y-pixels-5);ctx.restore();
+      }
+      if(this.draftCircle){
+        const z=this.draftCircle,p=this.position(...z.center),edge=this.position(z.center[0]+50*z.level/111195,z.center[1]);
+        ctx.save();ctx.strokeStyle='#ffce6a';ctx.fillStyle='rgba(243,178,62,.11)';ctx.lineWidth=3;ctx.setLineDash([6,4]);
+        ctx.beginPath();ctx.arc(p.x,p.y,Math.abs(p.y-edge.y),0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();
       }
       // Refuge : zone privée géométrique et visuelle, indépendante du GPS joueur.
       if(this.safeZone?.points?.length>=3)this.drawZone(this.safeZone.points,'#8acf9b','#357348',.21);
@@ -534,6 +549,9 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
 
 </script>
 <script>
+
+
+
 /* DEAD EARTH — prototype jouable, sans backend, données GPS conservées localement. */
 (() => {
   'use strict';
@@ -544,14 +562,20 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const safe = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const DEFAULT_CENTER = [48.8566, 2.3522]; // Démo fictive centrée sur Paris ; jamais une adresse personnelle.
   const STORAGE_KEY = 'dead-earth-alpha-v1';
-  const DAILY_REMOTE_LIMIT = 2;
-  const GPS_RANGE_METERS = 300;
+  const DAILY_REMOTE_LIMIT = 0; // Mode déplacement réel uniquement.
+  const GPS_RANGE_METERS = 10; // Fouilles : présence physique à moins de 10 m.
+  const ZOMBIE_COMBAT_RANGE_M = 20;
+  const ZONE_DEPLOY_RANGE_M = 35;
+  const GPS_FIX_MAX_AGE_MS = 60000;
+  const GPS_ACTION_ACCURACY_M = 35;
+  const ZONE_MAX_LEVEL = 10;
+  const ZONE_MAX_COUNT = 16;
   const SAFE_SIDE_M = 20;  // Le refuge est toujours un carré fixe de 400 m².
   const SAFE_RELOCATION_DAYS = 30;
   const SAFE_RELOCATION_MS = SAFE_RELOCATION_DAYS * 24 * 60 * 60 * 1000;
   const POI_RADIUS_M = 2800;
   const POI_CACHE_MS = 12 * 60 * 1000;
-  const MAX_GPS_ACCURACY_M = 120;
+  const MAX_GPS_ACCURACY_M = GPS_ACTION_ACCURACY_M;
   const ITEMS = {
     water:{label:'Eau potable',icon:'◉',weight:.5},food:{label:'Conserve',icon:'▣',weight:.4},bandage:{label:'Bandage',icon:'✚',weight:.1},
     wood:{label:'Bois',icon:'▥',weight:1.2},metal:{label:'Ferraille',icon:'⚙',weight:.8},cloth:{label:'Tissu',icon:'▤',weight:.2},
@@ -604,7 +628,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   ];
   const fresh = () => ({version:1,created:Date.now(),mode:'demo',lat:null,lon:null,defeatedZombies:[],hp:100,energy:100,water:86,food:80,xp:0,
     level:1,baseLevel:1,fort:25,threat:14,noise:0,survivorName:'',selected:'market',searchMethod:'quiet',totalSearches:0,totalUpgrades:0,kills:0,
-    dailyRemote:{day:'',used:0},safeZone:null,territory:null,micEnabled:false,lastMicLevel:null,
+    dailyRemote:{day:'',used:0},safeZone:null,homeConfirmed:false,territory:null,protectedZones:[],micEnabled:false,lastMicLevel:null,
     buildings:{collector:false,workbench:false,garden:false,generator:false,infirmary:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',
     weapons:{knife:{owned:true,durability:100},axe:{owned:false,durability:0},rifle:{owned:false,durability:0}},equippedWeapon:'knife',
     inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0},
@@ -622,18 +646,26 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         workbenchLevel:clamp(Number(obj.workbenchLevel)||0,0,2),
         productionDays:{...base.productionDays,...(obj.productionDays||{})},generatorDay:obj.generatorDay||'',
         claimed:Array.isArray(obj.claimed)?obj.claimed:[],cooldowns:obj.cooldowns||{},logs:obj.logs.slice(0,55),
-        dailyRemote:obj.dailyRemote||base.dailyRemote,defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-500):[],safeZone:obj.safeZone||null,territory:obj.territory&&Array.isArray(obj.territory.center)?{...obj.territory,defeatedIds:Array.isArray(obj.territory.defeatedIds)?obj.territory.defeatedIds:[],expansion:Number(obj.territory.expansion)||0,patrolKills:Number(obj.territory.patrolKills)||0}:null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
+        homeConfirmed:obj.homeConfirmed===true,protectedZones:Array.isArray(obj.protectedZones)?obj.protectedZones.filter(z=>Array.isArray(z.center)&&Number.isFinite(z.center[0])&&Number.isFinite(z.center[1])).map(z=>({id:String(z.id),center:z.center.map(Number),level:clamp(Number(z.level)||1,1,10),createdAt:z.createdAt||Date.now()})):[],dailyRemote:obj.dailyRemote||base.dailyRemote,defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-5000):[],safeZone:obj.safeZone||null,territory:obj.territory&&Array.isArray(obj.territory.center)?{...obj.territory,defeatedIds:Array.isArray(obj.territory.defeatedIds)?obj.territory.defeatedIds:[],expansion:Number(obj.territory.expansion)||0,patrolKills:Number(obj.territory.patrolKills)||0}:null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
         mode:'demo',lat:null,lon:null}; // Coordonnées GPS exactes jamais persistées.
     } catch {return fresh();}
   }
   let game=load();
-  // Les refuges antérieurs à la reconquête sont préservés, sans réinitialiser la partie.
-  if(game.safeZone&&!game.territory){game.territory={id:'ancien-'+Math.round(game.safeZone.center[0]*1000)+'-'+Math.round(game.safeZone.center[1]*1000),name:'Ancien secteur du refuge',kind:'village',center:[...game.safeZone.center],radius:750,target:8,kills:8,cleared:true,patrolKills:0,expansion:0,defeatedIds:[],legacy:true};}
-  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:game.buildings.generator&&game.generatorDay===localDay()});
+  // Conserver le logement déjà posé dans une ancienne sauvegarde, mais remplacer la campagne à quotas.
+  if(game.safeZone){
+    const previous=game.territory;
+    const home=game.safeZone.center;
+    if(!previous||!previous.spatialCampaign){
+      const radius=750;
+      game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),name:previous?.name||'Mon village',kind:previous?.kind||'village',center:[...home],radius,spatialCampaign:true};
+    }
+  }else game.territory=null;
+  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:game.buildings.generator&&game.generatorDay===localDay()});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
   let scanBusy=false,scanToken=null,safeDrawing=false,safeDraft=[],safeCandidate=null,gpsAccuracy=Infinity;
+  let gpsLastFixAt=0,zoneDraftMode=false,zoneCandidate=null,territoryStarting=false;
   let lastPOIRequest=null,lastPOIRequestAt=0,poiRequestSerial=0,poiLoading=false,poiError='';
   let selectedMethod='quiet';
   let engagedZombieId=null, roamingZombies=[],roamCenterKey='',exploreTimer=null,ambience=null;
@@ -642,109 +674,183 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   const zombieTracks=new Map(); // Position et destination mémorisées tant que la page est ouverte.
   function sectorKey(lat,lon){return Math.floor(lat/ZOMBIE_GRID_DEG)+':'+Math.floor(lon/ZOMBIE_GRID_DEG)}
   function seeded(n){let x=n|0;return ()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return (x>>>0)/4294967296}}
-  const CAMPAIGN_PATROL_STEPS=4;
-  const CAMPAIGN_PATROL_PER_STEP=4;
-  const CAMPAIGN_SAFETY_RATIOS=[.12,.30,.55,.76,1];
-  function territoryStage(){
-    const t=game.territory;
-    if(!t)return 'choose';
-    if(!t.cleared)return 'infected';
-    if(!game.safeZone)return 'place';
-    return t.expansion>=CAMPAIGN_PATROL_STEPS?'safe':'fortify';
-  }
-  function territorySafeRadius(){
-    const t=game.territory;
-    return t&&t.cleared&&game.safeZone?t.radius*CAMPAIGN_SAFETY_RATIOS[clamp(t.expansion||0,0,4)]:0;
-  }
-  function territoryRemaining(){const t=game.territory;return t?Math.max(0,t.target-t.kills):0;}
-  function isInCampaign(lat,lon){const t=game.territory;return Boolean(t&&distanceM(lat,lon,...t.center)<=t.radius+220);}
-  function campaignRng(i){const str=game.territory?.id||'x';let h=2166136261;for(const c of str){h=Math.imul(h^c.charCodeAt(0),16777619)}return seeded(h^Math.imul(i+1,2654435761));}
-  function campaignZombies(lat,lon){
-    const t=game.territory;
-    if(!t||!isInCampaign(lat,lon))return null;
-    const phase=territoryStage();
-    if(phase==='place'||phase==='safe')return [];
-    const start=phase==='infected'?0:t.target;
-    const end=phase==='infected'?t.target:t.target+CAMPAIGN_PATROL_PER_STEP*CAMPAIGN_PATROL_STEPS;
-    const list=[];
-    for(let i=start;i<end;i++){
-      if(phase==='fortify'&&i>=t.target+Math.min(4,t.expansion+1)*CAMPAIGN_PATROL_PER_STEP)break;
-      const id='campaign-'+t.id+'-'+i;
-      if((t.defeatedIds||[]).includes(id))continue;
-      const rand=campaignRng(i),angle=rand()*Math.PI*2;
-      const r=phase==='infected'?(75+rand()*140):Math.max(territorySafeRadius()+45,130+rand()*170);
-      const radius=Math.min(t.radius-45,r);
-      const homeLat=t.center[0]+Math.cos(angle)*radius/111195;
-      const homeLon=t.center[1]+Math.sin(angle)*radius/(111320*Math.max(.1,Math.cos(t.center[0]*Math.PI/180)));
+  // Campagne spatiale : pas de nombre de zombies exigé, seulement des zones nettoyées.
+  function territoryStage(){if(!game.safeZone||!game.homeConfirmed)return 'place';if(!game.territory)return 'identify';return villageCoverage()>=99.5?'safe':'expand'}
+  const zoneRadius=z=>50*clamp(Number(z.level)||1,1,ZONE_MAX_LEVEL);
+  function isProtected(lat,lon,padding=0){return(game.protectedZones||[]).some(z=>distanceM(lat,lon,...z.center)<zoneRadius(z)+padding)}
+  function worldZombies(){
+    const t=game.territory;if(!t)return [];
+    const defeated=new Set(game.defeatedZombies||[]),result=[];
+    const step=155,rad=t.radius,limit=Math.ceil(rad/step)+1;
+    let hash=0;for(const c of t.id)hash=Math.imul(hash^c.charCodeAt(0),16777619);
+    for(let row=-limit;row<=limit;row++)for(let col=-limit;col<=limit;col++){
+      const rng=seeded(hash^Math.imul(row+300,73856093)^Math.imul(col+300,19349663));
+      if(rng()>.52)continue;
+      const north=row*step+(rng()-.5)*66,east=col*step+(rng()-.5)*66;
+      if(Math.hypot(north,east)>rad-25)continue;
+      const id=`infected-${t.id}-${row}-${col}`;
+      if(defeated.has(id))continue;
+      const homeLat=t.center[0]+north/111195,homeLon=t.center[1]+east/(111320*Math.cos(t.center[0]*Math.PI/180));
+      const patrolRadius=8+rng()*12;
+      if(isProtected(homeLat,homeLon,patrolRadius))continue;
       let z=zombieTracks.get(id);
-      if(!z){z={id,kind:'zombie',symbol:'☣',homeLat,homeLon,lat:homeLat,lon:homeLon,radius:16+rand()*17,speed:.36+rand()*.35,targetLat:homeLat,targetLon:homeLon,restUntil:0,lastTime:performance.now(),rng:rand,campaign:true};zombieTracks.set(id,z);}
-      list.push(z);if(list.length>=MAX_VISIBLE_ZOMBIES)break;
+      if(!z){z={id,kind:'zombie',symbol:'☣',homeLat,homeLon,lat:homeLat,lon:homeLon,radius:patrolRadius,speed:.25+rng()*.3,targetLat:homeLat,targetLon:homeLon,restUntil:0,lastTime:performance.now(),rng};zombieTracks.set(id,z);}
+      result.push(z);
     }
-    return list;
+    return result;
+  }
+  function zoneBlockers(center,level,ignoreId=null){
+    const radius=level*50;
+    return worldZombies().filter(z=>z.id!==ignoreId&&distanceM(center[0],center[1],z.homeLat,z.homeLon)<=radius+z.radius);
+  }
+  function villageCoverage(){
+    const t=game.territory;if(!t||!game.protectedZones?.length)return 0;
+    const N=24,step=t.radius/N;let count=0,protectedCount=0;
+    for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){
+      if(i*i+j*j>N*N)continue;count++;
+      const lat=t.center[0]+i*step/111195,lon=t.center[1]+j*step/(111320*Math.cos(t.center[0]*Math.PI/180));
+      if(isProtected(lat,lon))protectedCount++;
+    }
+    return Math.round(1000*protectedCount/Math.max(1,count))/10;
+  }
+  function campaignZombies(lat,lon){
+    const t=game.territory;if(!t)return null;
+    if(distanceM(lat,lon,...t.center)>t.radius+700)return null;
+    // Afficher quelques infectés près du centre de la carte, sans en cacher l'existence aux vérifications des zones.
+    return worldZombies().filter(z=>distanceM(lat,lon,z.homeLat,z.homeLon)<900)
+      .sort((x,y)=>distanceM(lat,lon,x.homeLat,x.homeLon)-distanceM(lat,lon,y.homeLat,y.homeLon)).slice(0,MAX_VISIBLE_ZOMBIES);
   }
   async function territoryName(lat,lon){
     try{
-      const control=new AbortController(),timeout=setTimeout(()=>control.abort(),7000);
-      let response;
-      try{response=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=12&accept-language=fr&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lon),{signal:control.signal})}finally{clearTimeout(timeout)}
+      const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),6000);
+      let response;try{response=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=12&accept-language=fr&lat='+encodeURIComponent(lat)+'&lon='+encodeURIComponent(lon),{signal:controller.signal})}finally{clearTimeout(timeout)}
       if(!response.ok)throw Error('Reverse '+response.status);
-      const info=await response.json(),a=info.address||{};
-      const locality=a.city||a.town||a.village||a.municipality||a.hamlet||a.suburb||'';
-      const kind=a.city?'city':a.town?'town':'village';
-      return {name:String(locality||'Secteur local').slice(0,42),kind};
-    }catch(e){return {name:'Secteur local',kind:'village'};}
+      const a=(await response.json()).address||{};
+      const label=a.city||a.town||a.village||a.municipality||a.hamlet||'Secteur local';
+      return {name:String(label).slice(0,40),kind:a.city?'city':a.town?'town':'village'};
+    }catch{return {name:'Secteur local',kind:'village'}}
   }
-  let territoryStarting=false;
   async function beginTerritory(){
-    if(game.territory||territoryStarting)return;
-    if(!map)return toast('Attends le chargement de la carte.');
-    territoryStarting=true;const place=map.latlon(map.w/2,map.h/2),lat=place.lat,lon=place.lon;
-    toast('Identification du village ou de la ville…');
-    try{
-      const match=await territoryName(lat,lon),town=match.kind==='town',city=match.kind==='city';
-      game.territory={id:'region-'+Math.round(lat*1000)+'-'+Math.round(lon*1000),name:match.name,kind:match.kind,center:[lat,lon],radius:city?1600:town?1150:750,target:city?16:town?12:8,kills:0,cleared:false,patrolKills:0,expansion:0,defeatedIds:[],legacy:false};
-      center=[lat,lon];map.setView([lat,lon],15);roamCenterKey='';updateRoaming(true);commit(`☣ ${match.name} est infesté : élimine ${game.territory.target} infectés pour libérer le secteur !`);
-    }finally{territoryStarting=false;renderTerritory();}
+    if(!game.safeZone||territoryStarting)return;
+    territoryStarting=true;
+    const home=game.safeZone.center;
+    // Ne pas envoyer les coordonnées exactes du logement au service de géocodage.
+    const match=await territoryName(Math.round(home[0]/.003)*.003,Math.round(home[1]/.003)*.003);
+    const radius=match.kind==='city'?1600:match.kind==='town'?1150:750;
+    if(!game.territory)game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),center:[...home],name:match.name,kind:match.kind,radius,spatialCampaign:true};
+    else{game.territory.name=match.name;game.territory.kind=match.kind;game.territory.radius=radius;}
+    territoryStarting=false;roamCenterKey='';updateRoaming(true);commit(`☣ ${match.name} : sécurise le village zone par zone !`);
   }
   function claimTerritoryKill(id){
-    const t=game.territory;
-    if(!t||!id.startsWith('campaign-'+t.id+'-')||(t.defeatedIds||[]).includes(id))return;
-    t.defeatedIds.push(id);
-    if(!t.cleared){
-      t.kills=Math.min(t.target,t.kills+1);
-      if(t.kills>=t.target){t.cleared=true;t.clearedAt=Date.now();xpGain(120);log(`✓ ${t.name} libéré ! Tu peux maintenant y installer ton refuge.`);toast('SECTEUR LIBÉRÉ ! PLACE TON REFUGE !');}
-    }else if(game.safeZone){
-      t.patrolKills=Math.min(16,t.patrolKills+1);
-      log(`Patrouille éliminée : ${t.patrolKills}/16.`);
-      maybeExpandTerritory();
-    }
-    // Un peu de récupération fictive après chaque combat; le sac limite le butin.
-    const drop=takeLoot({[t.kills%3===0?'parts':t.kills%2?'wood':'metal']:1});
+    if(!game.territory||!id.startsWith('infected-'))return;
+    log('☣ Infecté éliminé dans le secteur. Cette position est maintenant libérée.');
+    const drop=takeLoot({[game.kills%3===0?'parts':game.kills%2?'wood':'metal']:1});
     if(drop.length)log('Sur l’infecté : '+drop.join(', ')+'.');
   }
-  function maybeExpandTerritory(){
-    const t=game.territory;if(!t||!t.cleared||!game.safeZone)return;
-    while(t.expansion<4&&game.baseLevel>=t.expansion+2&&t.patrolKills>=CAMPAIGN_PATROL_PER_STEP*(t.expansion+1)){
-      t.expansion++;xpGain(50);log(`✓ Périmètre sécurisé agrandi : niveau ${t.expansion+1}/5.`);
-      if(t.expansion===4){xpGain(200);log(`★ ${t.name} entièrement sécurisé ! Mission de reconquête accomplie.`)}
+  function actionGPS(range,lat,lon,label){
+    if(game.mode!=='gps'||game.lat===null||game.lon===null)return {ok:false,msg:'Active le GPS : cette action exige ta présence réelle.'};
+    if(Date.now()-gpsLastFixAt>GPS_FIX_MAX_AGE_MS)return {ok:false,msg:'Position GPS trop ancienne. Attends un nouveau signal.'};
+    // Pour les actions à 10/20 m, un GPS à ±35 m est trop imprécis.
+    // On préfère suspendre la fouille ou le combat plutôt que valider une présence incertaine.
+    const requiredAccuracy=Math.min(GPS_ACTION_ACCURACY_M,range+7);
+    if(gpsAccuracy>requiredAccuracy)return {ok:false,msg:`GPS trop imprécis (±${Math.round(gpsAccuracy)} m). Précision requise : ±${requiredAccuracy} m maximum. Réessaie depuis un espace public dégagé.`};
+    const d=distanceM(game.lat,game.lon,lat,lon);
+    if(d>range)return {ok:false,msg:`${label} : approche-toi à ${range} m maximum (actuellement ${Math.round(d)} m).`};
+    return {ok:true,d};
+  }
+  function zoneCost(level){return {wood:1+level*2,metal:Math.max(1,Math.ceil(level/2)),parts:Math.max(1,Math.floor(level/3))}}
+  function zoneStatus(z){const blocking=zoneBlockers(z.center,Math.min(10,z.level+1));return blocking.length;}
+  function focusBlockingZombie(blockers,message){
+    // Quitter le mode de placement est indispensable : dans ce mode, un toucher
+    // sur la carte pose un carré au lieu de sélectionner le zombie à combattre.
+    if(zoneDraftMode){zoneDraftMode=false;zoneCandidate=null;map?.setDrawing(false,[]);}
+    if(blockers.length&&map){
+      // Le zombie bloquant est rendu visible, même s’il ne faisait pas partie
+      // des trois infectés affichés dans le secteur précédent.
+      const nearest=[...blockers].sort((a,b)=>distanceM(a.lat,a.lon,game.lat||a.lat,game.lon||a.lon)-distanceM(b.lat,b.lon,game.lat||b.lat,game.lon||b.lon))[0];
+      map.setView([nearest.lat,nearest.lon],17);
+      updateRoaming(true);
     }
+    renderSafe();renderTerritory();
+    toast(message+' Placement arrêté : élimine la menace puis relance la construction.');
+  }
+  function startProtectionPlacement(){
+    if(!game.safeZone)return toast('Installe d’abord ton refuge à ton domicile.');
+    if((game.protectedZones||[]).length>=ZONE_MAX_COUNT)return toast('Maximum de 16 zones pour cette partie.');
+    if(safeDrawing)return toast('Termine le placement du refuge avant.');
+    zoneDraftMode=true;zoneCandidate=null;map?.setDrawing(true,[]);map?.setView(game.mode==='gps'?[game.lat,game.lon]:game.safeZone.center,17);
+    renderSafe();renderTerritory();toast('Touche la carte près de toi pour choisir la zone de protection de 100 m de diamètre.');
+  }
+  function candidateProtection(lat,lon){
+    if(!zoneDraftMode)return;
+    const t=game.territory;if(!t)return toast('Identification de ton village en cours.');
+    if(distanceM(lat,lon,...t.center)>t.radius)return toast('Choisis une position dans le secteur du village.');
+    zoneCandidate=[lat,lon];map?.setProtectionZones(game.protectedZones,{center:zoneCandidate,level:1});renderSafe();renderTerritory();
+  }
+  function cancelProtection(){zoneDraftMode=false;zoneCandidate=null;map?.setDrawing(false,[]);refreshMarkers();renderSafe();renderTerritory();}
+  function deployProtection(){
+    if(!zoneCandidate)return toast('Touche d’abord la carte pour placer la zone.');
+    const check=actionGPS(ZONE_DEPLOY_RANGE_M,...zoneCandidate,'Construction');if(!check.ok)return toast(check.msg);
+    const blockers=zoneBlockers(zoneCandidate,1);
+    if(blockers.length)return focusBlockingZombie(blockers,`${blockers.length} infecté(s) bloquent la zone. Un zombie bloquant est affiché sur la carte : rapproche-toi à 20 m pour combattre.`);
+    if(!canPay(zoneCost(1)))return toast('Matériaux insuffisants : '+costText(zoneCost(1)));
+    modal({tag:'🛡 TERRITOIRE LIBÉRÉ',title:'DÉPLOYER CETTE ZONE ?',text:'Niveau 1 : cercle sécurisé de 100 m de diamètre. Les matériaux seront consommés.',actions:[
+      {name:'ANNULER',alt:true,fn:closeModal},
+      {name:'CONSTRUIRE LA ZONE',fn:()=>{
+        closeModal();const check=actionGPS(ZONE_DEPLOY_RANGE_M,...zoneCandidate,'Construction');if(!check.ok)return toast(check.msg);
+        if(zoneBlockers(zoneCandidate,1).length)return toast('Un zombie est entré dans le périmètre.');
+        if(!pay(zoneCost(1)))return toast('Ressources insuffisantes.');
+        const id='zone-'+Date.now()+'-'+Math.floor(Math.random()*100000);
+        game.protectedZones.push({id,center:[...zoneCandidate],level:1,createdAt:Date.now()});
+        zoneDraftMode=false;zoneCandidate=null;map?.setDrawing(false,[]);refreshMarkers();xpGain(40);
+        commit('🛡 Nouvelle zone SAFE de 100 m de diamètre déployée !');
+      }}
+    ]});
+  }
+  function upgradeProtection(id){
+    const z=game.protectedZones?.find(z=>z.id===id);if(!z)return;
+    if(z.level>=ZONE_MAX_LEVEL)return toast('Cette zone est déjà au niveau 10.');
+    const check=actionGPS(ZONE_DEPLOY_RANGE_M,...z.center,'Amélioration');if(!check.ok)return toast(check.msg);
+    const blockers=zoneBlockers(z.center,z.level+1);
+    if(blockers.length)return focusBlockingZombie(blockers,`Extension impossible : ${blockers.length} infecté(s) dans le futur périmètre de ${100*(z.level+1)} m. Le plus proche s’affiche sur la carte.`);
+    const cost=zoneCost(z.level+1);if(!canPay(cost))return toast('Matériaux insuffisants : '+costText(cost));
+    if(!pay(cost))return;z.level++;xpGain(30);refreshMarkers();commit(`🛡 Zone améliorée au niveau ${z.level} : diamètre ${z.level*100} m.`);
+  }
+  function showProtection(id){
+    const z=game.protectedZones?.find(z=>z.id===id);if(!z)return;
+    const blockers=z.level<10?zoneStatus(z):0;
+    modal({tag:'🛡 POSTE DE PROTECTION',title:`ZONE SAFE — NIVEAU ${z.level}/10`,text:`Diamètre protégé : ${z.level*100} m. ${z.level===10?'Niveau maximal.':`Extension à ${100*(z.level+1)} m : ${blockers} zombie(s) à neutraliser.`}`,actions:[
+      {name:'FERMER',alt:true,fn:closeModal},...(z.level===10?[]:[{name:'AMÉLIORER',fn:()=>{closeModal();upgradeProtection(id)}}])
+    ]});
   }
   function renderTerritory(){
     const t=game.territory,stage=territoryStage(),card=$('territoryCampaign'),base=$('territoryBaseCard'),quest=$('territoryQuestCard');
     if(!card)return;
-    let title='',desc='',progress=0,action='',actionId='territoryAction',info='';
-    if(stage==='choose'){title='☣ TON VILLAGE EST INFESTÉ';desc='Active le GPS ou explore la carte, puis lance la reconquête du secteur affiché.';action='⚔ DÉMARRER ICI';info='La zone est un périmètre de jeu, pas une frontière administrative.';}
-    else if(stage==='infected'){title='☣ '+t.name.toLocaleUpperCase('fr');desc=`Élimine les infectés du secteur : ${t.kills} / ${t.target}`;progress=t.kills/t.target*100;info='Touche les zombies ☣ de la carte pour engager un combat. Le refuge se débloque après la libération.';}
-    else if(stage==='place'){title='✓ '+t.name.toLocaleUpperCase('fr')+' LIBÉRÉ';desc='Les infectés principaux ont été éliminés. Choisis où installer ton refuge.';progress=100;action='⌂ INSTALLER LE REFUGE';info='Choisis une position sur la carte, puis confirme le carré de 20 × 20 m.';}
-    else {title=stage==='safe'?'★ '+t.name.toLocaleUpperCase('fr')+' SÉCURISÉ':'⌂ '+t.name.toLocaleUpperCase('fr')+' EN RECONSTRUCTION';desc=stage==='safe'?'Secteur sécurisé ! Continue à améliorer ton équipement et explorer ailleurs.':`Périmètre sécurisé ${t.expansion+1}/5 · Patrouilles ${t.patrolKills}/16`;progress=(t.expansion+1)/5*100;info=stage==='safe'?'Victoire locale ! Les autres secteurs restent dangereux.':`Prochain palier : refuge niv. ${Math.min(5,t.expansion+2)} + ${Math.min(16,(t.expansion+1)*4)} patrouilles éliminées.`;}
-    card.innerHTML=`<div class="campaign-head"><b>${safe(title)}</b><span>${stage==='infected'?'INFESTÉ':stage==='choose'?'MISSION':stage==='place'?'LIBÉRÉ':stage==='safe'?'ZONE SAFE':'RECONQUÊTE'}</span></div><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>${action?`<button class="campaign-go" id="${actionId}">${safe(action)}</button>`:''}<small>${safe(info)}</small>`;
-    $('territoryAction')?.addEventListener('click',()=>stage==='choose'?beginTerritory():stage==='place'?startDrawing():null);
-    if(base){base.innerHTML=`<div class="pixel-heading">RECONQUÊTE DU TERRITOIRE</div><p class="campaign-base-copy">${safe(title)}<br>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><p class="base-section-hint">${safe(info)}</p>${stage==='choose'?'<button class="pixel-button full" id="territoryBaseStart">⌖ CHOISIR UN SECTEUR SUR LA CARTE</button>':stage==='infected'?'<button class="pixel-button full" id="territoryBaseMap">⚔ CHASSER LES INFECTÉS</button>':stage==='place'?'<button class="pixel-button full" id="territoryBasePlace">⌂ PLACER LE REFUGE</button>':''}`;}
-    $('territoryBaseStart')?.addEventListener('click',()=>switchTab('map'));
-    $('territoryBaseMap')?.addEventListener('click',()=>{switchTab('map');map?.setView(t.center,15)});
-    $('territoryBasePlace')?.addEventListener('click',()=>{switchTab('map');startDrawing()});
-    if(quest){quest.innerHTML=`<strong>☣ MISSION PRINCIPALE — ${safe(t?.name||'Choisir un secteur')}</strong><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><small>${safe(info)}</small>`;}
-    if(map){map.setTerritory?.(t,territorySafeRadius());}
+    let title='',desc='',progress=0,info='',action='';
+    if(stage==='place'){
+      title='⌂ ÉTABLIS TON REFUGE';desc='Commence par placer ton refuge à ton logement. Active le GPS, touche la carte près de toi, puis confirme que c’est chez toi.';
+      action=game.safeZone?'⌖ CONFIRMER / CORRIGER LE REFUGE':'⌖ PLACER MON REFUGE';info=game.safeZone?'Ancienne sauvegarde détectée : une correction gratuite avant le verrouillage de 30 jours.':'Un logement est privé : son emplacement reste sur cet appareil. Aucun zombie à éliminer avant cette étape.';
+    }else if(stage==='identify'){title='⌛ IDENTIFICATION DU VILLAGE';desc='Refuge confirmé. Recherche du nom de la commune et activation de la reconquête…';action='ATTENDS UN INSTANT';info='Aucune action n’est requise pendant le chargement.';
+    }else{
+      progress=villageCoverage();title=stage==='safe'?`★ ${t.name.toUpperCase()} PROTÉGÉ`:`☣ ${t.name.toUpperCase()} À RECONQUÉRIR`;
+      desc=`${progress}% du secteur protégé · ${game.protectedZones.length} zone(s) SAFE. Chaque zone commence à 100 m de diamètre et grandit de 100 m par niveau (10 niveaux).`;
+      action='⊕ CONSTRUIRE UNE ZONE SAFE';info=stage==='safe'?'Village protégé ! Toutes les zones restent visibles sur la carte.':'Combats possibles à 20 m, fouilles à 10 m, avec un GPS précis. Déplace-toi uniquement dans les espaces autorisés et arrête-toi pour jouer.';
+    }
+    const list=(game.protectedZones||[]).map(z=>{
+      const blockers=z.level<10?zoneStatus(z):0,cost=z.level<10?costText(zoneCost(z.level+1)):'MAX';
+      return `<div class="zone-safe-line"><b>🛡 ZONE ${safe(z.id.slice(-5))} · NIV. ${z.level}/10</b><span>${z.level*100} m diamètre</span><button data-zone="${safe(z.id)}" class="zone-safe-btn">${z.level>=10?'VOIR':'GÉRER / AMÉLIORER'}</button>${blockers?`<small>⚠ ${blockers} zombie(s) dans la future extension</small>`:''}<small>${safe(cost)}</small></div>`;
+    }).join('');
+    const form=zoneDraftMode?`<p class="zone-help">${zoneCandidate?'Point sélectionné.':'Touche la carte pour choisir le centre de protection.'} ${zoneCandidate?`Infectés dans le cercle : ${zoneBlockers(zoneCandidate,1).length}`:''}</p><button id="zoneConfirm" class="campaign-go" ${!zoneCandidate?'disabled':''}>✓ VALIDER CETTE ZONE (100 M)</button><button id="zoneCancel" class="zone-safe-btn">ANNULER</button>`:'';
+    card.innerHTML=`<div class="campaign-head"><b>${safe(title)}</b><span>${stage==='place'?'DÉPART':stage==='safe'?'ZONE SAFE':'RECONQUÊTE'}</span></div><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div>${!zoneDraftMode?`<button class="campaign-go" id="territoryAction" ${stage==='identify'?'disabled':''}>${action}</button>`:''}${form}<small>${safe(info)}</small><div class="zone-list">${list}</div>`;
+    $('territoryAction')?.addEventListener('click',()=>stage==='place'?startDrawing():startProtectionPlacement());
+    $('zoneConfirm')?.addEventListener('click',deployProtection);$('zoneCancel')?.addEventListener('click',cancelProtection);
+    card.querySelectorAll('[data-zone]').forEach(el=>el.addEventListener('click',()=>showProtection(el.dataset.zone)));
+    if(base){base.innerHTML=`<div class="pixel-heading">PROTECTION DU VILLAGE</div><p class="campaign-base-copy">${safe(title)}<br>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><p class="base-section-hint">${safe(info)}</p><button class="pixel-button full" id="baseZoneAction" ${stage==='identify'?'disabled':''}>${action}</button><div class="zone-list">${list}</div>`;
+      $('baseZoneAction')?.addEventListener('click',()=>{switchTab('map');stage==='place'?startDrawing():startProtectionPlacement()});
+      base.querySelectorAll('[data-zone]').forEach(el=>el.addEventListener('click',()=>showProtection(el.dataset.zone)));
+    }
+    if(quest)quest.innerHTML=`<strong>☣ OBJECTIF — ${safe(t?.name||'Mon refuge')}</strong><p>${safe(desc)}</p><div class="campaign-track"><i style="width:${progress}%"></i></div><small>${safe(info)}</small>`;
+    if(map){map.setTerritory?.(t,0);map.setProtectionZones?.(game.protectedZones,zoneCandidate?{center:zoneCandidate,level:1}:null)}
   }
 
   function ambientZombies(lat,lon){
@@ -755,7 +861,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       const id='zombie-'+sector+':0';
       if(game.defeatedZombies.includes(id))continue;
       const homeLat=(r+.2+rand()*.6)*ZOMBIE_GRID_DEG,homeLon=(c+.2+rand()*.6)*ZOMBIE_GRID_DEG;
-      if(territorySafeRadius()&&distanceM(homeLat,homeLon,...game.territory.center)<territorySafeRadius())continue;
+      if(isProtected(homeLat,homeLon,37))continue;
       if(game.safeZone&&distanceM(homeLat,homeLon,...game.safeZone.center)<55)continue;
       let z=zombieTracks.get(id);
       if(!z){
@@ -856,10 +962,10 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   // Le compteur journalier est fondé sur le jour local du téléphone (alpha hors ligne).
   function localDay(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
   function ensureDaily(){if(!game.dailyRemote || game.dailyRemote.day!==localDay())game.dailyRemote={day:localDay(),used:0}}
-  function remoteLeft(){ensureDaily();return Math.max(0,DAILY_REMOTE_LIMIT-game.dailyRemote.used)}
-  function isOnSite(p){return game.mode==='gps'&&game.lat!=null&&p.source==='osm'&&gpsAccuracy<=MAX_GPS_ACCURACY_M&&distanceM(game.lat,game.lon,p.lat,p.lon)<=GPS_RANGE_METERS}
+  function remoteLeft(){return 0}
+  function isOnSite(p){return Boolean(p?.source==='osm'&&actionGPS(GPS_RANGE_METERS,p.lat,p.lon,'Fouille').ok)}
   function isRemote(p){return !isOnSite(p)}
-  function canSearch(p){return (game.cooldowns[p.id]||0)<=Date.now()&&game.energy>=METHODS[selectedMethod].energy&&game.hp>0&&!scanBusy&&(!isRemote(p)||remoteLeft()>0)}
+  function canSearch(p){return (game.cooldowns[p.id]||0)<=Date.now()&&game.energy>=METHODS[selectedMethod].energy&&game.hp>0&&!scanBusy&&isOnSite(p)}
   // Catégories réelles OpenStreetMap : le butin est évidemment virtuel.
   const POI_TYPES={
     supermarket:{name:'Supermarché',symbol:'▣',loot:['food','water','cloth'],danger:29},
@@ -974,7 +1080,9 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   }
   async function findRealPoi(lat,lon){
     const serial=++poiRequestSerial;
-    const around=`around:${POI_RADIUS_M},${lat},${lon}`;
+    // Recherche cartographique sur une maille ~200 à 330 m : pas sur la position GPS exacte.
+    const approximateLat=Math.round(lat/.003)*.003,approximateLon=Math.round(lon/.003)*.003;
+    const around=`around:${POI_RADIUS_M+350},${approximateLat},${approximateLon}`;
     const query=`[out:json][timeout:20];(nwr(${around})["shop"~"^(supermarket|convenience|bakery|butcher|greengrocer|general|grocery|hardware|doityourself|car_parts|outdoor|chemist|department_store|clothes|shoes|electronics|mobile_phone|bicycle|car_repair|second_hand|stationery|books|florist)$"];nwr(${around})["amenity"~"^(pharmacy|fuel|restaurant|cafe|fast_food|hospital|clinic|doctors|library|community_centre|townhall|school|fire_station|police)$"];nwr(${around})["tourism"~"^(hotel|hostel|guest_house|museum)$"];nwr(${around})["leisure"~"^(park|garden|playground)$"];);out center tags;`;
     const servers=['https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
     poiLoading=true;poiError='';renderPois();
@@ -1031,46 +1139,58 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const time=game.safeZone?.placedAt;
     return Number.isFinite(time)&&time>0?time+SAFE_RELOCATION_MS:0;
   }
-  function refugeCanMove(){return !game.safeZone || Date.now()>=refugeNextMove()}
+  function refugeCanMove(){return !game.safeZone || !game.homeConfirmed || Date.now()>=refugeNextMove()}
   function renderSafe(){
     const zone=game.safeZone,el=$('safeZoneStatus');if(!el)return;
     if(safeDrawing)el.textContent=safeCandidate
       ?'Carré provisoire de 20 × 20 mètres sur la carte. Confirme pour enregistrer définitivement son emplacement.'
       :'Touche la carte pour choisir l’emplacement du carré de 20 × 20 mètres. Puis appuie sur VALIDER.';
-    else if(!zone)el.textContent=territoryStage()==='infected'?'Village infesté : élimine les zombies avant de poser le refuge.':territoryStage()==='choose'?'Choisis un secteur à reconquérir sur la carte avant de construire.':'Secteur libéré ! Place maintenant ton refuge : emplacement privé sur cet appareil.';
+    else if(!zone)el.textContent='Active le GPS à ton logement, choisis son emplacement sur la carte, puis confirme : « C’est bien là que je vis ». Ton refuge est enregistré localement. Les services OpenStreetMap reçoivent une zone approximative pour les recherches.';
+    else if(!game.homeConfirmed)el.textContent='Ancien refuge à confirmer. Tu peux corriger sa position une première fois, sans délai.';
     else if(refugeCanMove())el.textContent='Refuge placé (400 m²). Tu peux maintenant le déplacer une fois ; après confirmation, nouveau délai de 30 jours.';
     else el.textContent='Refuge verrouillé (400 m²). Prochain déplacement possible le '+new Date(refugeNextMove()).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})+'.';
-    $('editSafeZone').disabled=safeDrawing||!refugeCanMove()||(!zone&&territoryStage()!=='place');
-    $('editSafeZone').textContent=zone?'⌖ DÉPLACER MON REFUGE':'⌖ PLACER MON REFUGE';
+    $('editSafeZone').disabled=safeDrawing||zoneDraftMode||!refugeCanMove();
+    $('editSafeZone').textContent=zone?(game.homeConfirmed?'⌖ DÉPLACER MON REFUGE':'⌖ CONFIRMER MON REFUGE'):'⌖ PLACER MON REFUGE';
     $('drawingControls').hidden=!safeDrawing;$('drawingDone').disabled=!safeCandidate;
-    $('remoteCount').textContent=`${remoteLeft()} / ${DAILY_REMOTE_LIMIT} FOUILLES À DISTANCE`;
+    $('remoteCount').textContent='FOUILLE GPS UNIQUEMENT · ≤ 10 M';
     $('micToggle').textContent=game.micEnabled?'🎙 MICRO ACTIVÉ POUR LES FOUILLES · DÉSACTIVER':'🎙 ACTIVER LE MICRO PENDANT LES FOUILLES';
     $('micToggle').setAttribute('aria-pressed',String(!!game.micEnabled));
     $('lastMicReading').textContent=game.lastMicLevel===null?'Dernière fouille : aucun signal mesuré.':`Dernier bruit ambiant mesuré : ${game.lastMicLevel}/100 (échelle de jeu, pas des décibels).`;
   }
   function startDrawing(){
+    if(zoneDraftMode)return toast('Annule d’abord le placement de zone SAFE.');
     if(safeDrawing)return;
-    if(!game.safeZone && territoryStage()!=='place')return toast('Libère d’abord ton village pour débloquer le refuge.');
+    if(game.mode!=='gps'||game.lat===null)return toast('Active d’abord le GPS à ton domicile pour choisir ton refuge.');
     if(!refugeCanMove())return toast('Refuge verrouillé jusqu’au '+new Date(refugeNextMove()).toLocaleDateString('fr-FR')+'.');
     safeDrawing=true;safeDraft=[];safeCandidate=null;
-    map?.setDrawing(true,[]);if(game.safeZone)map?.setView(game.safeZone.center,18);else if(map){map.zoom=18;map.queueDraw();}
+    map?.setDrawing(true,[]);if(game.safeZone&&game.homeConfirmed)map?.setView(game.safeZone.center,18);else if(map){map.setView([game.lat,game.lon],18);}
     renderSafe();toast('Touche la carte pour y placer un carré de 20 × 20 m, puis valide.');
   }
   function addHomeVertex(lat,lon){
     if(!safeDrawing||!Number.isFinite(lat)||!Number.isFinite(lon))return;
-    if(game.territory&&distanceM(lat,lon,...game.territory.center)>game.territory.radius-20)return toast('Place le refuge à l’intérieur du secteur libéré.');
+    const check=actionGPS(40,lat,lon,'Placement du refuge');if(!check.ok)return toast(check.msg);
     safeCandidate=[lat,lon];safeDraft=squareAt(lat,lon);
     map?.setDrawing(true,safeDraft);renderSafe();
     $('placementHint').textContent='⌂ REFUGE 20 × 20 M · CHANGE SA POSITION OU VALIDE';
   }
   function finishDrawing(){
     if(!safeDrawing)return;
-    if(!safeCandidate)return toast('Touche d’abord la carte pour choisir le terrain du refuge.');
-    if(!game.safeZone&&territoryStage()!=='place'){cancelDrawing();return toast('Libère d’abord le territoire.');}
-    if(!refugeCanMove()){cancelDrawing();return toast('Déplacement indisponible avant 30 jours.');}
-    const now=Date.now();game.safeZone={center:[...safeCandidate],points:safeDraft.map(p=>[...p]),manual:true,placedAt:now};
-    safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);refreshMarkers();
-    maybeExpandTerritory();updateRoaming(true);commit('⌂ Refuge installé ! Sécurise maintenant les environs avec des patrouilles et améliore la base.');
+    if(!safeCandidate)return toast('Touche la carte à l’emplacement de ton logement.');
+    if(!refugeCanMove())return toast('Déplacement du refuge verrouillé pendant 30 jours.');
+    const check=actionGPS(40,...safeCandidate,'Refuge');if(!check.ok)return toast(check.msg);
+    modal({tag:'⌂ DÉCLARATION DU REFUGE',title:'C’EST BIEN CHEZ TOI ?',text:'Cet emplacement représente ton logement réel dans le jeu (carré 20 × 20 m). Es-tu sûr de l’avoir bien placé ? Après confirmation, tu ne pourras pas le déplacer pendant 30 jours. La position restera enregistrée sur cet appareil.',actions:[
+      {name:'MODIFIER L’EMPLACEMENT',alt:true,fn:closeModal},
+      {name:'OUI, C’EST MON LOGEMENT',fn:()=>{
+        const again=actionGPS(40,...safeCandidate,'Refuge');if(!again.ok)return toast(again.msg);
+        closeModal();const old=Boolean(game.safeZone);
+        game.safeZone={center:[...safeCandidate],points:safeDraft.map(p=>[...p]),manual:true,placedAt:Date.now()};
+        safeDrawing=false;safeCandidate=null;safeDraft=[];map?.setDrawing(false,[]);
+        if(!old||!game.homeConfirmed){game.territory=null;game.protectedZones=[];}
+        game.homeConfirmed=true;
+        refreshMarkers();commit(old?'⌂ Refuge confirmé à ton logement. Prochaine correction dans 30 jours.':'⌂ Refuge posé à ton logement. Commence la reconquête !');
+        if(!game.territory)beginTerritory();else{roamCenterKey='';updateRoaming(true)}
+      }}
+    ]});
   }
   function cancelDrawing(){
     if(!safeDrawing)return;
@@ -1124,7 +1244,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('poiList').innerHTML=pois.map(p=>{
       const cd=Math.max(0,Math.ceil(((game.cooldowns[p.id]||0)-Date.now())/60000));
       const distance=game.mode==='gps'&&game.lat!==null?`${Math.round(distanceM(game.lat,game.lon,p.lat,p.lon))} m · `:'';
-      const status='◉ OPENSTREETMAP';
+      const status='◉ OPENSTREETMAP · GPS 10 M';
       return `<button class="poi-card ${game.selected===p.id?'active':''}" data-poi="${safe(p.id)}"><span class="poi-symbol">${p.symbol}</span><span><b>${safe(p.name)}</b><small>${distance}${cd?`Disponible dans ${cd} min`:status}</small></span><span class="poi-danger">${p.danger}%</span></button>`;
     }).join('');
     const p=pois.find(p=>p.id===game.selected)||pois[0];
@@ -1134,17 +1254,17 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       renderSafe();return;
     }
     const cd=Math.max(0,Math.ceil(((game.cooldowns[p.id]||0)-Date.now())/60000));
-    const dist=game.mode==='gps'&&game.lat!==null?Math.round(distanceM(game.lat,game.lon,p.lat,p.lon))+' m':'À distance';
-    const onsite=isOnSite(p),remote=isRemote(p),remaining=remoteLeft();
+    const dist=game.mode==='gps'&&game.lat!==null?Math.round(distanceM(game.lat,game.lon,p.lat,p.lon))+' m':'GPS requis';
+    const onsite=isOnSite(p);
     const disabled=!canSearch(p);
-    const label=cd?`↻ RAVITAILLEMENT · ${cd} MIN`:scanBusy?'FOUILLE EN COURS…':remote&&remaining===0?'2/2 FOUILLES À DISTANCE UTILISÉES':'⌕ LANCER LA FOUILLE';
+    const label=cd?`↻ RAVITAILLEMENT · ${cd} MIN`:scanBusy?'FOUILLE EN COURS…':onsite?'⌕ FOUILLER SUR PLACE':'↗ APPROCHE-TOI À 10 M';
     $('targetCard').innerHTML=`<div class="target-eyebrow">/ LIEU SÉLECTIONNÉ · ${safe(p.type)}</div>
       <h3>${safe(p.name)}</h3><p>${'Lieu réel répertorié sur les données cartographiques ouvertes. Ressources fictives : ne pénètre pas dans un bâtiment pour jouer.'}</p>
       <div class="target-info"><span>MENACE : ${p.danger}%</span><span>${dist}</span></div>
-      <div class="target-info"><span>${onsite?'✓ SUR PLACE · FOUILLE GPS':'◇ À DISTANCE'}</span><span>${remaining}/${DAILY_REMOTE_LIMIT} GRATUITES</span></div>
+      <div class="target-info"><span>${onsite?'✓ SUR PLACE · GPS VALIDÉ':'⚠ DÉPLACEMENT RÉEL EXIGÉ'}</span><span>RAYON 10 M</span></div>
       <div class="search-options">${Object.entries(METHODS).map(([id,m])=>`<button type="button" data-method="${id}" class="${selectedMethod===id?'active':''}">${m.name}<br><small>⚡ ${m.energy}</small></button>`).join('')}</div>
       <button id="searchBtn" class="btn accent" ${disabled?'disabled':''}>${label}</button>
-      <p class="hint">${onsite?'À moins de 300 m de ce lieu : aucune fouille à distance consommée.':`Fouille à distance : ${remaining} restante(s) aujourd’hui. Au-delà, rapproche-toi à 300 m d'un vrai point de ravitaillement avec le GPS.`}${game.mode==='gps'&&gpsAccuracy>MAX_GPS_ACCURACY_M?' · Position trop imprécise pour débloquer une fouille sur place.':''}</p>`;
+      <p class="hint">${onsite?'À moins de 10 m du point réel référencé : fouille possible.':(actionGPS(10,p.lat,p.lon,'Fouille').msg)} · Ne pénètre pas sur une propriété ou dans un commerce pour jouer.</p>`;
     $('targetCard').querySelectorAll('[data-method]').forEach(el=>el.addEventListener('click',()=>{selectedMethod=el.dataset.method;renderPois()}));
     $('searchBtn').addEventListener('click',searchPoi);
     $('poiList').querySelectorAll('[data-poi]').forEach(el=>el.addEventListener('click',()=>{
@@ -1159,7 +1279,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if((game.cooldowns[p.id]||0)>Date.now())return toast('Ce lieu a besoin de se ravitailler.');
     const m=METHODS[selectedMethod];if(game.energy<m.energy)return toast('Endurance insuffisante : repose-toi.');
     if(game.hp===0)return toast('Récupère d’abord au refuge.');
-    if(isRemote(p)&&remoteLeft()===0)return toast('Tes deux fouilles à distance sont utilisées : approche-toi à 300 m d’un lieu OpenStreetMap avec le GPS.');
+    const siteCheck=actionGPS(10,p.lat,p.lon,'Fouille');if(!siteCheck.ok)return toast(siteCheck.msg);
     scanBusy=true;const token={cancelled:false};scanToken=token;renderPois();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'scavenge'}}));
     const duration=selectedMethod==='quiet'?9000:selectedMethod==='normal'?7000:5000;
     modal({tag:'⌕ FOUILLE EN COURS',title:'RESTE DISCRET',text:game.micEnabled?'Le bruit ambiant est analysé localement pendant la fouille. Aucun enregistrement.':'Micro désactivé : la discrétion dépend de ta méthode de fouille.',
@@ -1171,7 +1291,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(token.cancelled||mic===null){closeModal();renderAll();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'idle'}}));toast('Fouille annulée. Aucune ressource consommée.');return}
     closeModal();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'idle'}}));
     // On prélève les ressources uniquement après la fin de la fouille et on revérifie la distance.
-    if(isRemote(p)){ensureDaily();if(!remoteLeft()){renderAll();return toast('Quota de fouilles à distance épuisé.')}game.dailyRemote.used++;}
+    const finalCheck=actionGPS(10,p.lat,p.lon,'Fouille');if(!finalCheck.ok){renderAll();return toast('Fouille annulée : '+finalCheck.msg);}
     game.energy=clamp(game.energy-m.energy);game.water=clamp(game.water-2);game.food=clamp(game.food-2);
     const soundLevel=mic.hasMic?mic.level:0;
     game.lastMicLevel=mic.hasMic?soundLevel:null;
@@ -1181,8 +1301,11 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     const found=takeLoot(loot);xpGain(12+(p.danger>>3));
     const risk=clamp(8+p.danger*.45+m.risk+game.noise*.16+soundLevel*.40,0,92);
     log(`Fouille ${m.name.toLowerCase()} · ${p.name} : ${found.length?found.join(', '):'sac plein'}${mic.hasMic?` · bruit ${soundLevel}/100`:''}.`);
-    if(Math.random()*100<risk){engagedZombieId=null;save();renderAll();startCombat(p)}
-    else{game.threat=clamp(game.threat-4);commit(`Fouille réussie ! ${found.length?found.join(', '):'Sac à dos plein.'}`)}
+    if(Math.random()*100<risk){
+      const nearby=worldZombies().find(z=>actionGPS(ZOMBIE_COMBAT_RANGE_M,z.lat,z.lon,'Combat').ok);
+      if(nearby){engagedZombieId=nearby.id;save();renderAll();startCombat(p)}
+      else{game.threat=clamp(game.threat+3);commit(`Bruits inquiétants… Aucun infecté assez proche pour combattre. Butin : ${found.join(', ')||'sac plein'}.`)}
+    }else{game.threat=clamp(game.threat-4);commit(`Fouille réussie ! ${found.length?found.join(', '):'Sac à dos plein.'}`)}
     if(mic.denied)toast('Micro non disponible : fouille jouée normalement.');
   }
   function startCombat(p){
@@ -1210,7 +1333,16 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     });
   }
   function combatAction(action){
-    if(!combat)return;const z=combat.z;let note='';
+    if(!combat)return;
+    if(engagedZombieId){
+      const enemy=worldZombies().find(z=>z.id===engagedZombieId)||roamingZombies.find(z=>z.id===engagedZombieId);
+      const valid=enemy&&actionGPS(ZOMBIE_COMBAT_RANGE_M,enemy.lat,enemy.lon,'Combat');
+      if(!valid||!valid.ok){
+        combat=null;engagedZombieId=null;closeModal();
+        return toast(valid?.msg||'L’infecté n’est plus à portée : combat interrompu.');
+      }
+    }
+    const z=combat.z;let note='';
     if(action==='attack'){
       if(game.energy<8){showCombat('Tu es trop épuisé pour attaquer. Tente de fuir.');return;}
       game.energy-=8;const bonus=wearWeapon('melee');const dmg=random(10,20)+Math.floor(game.level*.9)+bonus;z.hp-=dmg;game.noise=clamp(game.noise+6);
@@ -1227,7 +1359,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
         game.energy=clamp(game.energy-5);game.threat=clamp(game.threat+3);combat=null;engagedZombieId=null;closeModal();commit('Tu as réussi à fuir le combat.');return;
       }game.energy=clamp(game.energy-5);note='La fuite échoue. Le zombie t’atteint !';
     }
-    if(z.hp<=0){if(engagedZombieId){const id=engagedZombieId;game.defeatedZombies.push(id);claimTerritoryKill(id);engagedZombieId=null;roamingZombies=roamingZombies.filter(e=>e.id!==id);}game.kills++;xpGain(z.xp);game.threat=clamp(game.threat-8);combat=null;closeModal();updateRoaming(true);commit(`☠ ${z.name} neutralisé ! +${z.xp} XP.`);return;}
+    if(z.hp<=0){if(engagedZombieId){const id=engagedZombieId;if(!game.defeatedZombies.includes(id))game.defeatedZombies.push(id);claimTerritoryKill(id);engagedZombieId=null;roamingZombies=roamingZombies.filter(e=>e.id!==id);}game.kills++;xpGain(z.xp);game.threat=clamp(game.threat-8);combat=null;closeModal();updateRoaming(true);commit(`☠ ${z.name} neutralisé ! +${z.xp} XP.`);return;}
     combat.round++;
     const raw=random(...z.damage);const hit=combat.guard?Math.ceil(raw*.25):raw;combat.guard=false;
     game.hp=clamp(game.hp-hit);note+=` ${z.name} t’inflige ${hit} dégâts.`;
@@ -1421,13 +1553,21 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     }));
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
-  function renderAll(){renderHud();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:remoteLeft(),capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
+  function renderAll(){renderHud();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
   function switchTab(tab){window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
     try{
-      map=new window.DeadEarthFastMap($('map'),{center,onTap:addHomeVertex,onTilePOI:onVectorPOI,onMarker:id=>{
-        if(id.startsWith('zombie-')||id.startsWith('campaign-')){if(!combat&&!scanBusy){engagedZombieId=id;startCombat({danger:40,name:'secteur infecté'});}return;}
+      map=new window.DeadEarthFastMap($('map'),{center,onTap:(lat,lon)=>zoneDraftMode?candidateProtection(lat,lon):addHomeVertex(lat,lon),onTilePOI:onVectorPOI,onMarker:id=>{
+        if(id.startsWith('infected-')||id.startsWith('zombie-')){
+          if(combat||scanBusy)return;
+          const z=worldZombies().find(z=>z.id===id)||roamingZombies.find(z=>z.id===id);
+          if(!z)return toast('Infecté déjà éliminé ou trop loin du secteur.');
+          const check=actionGPS(ZOMBIE_COMBAT_RANGE_M,z.lat,z.lon,'Combat');
+          if(!check.ok)return toast(check.msg);
+          engagedZombieId=id;startCombat({danger:40,name:'infecté repéré'});return;
+        }
+        if(id.startsWith('protected-')){showProtection(id.slice('protected-'.length));return;}
         if(!pois.some(p=>p.id===id))return;
         game.selected=id;save();renderPois();renderHud();refreshMarkers();window.dispatchEvent(new CustomEvent('de:poi',{detail:{id}}));
       }});
@@ -1435,7 +1575,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       setInterval(()=>{if(document.visibilityState==='visible'&&currentTab==='map')updateRoaming()},1200);
       // Déplacement libre de la carte : découvrir les secteurs et leurs points réels.
       map.onExplore=()=>{clearTimeout(exploreTimer);exploreTimer=setTimeout(()=>{
-        if(safeDrawing||scanBusy)return;
+        if(safeDrawing||zoneDraftMode||scanBusy)return;
         const p=map.latlon(map.w/2,map.h/2);
         updateRoaming(true);
         // Le centre de la vue est la référence de découverte, même loin du GPS.
@@ -1450,16 +1590,17 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     if(game.mode==='gps'&&game.lat!==null){markers.push({id:'player',kind:'player',symbol:'■',label:'MA POSITION',lat:game.lat,lon:game.lon})}else{markers.push({id:'player',kind:'player',symbol:'□',label:'POSITION FICTIVE',lat:center[0],lon:center[1]})}
     if(game.safeZone)markers.push({id:'safe',kind:'home',symbol:'⌂',label:'REFUGE',lat:game.safeZone.center[0],lon:game.safeZone.center[1]});
     for(const p of pois)markers.push({id:p.id,kind:'poi',symbol:p.symbol,label:p.name,lat:p.lat,lon:p.lon,selected:p.id===game.selected});
+    for(const z of game.protectedZones||[])markers.push({id:'protected-'+z.id,kind:'home',symbol:'✚',label:'ZONE SAFE NIV '+z.level,lat:z.center[0],lon:z.center[1]});
     // Les infectés figurés sont de simples éléments fictionnels sur le terrain.
     for(const z of roamingZombies)markers.push(z);
-    map.setMarkers(markers);map.setSafeZone(game.safeZone);map.setTerritory?.(game.territory,territorySafeRadius());map.setDrawing(safeDrawing,safeDraft);
+    map.setMarkers(markers);map.setSafeZone(game.safeZone);map.setTerritory?.(game.territory,0);map.setProtectionZones?.(game.protectedZones,zoneCandidate?{center:zoneCandidate,level:1}:null);map.setDrawing(safeDrawing||zoneDraftMode,safeDraft);
   }
   function setDemo(){
     if(gpsWatch!==null){navigator.geolocation?.clearWatch(gpsWatch);gpsWatch=null;}
     poiRequestSerial++;poiLoading=false;poiError='';game.mode='demo';game.lat=null;game.lon=null;gpsAccuracy=Infinity;
     center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];pois=[];game.selected='';
     if(map){map.setView(center,15);refreshMarkers()}
-    commit('Mode sans GPS : exploration des lieux réels de la carte, fouilles à distance limitées.');
+    commit('Mode exploration sans GPS : carte consultable, fouilles et combats verrouillés tant que le GPS est inactif.');
     loadPOIsNear(...center,true);
   }
   function setGPS(){
@@ -1471,14 +1612,14 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
       const lat=pos.coords.latitude,lon=pos.coords.longitude;
       if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
       const previous=game.lat===null?0:distanceM(lat,lon,game.lat,game.lon);const moved=game.lat===null||previous>350;
-      gpsAccuracy=Number.isFinite(pos.coords.accuracy)?pos.coords.accuracy:Infinity;
+      gpsAccuracy=Number.isFinite(pos.coords.accuracy)?pos.coords.accuracy:Infinity;gpsLastFixAt=Date.now();
       if(previous>4 && previous<400)window.dispatchEvent(new CustomEvent('de:action',{detail:{type:pos.coords.speed>2.2?'run':'walk'}}));
       const first=game.mode!=='gps';game.mode='gps';game.lat=lat;game.lon=lon;center=[lat,lon];
       if(first&&map)map.setView(center,15);
       if(first||moved){const shown=map?.latlon(map.w/2,map.h/2);if(!shown||first||distanceM(shown.lat,shown.lon,lat,lon)<500)loadPOIsNear(lat,lon)}
       refreshMarkers();save();renderAll();
-    },err=>{const msg=err.code===1?'Autorisation GPS refusée.':'Position GPS indisponible.';toast(`${msg} Mode démo conservé.`);setDemo();},
-    {enableHighAccuracy:false,maximumAge:30000,timeout:12000});
+    },err=>{const msg=err.code===1?'Autorisation GPS refusée.':'Position GPS indisponible.';toast(`${msg} Mode exploration sans action conservé.`);setDemo();},
+    {enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   }
   function beep(freq,duration){try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sawtooth';osc.frequency.value=freq;gain.gain.setValueAtTime(.05,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);osc.connect(gain).connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+duration);osc.onended=()=>ctx.close();}catch{}}
   function init(){
@@ -1518,6 +1659,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 
+
 </script>
 <script>
 /* DEAD EARTH 0.4 — interface pixel : commandes regroupées, animations et tiroirs. */
@@ -1528,7 +1670,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
   function snapshot(){return window.DEAD_EARTH_SNAPSHOT?.()||null}
   function renderMini(s){
     if(!s)return;
-    $('remoteCount').textContent=Math.max(0,s.dailyRemaining)+'/2 À DISTANCE';
+    $('remoteCount').textContent='FOUILLES GPS ≤10 M';
     $('gpsMode').classList.toggle('selected',s.mode==='gps');
     
     $('drawingControls').hidden=!s.drawing;
