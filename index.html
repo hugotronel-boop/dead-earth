@@ -244,6 +244,14 @@
    de détection, le micro et les réglages Options restent opérationnels. */
 #page-map #detectionHud{display:none!important}
 </style>
+<style>
+/* DEAD EARTH V1.8 — infos de récupération selon le soleil, page Perso uniquement */
+#page-survivor .rest-cycle-panel{margin-top:12px;padding:11px 12px;display:grid;gap:6px;background:#1c2a2d;color:#f3e0b3;border:3px solid;border-color:#668183 #101e26 #101e26 #668183;box-shadow:3px 3px 0 #0b1115}
+#page-survivor .rest-cycle-panel strong{font:10px/1.6 var(--pixel,monospace);color:#f8cc7f}
+#page-survivor .rest-cycle-panel.night strong{color:#a4caff}
+#page-survivor .rest-cycle-panel span{font:11px/1.5 var(--font-body,Arial,sans-serif);color:#f1e8d1}
+#page-survivor .rest-cycle-panel small{font:10px/1.5 var(--font-body,Arial,sans-serif);color:#afc3bc}
+</style>
 </head>
 <body>
 <div id="app">
@@ -343,6 +351,11 @@
       </div>
       <div class="pixel-frame page-panel"><div class="pixel-heading">ACTIONS DE SURVIE</div>
         <div class="action-list"><button id="eatBtn" class="pixel-button">▣ MANGER UNE CONSERVE</button><button id="drinkBtn" class="pixel-button">◉ BOIRE DE L'EAU</button><button id="healBtn" class="pixel-button">✚ UTILISER UN BANDAGE</button><button id="restBtn" class="pixel-button">☾ SE REPOSER AU REFUGE</button></div>
+        <div id="restCyclePanel" class="rest-cycle-panel pixel-frame" role="status" aria-live="polite">
+          <strong id="restCycleTitle">☀ CYCLE JOUR / NUIT</strong>
+          <span id="restCycleDescription">Calcul du repos en cours…</span>
+          <small id="restCycleSource">Selon l'heure réelle du téléphone.</small>
+        </div>
       </div>
     </section>
 
@@ -1907,6 +1920,47 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     }
     save();renderAll();showCombat(note);
   }
+  // Cycle de repos fondé sur l'heure réelle. Si le GPS est actif, on estime la hauteur
+  // du soleil localement (sans requête réseau) pour tenir compte des saisons.
+  // Sans position GPS : plage de jour 07:00–20:00, heure locale du téléphone.
+  const REST_DAY_GAIN=25, REST_NIGHT_GAIN=55;
+  function solarElevationDegrees(date,latitude,longitude){
+    const toRad=Math.PI/180;
+    const n=date.getTime()/86400000+2440587.5-2451545;
+    const meanLongitude=(280.46+0.9856474*n)*toRad;
+    const anomaly=(357.528+0.9856003*n)*toRad;
+    const eclipticLongitude=meanLongitude+(1.915*Math.sin(anomaly)+.020*Math.sin(2*anomaly))*toRad;
+    const obliquity=(23.439-.0000004*n)*toRad;
+    const declination=Math.asin(Math.sin(obliquity)*Math.sin(eclipticLongitude));
+    const rightAscension=Math.atan2(Math.cos(obliquity)*Math.sin(eclipticLongitude),Math.cos(eclipticLongitude));
+    const sidereal=(18.697374558+24.06570982441908*n)*15*toRad+longitude*toRad;
+    const hourAngle=Math.atan2(Math.sin(sidereal-rightAscension),Math.cos(sidereal-rightAscension));
+    const lat=latitude*toRad;
+    const altitude=Math.asin(Math.sin(lat)*Math.sin(declination)+Math.cos(lat)*Math.cos(declination)*Math.cos(hourAngle));
+    return altitude/toRad;
+  }
+  function realRestCycle(now=new Date()){
+    const hasGPS=game.mode==='gps'&&Number.isFinite(game.lat)&&Number.isFinite(game.lon)
+      &&Math.abs(game.lat)<=90&&Math.abs(game.lon)<=180;
+    const hour=now.getHours()+now.getMinutes()/60;
+    const isDay=hasGPS
+      ?solarElevationDegrees(now,game.lat,game.lon)>-.833
+      :hour>=7&&hour<20;
+    return {isDay,gain:isDay?REST_DAY_GAIN:REST_NIGHT_GAIN,hasGPS,
+      clock:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})};
+  }
+  function updateRestCycleUI(){
+    const cycle=realRestCycle();
+    const panel=$('restCyclePanel');
+    if(!panel)return;
+    panel.classList.toggle('night',!cycle.isDay);
+    $('restCycleTitle').textContent=cycle.isDay?'☀ JOUR — REPOS LÉGER':'☾ NUIT — REPOS COMPLET';
+    $('restCycleDescription').textContent=`${cycle.clock} · +${cycle.gain} points d’endurance par repos`;
+    $('restCycleSource').textContent=cycle.hasGPS
+      ?'Jour/nuit estimé d’après la position GPS et la saison.'
+      :'Jour : 7 h–20 h · Nuit : 20 h–7 h (horloge du téléphone).';
+    $('restBtn').textContent=`${cycle.isDay?'☀':'☾'} SE REPOSER · +${cycle.gain} ENDURANCE`;
+  }
   function renderSurvivor(){
     $('survivorDisplayName').textContent=game.survivorName||'SURVIVANT #001';
     const nameInput=$('survivorNameInput');
@@ -1919,12 +1973,23 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     $('drinkBtn').disabled=quantity('water')===0||game.water>=100;
     $('healBtn').disabled=quantity('bandage')===0||game.hp>=100;
     $('restBtn').disabled=game.energy>=100;
+    updateRestCycleUI();
   }
   function useItem(id,prop,points,msg){
     if(quantity(id)<1||game[prop]>=100)return;
     game.inventory[id]--;game[prop]=clamp(game[prop]+points);window.dispatchEvent(new CustomEvent('de:action',{detail:{type:id==='food'?'eat':id==='water'?'drink':'heal'}}));commit(msg);
   }
-  function rest(){window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'rest'}}));game.energy=clamp(game.energy+45);game.noise=clamp(game.noise-20);game.threat=clamp(game.threat-8);game.food=clamp(game.food-4);game.water=clamp(game.water-4);if(game.buildings.infirmary)game.hp=clamp(game.hp+15);commit(`Repos au refuge : +45 endurance${game.buildings.infirmary?' · +15 santé':''}.`);}
+  function rest(){
+    const cycle=realRestCycle();
+    if(game.energy>=100)return toast('Ton endurance est déjà au maximum.');
+    const recovered=Math.min(100-game.energy,cycle.gain);
+    window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'rest'}}));
+    game.energy=clamp(game.energy+cycle.gain);
+    game.noise=clamp(game.noise-20);game.threat=clamp(game.threat-8);
+    game.food=clamp(game.food-4);game.water=clamp(game.water-4);
+    if(game.buildings.infirmary)game.hp=clamp(game.hp+15);
+    commit(`${cycle.isDay?'☀ Repos de jour':'☾ Repos de nuit'} (${cycle.clock}) : +${recovered} endurance${game.buildings.infirmary?' · +15 santé':''}.`);
+  }
   function costText(cost){return Object.entries(cost).map(([id,num])=>`${num} ${ITEMS[id].label}`).join(' · ')}
   function maxFort(){return BASE_TIERS[clamp(game.baseLevel,1,5)-1].max}
   function powered(){return Boolean(game.buildings.generator&&game.generatorDay===localDay())}
@@ -2221,7 +2286,7 @@ window.DEAD_EARTH_ASSET_IMAGES={"bandage":"data:image/png;base64,iVBORw0KGgoAAAA
     });
     window.addEventListener('pagehide',()=>{stopDetectionMic();persistZombieMotion(true);});
     // La page peut rester ouverte pendant le changement de date.
-    setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();}},60000);
+    setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();if(currentTab==='survivor')updateRestCycleUI();}},60000);
     /* Single-file edition: service worker deliberately not registered. */
     toast('Transmission ouverte. Prêt pour ta première expédition !');
   }
