@@ -222,12 +222,29 @@
   @media(max-height:690px){.detection-hud{top:51px;min-height:57px;padding:5px 7px}.detection-hud strong{font-size:7px}.detection-hud small{font-size:8px}}
   @media(max-width:355px){.detection-hud{width:126px}.detection-hud strong{font-size:7px}}
 </style>
+<style id="dead-earth-v16-map-cleanup">
+/* Bouton village compact ; le panneau de gestion conserve sa largeur à l'ouverture. */
+#page-map .territory-campaign:not(.is-open){
+  width:min(148px,calc(100% - 100px));
+  max-width:148px;
+}
+#page-map .territory-campaign.is-open{
+  width:min(265px,calc(100% - 88px));
+  max-width:265px;
+}
+#page-map .village-toggle{min-height:36px;gap:5px;padding:6px 8px;font-size:10px}
+#page-map .village-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal;flex:1}
+#page-map .village-arrow{flex-shrink:0}
+/* Retirer uniquement l'affichage flottant « Mode passif » : les mécaniques
+   de détection, le micro et les réglages Options restent opérationnels. */
+#page-map #detectionHud{display:none!important}
+</style>
 </head>
 <body>
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.5 · DÉTECTION ZOMBIE</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>ALPHA 1.6 · CARTE ÉPURÉE</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
