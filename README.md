@@ -1,19 +1,32 @@
-# DEAD EARTH V2.0 LIGHT — Sans images
+# DEAD EARTH — V2.1 LIGHT | Constructions de survie
 
-Version allégée de la V1.9 : uniquement le fichier `index.html` est nécessaire pour GitHub Pages. Toutes les images raster embarquées ont été retirées et remplacées par des emojis, des symboles et des motifs CSS. Le fond cartographique reste fonctionnel via un rendu Canvas de **données vectorielles OpenStreetMap/OpenFreeMap** (ce ne sont pas des images embarquées). Les mécaniques de la V1.9 sont conservées, avec la même clé de sauvegarde locale `dead-earth-alpha-v1`.
+## Mise à jour
 
-## Installation
+Cette version repart de **DEAD EARTH V2.0 LIGHT** (sans images intégrées). Elle conserve la carte, la détection des zombies, les protections, les combats, l'équipement et les sauvegardes sur cet appareil.
 
-Déposez `index.html` à la racine du dépôt GitHub, en remplaçant le précédent. Les anciens fichiers/images du dépôt peuvent rester : cette version n'en dépend pas.
+Il suffit de **remplacer `index.html`** à la racine de ton dépôt GitHub Pages. Aucune installation, aucun framework et aucun dossier d'images nécessaire.
 
-## Quand tu prépareras ton dossier d'images
+## Constructions — niveaux 1 à 5
 
-Les identifiants techniques des items sont conservés : `water`, `food`, `bandage`, `wood`, `metal`, `cloth`, `ammo`, `parts`, `medkit`, `fuel`. Le personnage est représenté par 🥷 et 🎒. Pour une future version, tu pourras préparer un dossier `assets/` avec des illustrations portant ces noms, mais **ce dossier n'est pas requis** aujourd'hui.
+La Base contient huit installations évolutives :
 
-## Ce qui reste en ligne
+- **Récupérateur d'eau** : 2, 4, 6, 8, puis 10 eaux par jour (à récupérer une fois par jour).
+- **Atelier d'armes** : armes débloquées aux niveaux 1 et 2 ; réparations progressives de +45 à +85 points de durabilité.
+- **Potager** : de 1 à 5 rations par jour.
+- **Générateur** : avec un carburant consommé pour la journée, le bonus de défense passe de +20 à +60 ; baisse également le niveau de menace.
+- **Coin médical** : le repos restaure +15 à +35 points de santé.
+- **Tour de guet (nouveau)** : rayon de détection autour du refuge de 150 à 650 m selon le niveau. Affiche les zombies repérés et ceux dont la trajectoire se rapproche du refuge. Il s'agit d'un radar sur les zombies simulés, pas d'une attaque automatique de hordes.
+- **Réserve de stockage (nouveau)** : de 50 à 250 kg indépendamment du sac (30 kg, ou 40 kg avec équipement). Les ressources peuvent être déposées / retirées une unité à la fois. Les constructions et réparations faites **dans la Base** peuvent prélever dans le sac **ou** dans la réserve ; les zones SAFE éloignées continuent de réclamer les ressources portées dans le sac.
+- **Station radio (nouveau)** : une transmission quotidienne aux niveaux 1–2, deux aux niveaux 3–4, trois au niveau 5. Des appels de détresse et missions spéciales demandent des fouilles ou l'élimination de zombies, puis donnent des ressources et de l'XP. À partir du niveau 3, transmissions mystérieuses. Dès le niveau 4, petit événement radio quotidien modifiant la menace fictive.
 
-La carte peut récupérer des **tuiles vectorielles** auprès d'OpenFreeMap et les lieux auprès des services OSM. Une connexion internet et le GPS (avec autorisation) restent nécessaires aux fonctions géographiques. Le jeu ne télécharge plus les anciennes photos/décors/sprites raster intégrés au fichier HTML.
+Chaque construction affiche **niveau / 5**, l'effet actuel, les matériaux nécessaires à l'étape suivante, ainsi que les quantités possédées (**sac + réserve**). Le bouton est bloqué si les matériaux sont insuffisants ou si le niveau maximal est atteint.
 
-## Limitations
+## Sauvegardes
 
-Il s'agit d'une interface d'attente allégée, pas d'un nouveau graphisme pixel art définitif. Les emojis peuvent avoir un rendu un peu différent selon iOS/Android.
+La clé `dead-earth-alpha-v1` est inchangée. Les anciens bâtiments en booléens sont convertis en niveau 1 ; l'atelier déjà niveau 2 reste niveau 2. Les nouvelles données (niveaux, réserve, radio) sont ajoutées à la sauvegarde sans effacer les quêtes, les armes ou les constructions antérieures.
+
+La date journalière, les stocks et les temps sont gérés localement par le navigateur, sans serveur. Les données seront perdues si l'utilisateur efface le stockage local du site.
+
+## Tests
+
+Syntaxe JavaScript validée avec `node --check`. Tests du moteur réalisés sur les coûts, la migration d'anciennes sauvegardes, les huit constructions jusqu'au niveau 5, le stockage séparé du sac, les transferts et la réserve pleine, la production, les missions radio, la récompense non répétable, ainsi que le rendu HTML de la Base dans un DOM simulé. Le navigateur de test de cet environnement bloque les adresses locales : **rendu iPhone réel à confirmer après publication**.
