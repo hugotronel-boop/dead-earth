@@ -1,7 +1,11 @@
-DEAD EARTH V1.6 — Retouches de la page Carte
+DEAD EARTH V1.7 — RETOUCHES PAGE PERSO
 
-- Bouton du village compact (148 px fermé) ; panneau de reconquête élargi à 265 px lorsqu’il est ouvert.
-- Cadre flottant « Mode passif » masqué. La détection des zombies et les réglages du microphone restent actifs.
-- Les autres mécaniques et les sauvegardes restent inchangées.
+• Crayon à droite du nom du survivant : ouvrir l'édition.
+• Entrer un nom de 2 à 20 caractères, puis ✓ pour enregistrer ou ✕ pour annuler.
+• Ancien cadre de changement de nom retiré.
+• Bouton d'activation du micro retiré de la page Perso.
+• Micro et sensibilité toujours dans Carte > Options.
+• Aucun changement volontaire de sauvegarde, carte, combats, base, sac ou quêtes.
 
-Installation : remplace le fichier index.html à la racine de ton dépôt GitHub Pages.
+Installation : remplacer uniquement index.html dans le dépôt GitHub à sa racine.
+Ce fichier est autonome. Ne pas importer les scripts des tests.
