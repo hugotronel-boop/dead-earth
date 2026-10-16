@@ -1,16 +1,25 @@
-# DEAD EARTH V1.8 — Repos jour / nuit
+# DEAD EARTH — V1.9 : équipements du survivant
 
-Mise à jour **uniquement dans la page Perso** à partir de la version V1.7.
+Version à importer sur GitHub Pages : `index.html` (fichier autonome). Remplace uniquement l'ancien fichier `index.html` à la racine du dépôt `dead-earth` ; les autres fichiers du dépôt peuvent rester.
 
-- Le repos rend +25 points d’endurance le jour et +55 la nuit, plafonnés à 100.
-- Heure réelle du téléphone et cycle actualisé toutes les minutes quand la fiche Perso est affichée.
-- Si le GPS du jeu est activé : estimation astronomique locale du lever/coucher du soleil, sans appel réseau ni permission supplémentaire.
-- Sinon : jour de 07:00 à 20:00 et nuit de 20:00 à 07:00, heure locale du téléphone.
-- L’infirmerie conserve son bonus +15 santé, et les autres coûts de repos ne changent pas.
-- Sauvegarde existante conservée : même stockage et aucun reset.
+## Menu Perso
 
-## Installation GitHub Pages
+Quatre emplacements en grille 2 × 2 sous le portrait :
+- **Arme principale** : couteau ou hache, influence les dégâts en mêlée et la durabilité.
+- **Sac** : sac initial de 30 kg ; sac renforcé de 40 kg après fabrication.
+- **Arme secondaire** : carabine fabriquée à l'atelier, équipée séparément de l'arme de mêlée ; s'utilise avec des munitions.
+- **Protection** : gilet rembourré (après fabrication), réduit de 25 % les dégâts reçus lors des combats de zombies.
 
-Remplacer **uniquement** le `index.html` à la racine du dépôt par celui-ci. Les autres fichiers ne changent pas.
+Appuie sur une case pour choisir un objet possédé ou retirer l'équipement quand c'est possible. Fabrique le **Sac renforcé** et le **Gilet rembourré** dans **Sac > Équipement à porter** avec les matériaux de l'inventaire. La fabrication consomme les ressources.
 
-Note : le cycle utilise l’horloge locale de l’appareil, qui n’est pas validée par un serveur (prototype solo). Les gains du repos ne sont pas encore limités par un nombre de repos par jour.
+Coûts :
+- Sac renforcé : 4 tissus, 2 bois, 1 pièce.
+- Gilet rembourré : 5 tissus, 2 ferrailles, 1 pièce.
+
+Les anciennes sauvegardes locales conservent leur progression : les armes fabriquées sont reconnues, et une ancienne carabine équipée est transférée vers la case secondaire.
+
+## Technique
+
+Le fichier unique embarque HTML, CSS, JS, sprites et données visuelles. Les nouvelles cases utilisent la sauvegarde locale existante `dead-earth-alpha-v1`.
+
+Tests réalisés : syntaxe JavaScript, affichage sur viewport 390×844, ouverture des cases, navigation, fabrication/équipement/sauvegarde sur fixture de navigateur et migration d'une ancienne sauvegarde simulée. Test final sur iPhone conseillé avant usage prolongé. Le code a été préparé localement : aucune écriture directe sur GitHub n'a été effectuée.
