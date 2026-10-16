@@ -1,25 +1,19 @@
-# DEAD EARTH — V1.9 : équipements du survivant
+# DEAD EARTH V2.0 LIGHT — Sans images
 
-Version à importer sur GitHub Pages : `index.html` (fichier autonome). Remplace uniquement l'ancien fichier `index.html` à la racine du dépôt `dead-earth` ; les autres fichiers du dépôt peuvent rester.
+Version allégée de la V1.9 : uniquement le fichier `index.html` est nécessaire pour GitHub Pages. Toutes les images raster embarquées ont été retirées et remplacées par des emojis, des symboles et des motifs CSS. Le fond cartographique reste fonctionnel via un rendu Canvas de **données vectorielles OpenStreetMap/OpenFreeMap** (ce ne sont pas des images embarquées). Les mécaniques de la V1.9 sont conservées, avec la même clé de sauvegarde locale `dead-earth-alpha-v1`.
 
-## Menu Perso
+## Installation
 
-Quatre emplacements en grille 2 × 2 sous le portrait :
-- **Arme principale** : couteau ou hache, influence les dégâts en mêlée et la durabilité.
-- **Sac** : sac initial de 30 kg ; sac renforcé de 40 kg après fabrication.
-- **Arme secondaire** : carabine fabriquée à l'atelier, équipée séparément de l'arme de mêlée ; s'utilise avec des munitions.
-- **Protection** : gilet rembourré (après fabrication), réduit de 25 % les dégâts reçus lors des combats de zombies.
+Déposez `index.html` à la racine du dépôt GitHub, en remplaçant le précédent. Les anciens fichiers/images du dépôt peuvent rester : cette version n'en dépend pas.
 
-Appuie sur une case pour choisir un objet possédé ou retirer l'équipement quand c'est possible. Fabrique le **Sac renforcé** et le **Gilet rembourré** dans **Sac > Équipement à porter** avec les matériaux de l'inventaire. La fabrication consomme les ressources.
+## Quand tu prépareras ton dossier d'images
 
-Coûts :
-- Sac renforcé : 4 tissus, 2 bois, 1 pièce.
-- Gilet rembourré : 5 tissus, 2 ferrailles, 1 pièce.
+Les identifiants techniques des items sont conservés : `water`, `food`, `bandage`, `wood`, `metal`, `cloth`, `ammo`, `parts`, `medkit`, `fuel`. Le personnage est représenté par 🥷 et 🎒. Pour une future version, tu pourras préparer un dossier `assets/` avec des illustrations portant ces noms, mais **ce dossier n'est pas requis** aujourd'hui.
 
-Les anciennes sauvegardes locales conservent leur progression : les armes fabriquées sont reconnues, et une ancienne carabine équipée est transférée vers la case secondaire.
+## Ce qui reste en ligne
 
-## Technique
+La carte peut récupérer des **tuiles vectorielles** auprès d'OpenFreeMap et les lieux auprès des services OSM. Une connexion internet et le GPS (avec autorisation) restent nécessaires aux fonctions géographiques. Le jeu ne télécharge plus les anciennes photos/décors/sprites raster intégrés au fichier HTML.
 
-Le fichier unique embarque HTML, CSS, JS, sprites et données visuelles. Les nouvelles cases utilisent la sauvegarde locale existante `dead-earth-alpha-v1`.
+## Limitations
 
-Tests réalisés : syntaxe JavaScript, affichage sur viewport 390×844, ouverture des cases, navigation, fabrication/équipement/sauvegarde sur fixture de navigateur et migration d'une ancienne sauvegarde simulée. Test final sur iPhone conseillé avant usage prolongé. Le code a été préparé localement : aucune écriture directe sur GitHub n'a été effectuée.
+Il s'agit d'une interface d'attente allégée, pas d'un nouveau graphisme pixel art définitif. Les emojis peuvent avoir un rendu un peu différent selon iOS/Android.
