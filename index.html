@@ -347,12 +347,30 @@
 @media(max-width:360px){#page-survivor .character-profile{grid-template-columns:40% minmax(0,1fr);gap:8px}#page-survivor .equip-grid{gap:4px}#page-survivor .equip-slot{min-height:78px;padding:3px 1px}#page-survivor .equip-slot small{font-size:7px}}
 
 </style>
+<style id="v24-base-accordion-style">
+/* V2.4 — panneaux dépliables de la Base ; aucune mécanique modifiée */
+#page-base .base-accordion{margin:0 0 11px;overflow:hidden;}
+#page-base .base-accordion-summary{display:flex;align-items:center;gap:8px;min-height:53px;padding:12px 11px;cursor:pointer;list-style:none;color:#f4e4c1;font:10px var(--pixel,monospace);line-height:1.7;letter-spacing:.15px;background:linear-gradient(120deg,#344650,#273840);user-select:none;-webkit-user-select:none;}
+#page-base .base-accordion-summary::-webkit-details-marker{display:none;}
+#page-base .base-accordion-summary::marker{content:'';}
+#page-base .base-accordion-summary:focus-visible{outline:3px solid #edc47d;outline-offset:-4px;}
+#page-base .base-accordion-summary:active{background:#425760;}
+#page-base .base-accordion[open]>.base-accordion-summary{background:linear-gradient(120deg,#475f68,#30444a);color:#fff3ce;}
+#page-base .base-accordion-title{min-width:0;flex:1;overflow-wrap:anywhere;}
+#page-base .base-accordion-summary .base-mini-rank{float:none;flex:none;font:9px monospace;color:#f0c685;white-space:nowrap;margin-left:3px;}
+#page-base .base-chevron{flex:none;margin-left:auto;color:#f3cb8c;font:17px monospace;display:inline-block;transition:transform .2s ease;}
+#page-base .base-accordion[open]>.base-accordion-summary .base-chevron{transform:rotate(180deg);}
+#page-base .base-accordion-content{border-top:2px solid #627e83;padding:12px 10px 13px;background:linear-gradient(165deg,#2c3c43,#223138);}
+#page-base .base-accordion-content>.base-panel{padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;margin:0!important;}
+#page-base .base-accordion-content>#territoryBaseCard>.pixel-heading{display:none;}
+@media(prefers-reduced-motion:reduce){#page-base .base-chevron{transition:none}}
+</style>
 </head>
 <body>
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.3 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.4 · LIGHT</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -461,64 +479,64 @@
       </div>
     </section>
 
-    <section id="page-base" class="page scroll-page" aria-label="Base">
-      <h1>⌂ MON REFUGE</h1>
-      <div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div>
-      <div class="pixel-frame page-panel base-panel">
-        <div class="pixel-heading">ZONE SÉCURISÉE <span class="base-mini-rank" id="baseRank">NIV. 1 / 5</span></div>
-        <div class="base-diorama tier-1" id="baseDiorama" role="img" aria-label="Refuge : abri de branchages">
-          <div class="base-sky"></div><div class="base-ground"></div>
-          <div class="base-hut"><div class="base-roof"></div><div class="base-wall"></div><div class="base-door"></div><div class="base-window"></div></div>
-          <div class="base-fence left"></div><div class="base-fence right"></div>
-          <div class="base-scene-details"><span>✦</span><span>▤</span><span>✦</span></div>
-          <div class="base-scene-label" id="baseTierName">ABRI DE BRANCHAGES</div>
-        </div>
-        <div class="base-details">
-          <div class="metric-row"><span>NIVEAU DU REFUGE</span><strong id="baseLevel">1 / 5</strong></div>
-          <div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
-          <div class="pixel-track dark"><i id="fortBar" class="green"></i></div>
-          <p class="help-text" id="baseLevelDesc">Quelques branches maintiennent l'abri debout. Il protège à peine des rôdeurs.</p>
-        </div>
-        <div class="base-level-steps" id="baseLevelSteps" aria-label="Progression du refuge"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel">
-        <div class="pixel-heading">AMÉLIORER LE REFUGE</div>
-        <div id="upgradeList" class="item-list"></div>
-        <button id="defendBtn" class="pixel-button full danger-button">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
-        <p class="help-text">Les hordes ne frappent pas hors ligne : le test de défense est lancé uniquement avec ce bouton.</p>
-      </div>
-      <div class="pixel-frame page-panel base-panel">
-        <div class="pixel-heading">CONSTRUCTIONS DE SURVIE</div>
-        <p class="base-section-hint">Bâtis des installations dans ton refuge. Les ressources proviennent des fouilles et sont retirées du sac.</p>
-        <div id="baseBuildList" class="base-build-grid"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel" id="watchtowerPanel">
-        <div class="pixel-heading">🔭 SURVEILLANCE DU REFUGE</div>
-        <div id="watchtowerIntel" aria-live="polite" class="base-feature-content"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel" id="baseStoragePanel">
-        <div class="pixel-heading">📦 RÉSERVE DE STOCKAGE</div>
-        <div id="baseStorage" class="base-feature-content"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel" id="advancedMedicalPanel">
-        <div class="pixel-heading">✚ INFIRMERIE ÉLECTRIQUE</div><div id="advancedMedical"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel" id="baseRadioPanel">
-        <div class="pixel-heading">📻 STATION RADIO</div>
-        <div id="baseRadio" class="base-feature-content"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel">
-        <div class="pixel-heading">PRODUCTION & ÉLECTRICITÉ</div>
-        <p class="base-section-hint">Les productions se récupèrent une fois par jour. Les équipements électriques demandent du carburant et une puissance suffisante.</p>
-        <div id="baseProduction" class="item-list"></div>
-      </div>
-      <div class="pixel-frame page-panel base-panel">
-        <div class="pixel-heading">ATELIER D'ARMES</div>
-        <p class="base-section-hint">⚡ L’atelier nécessite le générateur en marche et son alimentation activée. Sans courant, la fabrication et les réparations sont bloquées.</p>
-        <div id="baseWeapons" class="item-list"></div>
-      </div>
-      <p class="help-text base-privacy">⌂ Refuge virtuel privé. Les améliorations et équipements sont sauvegardés sur cet appareil.</p>
-    </section>
+    <section aria-label="Base" class="page scroll-page" id="page-base">
+<h1>⌂ MON REFUGE</h1>
+
+
+
+
+
+
+
+
+
+
+<details class="pixel-frame base-accordion" data-base-section="protection"><summary class="base-accordion-summary"><span class="base-accordion-title">☣ PROTECTION DU VILLAGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div></div></details><details class="pixel-frame base-accordion" data-base-section="zone"><summary class="base-accordion-summary"><span class="base-accordion-title">⌂ ZONE SÉCURISÉE</span><span class="base-mini-rank" id="baseRank">NIV. 1 / 5</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
+
+<div aria-label="Refuge : abri de branchages" class="base-diorama tier-1" id="baseDiorama" role="img">
+<div class="base-sky"></div><div class="base-ground"></div>
+<div class="base-hut"><div class="base-roof"></div><div class="base-wall"></div><div class="base-door"></div><div class="base-window"></div></div>
+<div class="base-fence left"></div><div class="base-fence right"></div>
+<div class="base-scene-details"><span>✦</span><span>▤</span><span>✦</span></div>
+<div class="base-scene-label" id="baseTierName">ABRI DE BRANCHAGES</div>
+</div>
+<div class="base-details">
+<div class="metric-row"><span>NIVEAU DU REFUGE</span><strong id="baseLevel">1 / 5</strong></div>
+<div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
+<div class="pixel-track dark"><i class="green" id="fortBar"></i></div>
+<p class="help-text" id="baseLevelDesc">Quelques branches maintiennent l'abri debout. Il protège à peine des rôdeurs.</p>
+</div>
+<div aria-label="Progression du refuge" class="base-level-steps" id="baseLevelSteps"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="ameliorer"><summary class="base-accordion-summary"><span class="base-accordion-title">⬆ AMÉLIORER LE REFUGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
+
+<div class="item-list" id="upgradeList"></div>
+<button class="pixel-button full danger-button" id="defendBtn">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
+<p class="help-text">Les hordes ne frappent pas hors ligne : le test de défense est lancé uniquement avec ce bouton.</p>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="constructions"><summary class="base-accordion-summary"><span class="base-accordion-title">🔨 CONSTRUCTIONS DE SURVIE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
+
+<p class="base-section-hint">Bâtis des installations dans ton refuge. Les ressources proviennent des fouilles et sont retirées du sac.</p>
+<div class="base-build-grid" id="baseBuildList"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="surveillance"><summary class="base-accordion-summary"><span class="base-accordion-title">🔭 SURVEILLANCE DU REFUGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="watchtowerPanel">
+
+<div aria-live="polite" class="base-feature-content" id="watchtowerIntel"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="stockage"><summary class="base-accordion-summary"><span class="base-accordion-title">📦 RÉSERVE DE STOCKAGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="baseStoragePanel">
+
+<div class="base-feature-content" id="baseStorage"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="infirmerie"><summary class="base-accordion-summary"><span class="base-accordion-title">✚ INFIRMERIE ÉLECTRIQUE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="advancedMedicalPanel">
+<div id="advancedMedical"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="radio"><summary class="base-accordion-summary"><span class="base-accordion-title">📻 STATION RADIO</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="baseRadioPanel">
+
+<div class="base-feature-content" id="baseRadio"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="production"><summary class="base-accordion-summary"><span class="base-accordion-title">⚡ PRODUCTION &amp; ÉLECTRICITÉ</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
+
+<p class="base-section-hint">Les productions se récupèrent une fois par jour. Les équipements électriques demandent du carburant et une puissance suffisante.</p>
+<div class="item-list" id="baseProduction"></div>
+</div></div></details><details class="pixel-frame base-accordion" data-base-section="atelier"><summary class="base-accordion-summary"><span class="base-accordion-title">⚒ ATELIER D’ARMES</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
+
+<p class="base-section-hint">⚡ L’atelier nécessite le générateur en marche et son alimentation activée. Sans courant, la fabrication et les réparations sont bloquées.</p>
+<div class="item-list" id="baseWeapons"></div>
+</div></div></details><p class="help-text base-privacy">⌂ Refuge virtuel privé. Les améliorations et équipements sont sauvegardés sur cet appareil.</p>
+</section>
 
     <section id="page-inventory" class="page scroll-page" aria-label="Inventaire">
       <h1>▦ INVENTAIRE</h1><div class="pixel-frame page-panel"><div class="metric-row"><span>CHARGE DU SAC</span><strong id="capacityText">0/30 KG</strong></div><div class="pixel-track dark"><i id="capacityBar" class="gold"></i></div><div id="inventoryGrid" class="inventory-grid"></div></div>
