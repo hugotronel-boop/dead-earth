@@ -196,7 +196,7 @@
 .item-emoji{font-family:system-ui,'Apple Color Emoji','Segoe UI Emoji',sans-serif;font-size:clamp(33px,10vw,52px);line-height:1;display:grid;place-items:center;min-height:64px;width:100%;filter:drop-shadow(3px 4px 0 #111a1d66)}
 @media(prefers-reduced-motion:reduce){.character-image .survivor-avatar-symbol{animation:none!important}}
 
-/* V2.2 LIGHT : réservoir du générateur, sans images externes */
+/* V2.3 LIGHT : réseau électrique du refuge, sans images externes */
 .generator-box{border:2px solid #687b76;padding:12px!important;background:linear-gradient(150deg,#263733,#1b282b)}
 .generator-meter-head{display:flex;gap:8px;justify-content:space-between;align-items:center;font:11px monospace;margin:11px 0 5px;color:#f1e0a7}
 .generator-meter{height:20px;padding:2px;border:2px solid #0f1a1c;background:#0c161a;box-shadow:inset 2px 2px #071011}
@@ -210,6 +210,21 @@
 .generator-hint{font-size:10px!important;color:#c1b8a3!important}
 @media(max-width:355px){.generator-buttons{flex-wrap:wrap}.generator-buttons>button{min-width:90px}}
 
+/* Réseau électrique et éclairage : panneau compact, lisible sur téléphone. */
+.electric-grid{display:grid;gap:7px;margin:12px 0}
+.electric-consumer{border:2px solid #536968;background:#1c2d31;padding:9px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px}
+.electric-consumer strong{font:11px monospace;color:#e6dcba}
+.electric-consumer small{display:block;color:#afc4b9;font:10px/1.55 monospace;margin-top:4px}
+.electric-consumer button{min-width:76px;min-height:39px}
+.electric-consumer .state-on{color:#a9ebbd}.electric-consumer .state-off{color:#f0aa87}
+.electric-status{font:11px/1.6 monospace;color:#d6d2af;line-height:1.55}
+.electric-meter{height:15px;border:2px solid #101a1f;background:#121c22;margin:7px 0}
+.electric-meter i{display:block;background:repeating-linear-gradient(90deg,#6fc7ad 0 12px,#8fe2a7 12px 16px);height:100%;transition:width .2s}
+.electric-alert{font:10px/1.6 monospace;color:#f2b0a0;margin:7px 0}
+.generator-condition{font:10px monospace;margin-top:9px;color:#c6e0d0}
+.generator-condition .progress{margin-top:6px}
+#page-map #nightClock{position:absolute;z-index:8;left:10px;bottom:10px;font:10px monospace;background:#0c171dc9;border:1px solid #8e9274;padding:4px 6px;color:#f3dda0;pointer-events:none}
+@media(max-width:360px){.electric-consumer button{min-width:66px;font-size:10px}}
 </style>
 <style>
 
@@ -228,8 +243,10 @@
 #page-survivor .survivor-name-inline .help-text{margin:6px 0 0;font-size:10px}
 
 
+
 </style>
-<style id="v08-map-design">#page-map .survivor-figure{display:none!important}</style>
+<style id="v08-map-design">#page-map .survivor-figure{display:none!important}
+</style>
 
 <style id="dead-earth-v12-zone-ui">
 /* V1.2 : le village est désormais un bouton ouvrant le menu de reconquête. */
@@ -254,6 +271,7 @@
 .zone-modal-subtitle{display:block;margin:12px 0 7px;color:#ffe3ab;font:bold 11px 'Courier New',monospace}
 .territory-base .zone-requirements{max-width:390px}
 @media(max-width:360px){.territory-campaign{width:clamp(155px,calc(100% - 132px),230px)}.village-toggle{font-size:10px;padding:7px}.village-panel{max-height:58vh}}
+
 </style>
 
 <style id="v15-detection-style">
@@ -277,6 +295,7 @@
   .detection-hud.alert .detection-meter i{background:#f17558}
   @media(max-height:690px){.detection-hud{top:51px;min-height:57px;padding:5px 7px}.detection-hud strong{font-size:7px}.detection-hud small{font-size:8px}}
   @media(max-width:355px){.detection-hud{width:126px}.detection-hud strong{font-size:7px}}
+
 </style>
 <style id="dead-earth-v16-map-cleanup">
 /* Bouton village compact ; le panneau de gestion conserve sa largeur à l'ouverture. */
@@ -294,6 +313,7 @@
 /* Retirer uniquement l'affichage flottant « Mode passif » : les mécaniques
    de détection, le micro et les réglages Options restent opérationnels. */
 #page-map #detectionHud{display:none!important}
+
 </style>
 <style>
 /* DEAD EARTH V1.8 — infos de récupération selon le soleil, page Perso uniquement */
@@ -325,13 +345,14 @@
 .gear-craft-card{margin-top:8px}
 .gear-craft-card .gear-craft-cost{font:10px/1.5 monospace;color:#dbc495}
 @media(max-width:360px){#page-survivor .character-profile{grid-template-columns:40% minmax(0,1fr);gap:8px}#page-survivor .equip-grid{gap:4px}#page-survivor .equip-slot{min-height:78px;padding:3px 1px}#page-survivor .equip-slot small{font-size:7px}}
+
 </style>
 </head>
 <body>
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.2 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.3 · LIGHT</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -389,7 +410,7 @@
         <button id="drawingDone" type="button" disabled>✓ VALIDER</button>
         <button id="drawingCancel" type="button">× ANNULER</button>
       </div>
-      <div class="map-attribution">© OpenStreetMap contributors · OpenFreeMap</div>
+      <div id="nightClock" aria-live="off">☀ JOUR</div><div class="map-attribution">© OpenStreetMap contributors · OpenFreeMap</div>
       <div class="survivor-figure" aria-hidden="true">
         <div class="hero-target"></div>
         <span class="survivor-avatar-symbol" aria-hidden="true">🥷</span>
@@ -479,18 +500,21 @@
         <div class="pixel-heading">📦 RÉSERVE DE STOCKAGE</div>
         <div id="baseStorage" class="base-feature-content"></div>
       </div>
+      <div class="pixel-frame page-panel base-panel" id="advancedMedicalPanel">
+        <div class="pixel-heading">✚ INFIRMERIE ÉLECTRIQUE</div><div id="advancedMedical"></div>
+      </div>
       <div class="pixel-frame page-panel base-panel" id="baseRadioPanel">
         <div class="pixel-heading">📻 STATION RADIO</div>
         <div id="baseRadio" class="base-feature-content"></div>
       </div>
       <div class="pixel-frame page-panel base-panel">
         <div class="pixel-heading">PRODUCTION & ÉLECTRICITÉ</div>
-        <p class="base-section-hint">Les productions se récupèrent une fois par jour, et les objets vont dans ton inventaire.</p>
+        <p class="base-section-hint">Les productions se récupèrent une fois par jour. Les équipements électriques demandent du carburant et une puissance suffisante.</p>
         <div id="baseProduction" class="item-list"></div>
       </div>
       <div class="pixel-frame page-panel base-panel">
         <div class="pixel-heading">ATELIER D'ARMES</div>
-        <p class="base-section-hint">Construis l’atelier pour débloquer des armes de jeu. Chaque utilisation les use ; répare-les avec des matériaux.</p>
+        <p class="base-section-hint">⚡ L’atelier nécessite le générateur en marche et son alimentation activée. Sans courant, la fabrication et les réparations sont bloquées.</p>
         <div id="baseWeapons" class="item-list"></div>
       </div>
       <p class="help-text base-privacy">⌂ Refuge virtuel privé. Les améliorations et équipements sont sauvegardés sur cet appareil.</p>
@@ -765,6 +789,27 @@ const DEAD_EARTH_ICONS = Object.freeze({
         if(m.kind==='home'||m.selected){ctx.font='bold 10px monospace';ctx.fillStyle='#151b1c';const label=(m.label||'').slice(0,18);ctx.fillRect(px-label.length*3.2-4,py+19,label.length*6.4+8,14);ctx.fillStyle='#fff0d0';ctx.fillText(label,px,py+26)}
       }
       ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#2e2e2a';ctx.globalAlpha=.7;ctx.font='9px monospace';ctx.fillText(this.tileTemplate?'DÉTAILS EN CHARGEMENT...':'CARTE EN MODE TERRAIN',9,14);ctx.globalAlpha=1;
+      // Même cycle jour/nuit que le repos. Un seul voile sur le Canvas = rendu rapide.
+      const vision=window.DEAD_EARTH_NIGHT_VIEW?.();
+      if(vision?.night){
+        ctx.save();ctx.fillStyle='rgba(5,10,22,.70)';ctx.beginPath();ctx.rect(0,0,W,H);
+        if(vision.light && Array.isArray(vision.home)){
+          const p=this.position(vision.home[0],vision.home[1]);
+          const edge=this.position(vision.home[0]+300/111195,vision.home[1]);
+          const r=Math.abs(p.y-edge.y);
+          if(r>0){ctx.moveTo(p.x+r,p.y);ctx.arc(p.x,p.y,r,0,Math.PI*2,true)}
+        }
+        ctx.fill('evenodd');
+        if(vision.light && Array.isArray(vision.home)){
+          const p=this.position(vision.home[0],vision.home[1]);
+          const edge=this.position(vision.home[0]+300/111195,vision.home[1]);
+          const r=Math.abs(p.y-edge.y);
+          ctx.fillStyle='rgba(16,22,33,.16)';ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
+          ctx.strokeStyle='rgba(246,209,122,.65)';ctx.lineWidth=2;ctx.stroke();
+        }
+        ctx.restore();
+      }
+      
     }
     drawZone(points,fill,stroke,alpha,open=false){const ctx=this.ctx;ctx.beginPath();points.forEach((p,i)=>{const t=this.position(p[0],p[1]);if(i===0)ctx.moveTo(t.x,t.y);else ctx.lineTo(t.x,t.y)});ctx.closePath();ctx.globalAlpha=alpha;ctx.fillStyle=fill;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=3;ctx.strokeStyle=stroke;ctx.stroke();if(open)for(const p of points){const t=this.position(p[0],p[1]);ctx.fillStyle='#ffe6ad';ctx.beginPath();ctx.arc(t.x,t.y,4,0,7);ctx.fill()}}
     destroy(){this.destroyed=true;clearInterval(this.animation);this.ro?.disconnect();window.removeEventListener('resize',this.resize)}
@@ -816,7 +861,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const RECIPES = [
     {id:'bandage',name:'Bandage',cost:{cloth:2},gain:{bandage:1},desc:'Soigne 30 points de vie.'},
     {id:'medkit',name:'Trousse de secours',cost:{cloth:3,bandage:2,parts:1},gain:{medkit:1},desc:'Soigne 70 points de vie.'},
-    {id:'ammo',name:'Munitions de fortune',cost:{metal:2,parts:1},gain:{ammo:4},desc:'Équipement fictif pour les combats.'}
+    {id:'ammo',name:'Munitions de fortune',cost:{metal:2,parts:1},gain:{ammo:4},requiresWorkshop:true,desc:'Fabriquées à l’atelier alimenté en électricité.'}
   ];
   // Progression indépendante des objets construits : une amélioration = un niveau supplémentaire.
   const BASE_TIERS = [
@@ -826,23 +871,33 @@ const DEAD_EARTH_ICONS = Object.freeze({
     {name:'Bunker de fortune',max:135,desc:'Acier et béton récupérés. Les hordes font moins de dégâts.',cost:{wood:10,metal:8,parts:5}},
     {name:'Forteresse survivante',max:180,desc:'Un poste de survie blindé, fait pour tenir longtemps.',cost:{wood:12,metal:11,parts:7}}
   ];
-  // Générateur : 8 unités max, 1 unité pour 2 heures de marche réelle.
-  // Les durées avancent avec l'horloge même si la page est fermée, uniquement tant que le moteur est en marche.
+  // Générateur : 8 unités max, consommation variable selon les circuits et usure mécanique.
+  // La consommation avance avec l'horloge même si la page est fermée, uniquement tant que le moteur est en marche.
   const GENERATOR_TANK_CAPACITY=8;
   const GENERATOR_FUEL_UNITS_PER_HOUR=0.5;
-  const GENERATOR_MS_PER_UNIT=3600000/GENERATOR_FUEL_UNITS_PER_HOUR;
+  // Réseau électrique : puissance arbitraire du jeu (kW virtuels), pas des valeurs électriques réelles.
+  // Niveau de générateur 1 à 5 : 3 à 7 kW ; veille 0,5 unité/h + 0,12 unité/h par kW utilisé.
+  const ELECTRIC_CONSUMERS=[
+    {id:'lighting',label:'💡 Éclairage extérieur',draw:1,requirements:()=>true,desc:'Éclaire un rayon de 300 m autour du refuge la nuit (ne repousse pas les zombies).'},
+    {id:'workbench',label:'⚒ Atelier d’armes',draw:2,requirements:()=>buildingLevel('workbench')>=1,desc:'Fabrication et réparation, outils électriques à partir du niveau 3.'},
+    {id:'radio',label:'📻 Station radio',draw:1,requirements:()=>buildingLevel('radio')>=1,desc:'Transmissions, missions, événements et récompenses.'},
+    {id:'infirmary',label:'✚ Infirmerie avancée',draw:2,requirements:()=>buildingLevel('infirmary')>=2,desc:'Soins accélérés dès le niveau 2 ; bandages simples utilisables sans courant.'},
+    {id:'defense',label:'🛡 Défenses électriques',draw:1,requirements:()=>Boolean(game.safeZone),desc:'Renforce les défenses lors des attaques de hordes.'}
+  ];
+  const ELECTRIC_DEFAULTS={lighting:true,workbench:true,radio:false,infirmary:false,defense:false};
+  const GENERATOR_WEAR_PER_HOUR=.6;
   // Niveaux 1–5 pour toutes les installations, avec un véritable effet par niveau.
   // Les anciens booléens buildings et workbenchLevel sont conservés pour les sauvegardes V2.0.
   const MAX_BUILDING_LEVEL = 5;
   const BASE_BUILDINGS = [
     {id:'collector',icon:'◉',name:'Récupérateur d’eau',minLevel:1,cost:{wood:3,cloth:2,parts:1},desc:'Produit 2 eaux potables virtuelles par jour.'},
-    {id:'workbench',icon:'⚒',name:'Atelier d’armes',minLevel:1,cost:{wood:3,metal:2,parts:2},desc:'Fabrication et réparation d’armes équipables.'},
+    {id:'workbench',icon:'⚒',name:'Atelier d’armes',minLevel:1,cost:{wood:3,metal:2,parts:2},desc:'Nécessite le courant pour fabriquer ou réparer ; outils avancés au niveau 3.'},
     {id:'garden',icon:'♣',name:'Potager',minLevel:2,cost:{wood:4,cloth:2,water:1},desc:'Produit 1 ration par jour.'},
-    {id:'generator',icon:'ϟ',name:'Générateur',minLevel:2,cost:{metal:4,parts:3},desc:'Réservoir 8 unités · 1 unité consommée toutes les 2 h en marche · arrêt manuel.'},
-    {id:'infirmary',icon:'✚',name:'Coin médical',minLevel:3,cost:{cloth:4,bandage:2,parts:2},desc:'Soigne +15 PV au repos au niveau 1, puis +5 PV par niveau.'},
+    {id:'generator',icon:'ϟ',name:'Générateur',minLevel:2,cost:{metal:4,parts:3},desc:'Réservoir 8 unités · puissance limitée · consommation d’essence et usure selon les équipements activés.'},
+    {id:'infirmary',icon:'✚',name:'Coin médical',minLevel:3,cost:{cloth:4,bandage:2,parts:2},desc:'Soins simples sans courant au niveau 1 ; soins accélérés alimentés dès le niveau 2.'},
     {id:'watchtower',icon:'🔭',name:'Tour de guet',minLevel:1,cost:{wood:5,metal:3,parts:2},desc:'Détecte les infectés autour du refuge et signale les groupes en approche.'},
     {id:'storage',icon:'📦',name:'Réserve de stockage',minLevel:1,cost:{wood:4,metal:2,cloth:2,parts:2},desc:'Stocke les ressources séparément du sac, 50 kg par niveau.'},
-    {id:'radio',icon:'📻',name:'Station radio',minLevel:2,cost:{metal:4,parts:3,cloth:2},desc:'Transmissions quotidiennes, missions de secours et signaux mystérieux.'}
+    {id:'radio',icon:'📻',name:'Station radio',minLevel:2,cost:{metal:4,parts:3,cloth:2},desc:'Nécessite 1 kW du générateur pour recevoir les missions et messages.'}
   ];
   const RADIO_MESSAGES = [
     {id:'sos',title:'APPEL DE DÉTRESSE',subtitle:'Un groupe de survivants réclame du ravitaillement.',kind:'search',target:2,reward:{bandage:2,food:1},xp:45},
@@ -855,7 +910,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const BASE_WEAPONS = [
     {id:'knife',name:'Couteau usé',type:'melee',bonus:2,icon:'╱',basic:true},
     {id:'axe',name:'Hache de récupération',type:'melee',bonus:9,icon:'⚒',cost:{wood:2,metal:3,parts:1},workbench:1},
-    {id:'rifle',name:'Carabine rafistolée',type:'ranged',bonus:13,icon:'⌁',cost:{metal:4,parts:4,wood:1},workbench:2,power:true}
+    {id:'rifle',name:'Carabine rafistolée',type:'ranged',bonus:13,icon:'⌁',cost:{metal:4,parts:4,wood:1},workbench:3,power:true}
   ];
   const ZOMBIES = [
     {name:'Rôdeur',hp:30,damage:[5,13],xp:18},
@@ -881,7 +936,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     dailyRemote:{day:'',used:0},safeZone:null,homeConfirmed:false,territory:null,protectedZones:[],micEnabled:false,lastMicLevel:null,
     buildings:{collector:false,workbench:false,garden:false,generator:false,infirmary:false,watchtower:false,storage:false,radio:false},
     buildingLevels:{collector:0,workbench:0,garden:0,generator:0,infirmary:0,watchtower:0,storage:0,radio:0},
-    storageInventory:{},radioOps:{day:'',entries:[]},radioEvent:{day:'',resolved:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',generatorState:{running:false,fuel:0,updatedAt:Date.now()},
+    storageInventory:{},radioOps:{day:'',entries:[]},radioEvent:{day:'',resolved:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',generatorState:{running:false,fuel:0,condition:100,updatedAt:Date.now()},electricSwitches:{...ELECTRIC_DEFAULTS},
     weapons:{knife:{owned:true,durability:100},axe:{owned:false,durability:0},rifle:{owned:false,durability:0}},equippedWeapon:'knife',
     craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},
     inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0},
@@ -937,8 +992,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
         generatorState:obj.generatorState&&typeof obj.generatorState==='object'?{
           running:!!obj.generatorState.running,
           fuel:clamp(Number(obj.generatorState.fuel)||0,0,GENERATOR_TANK_CAPACITY),
-          updatedAt:Number.isFinite(Number(obj.generatorState.updatedAt))?Number(obj.generatorState.updatedAt):Date.now()
-        }:{running:false,fuel:0,updatedAt:Date.now()},
+          updatedAt:Number.isFinite(Number(obj.generatorState.updatedAt))?Number(obj.generatorState.updatedAt):Date.now(),
+          condition:clamp(Number(obj.generatorState.condition??100),0,100)
+        }:{running:false,fuel:0,condition:100,updatedAt:Date.now()},
+        electricSwitches:{...ELECTRIC_DEFAULTS,...(obj.electricSwitches||{})},
         claimed:Array.isArray(obj.claimed)?obj.claimed:[],cooldowns:obj.cooldowns||{},logs:obj.logs.slice(0,55),
         homeConfirmed:obj.homeConfirmed===true,protectedZones:Array.isArray(obj.protectedZones)?obj.protectedZones.filter(z=>Array.isArray(z.center)&&Number.isFinite(z.center[0])&&Number.isFinite(z.center[1])).map(z=>({id:String(z.id),center:z.center.map(Number),level:clamp(Number(z.level)||1,1,10),createdAt:z.createdAt||Date.now()})):[],dailyRemote:obj.dailyRemote||base.dailyRemote,zombieRespawns:obj.zombieRespawns&&typeof obj.zombieRespawns==='object'?obj.zombieRespawns:{},defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-5000):[],safeZone:obj.safeZone||null,territory:obj.territory&&Array.isArray(obj.territory.center)?{...obj.territory,defeatedIds:Array.isArray(obj.territory.defeatedIds)?obj.territory.defeatedIds:[],expansion:Number(obj.territory.expansion)||0,patrolKills:Number(obj.territory.patrolKills)||0}:null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
         mode:'demo',lat:null,lon:null}; // Coordonnées GPS exactes jamais persistées.
@@ -956,7 +1013,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),name:previous?.name||'Mon village',kind:previous?.kind||'village',center:[...home],radius,spatialCampaign:true};
     }
   }else game.territory=null;
-  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY});
+  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
@@ -1705,12 +1762,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(!level)return 'Non construite';
     return ({
       collector:()=>`${2*level} eaux / jour`,garden:()=>`${level} ration${level>1?'s':''} / jour`,
-      workbench:()=>level===1?'Fabrique la hache · réparation +45':`Carabine débloquée · réparation +${Math.min(85,45+10*(level-1))}`,
-      generator:()=>`Réservoir ${GENERATOR_TANK_CAPACITY} unités · ${powered()?'en marche':'éteint'} · défense +${20+(level-1)*10} si en marche`,
-      infirmary:()=>`+${15+(level-1)*5} PV par repos`,
+      workbench:()=>`⚡ ${isConsumerPowered('workbench')?'Alimenté':'Hors service'} · ${level>=3?'outils électriques avancés':'outils de base'} · réparation +${Math.min(85,45+10*(level-1))}`,
+      generator:()=>`Puissance ${electricCapacity()} kW · ${powered()?'en marche':'éteint'} · ${isConsumerPowered('defense')?'défenses électriques actives':'défenses électriques inactives'}`,
+      infirmary:()=>`+15 PV au repos · ${level>=2?(isConsumerPowered('infirmary')?'soins électriques actifs':'soins avancés sans courant'):'soins simples'}`,
       watchtower:()=>`Détection à ${150+(level-1)*125} m autour du refuge`,
       storage:()=>`Réserve : ${level*50} kg hors du sac`,
-      radio:()=>`${level>=5?3:level>=3?2:1} transmission(s) quotidienne(s)`
+      radio:()=>`${level>=5?3:level>=3?2:1} transmission(s) · ${isConsumerPowered('radio')?'alimentée':'hors tension'}`
     }[id]?.()||'Prête');
   }
   function takeLoot(items){
@@ -2282,36 +2339,84 @@ const DEAD_EARTH_ICONS = Object.freeze({
     game.energy=clamp(game.energy+cycle.gain);
     game.noise=clamp(game.noise-20);game.threat=clamp(game.threat-8);
     game.food=clamp(game.food-4);game.water=clamp(game.water-4);
-    if(buildingLevel('infirmary'))game.hp=clamp(game.hp+15+5*(buildingLevel('infirmary')-1));
-    commit(`${cycle.isDay?'☀ Repos de jour':'☾ Repos de nuit'} (${cycle.clock}) : +${recovered} endurance${buildingLevel('infirmary')?' · +'+(15+5*(buildingLevel('infirmary')-1))+' santé':''}.`);
+    if(buildingLevel('infirmary'))game.hp=clamp(game.hp+15+(isConsumerPowered('infirmary')?5*(buildingLevel('infirmary')-1):0));
+    commit(`${cycle.isDay?'☀ Repos de jour':'☾ Repos de nuit'} (${cycle.clock}) : +${recovered} endurance${buildingLevel('infirmary')?' · soins infirmiers '+(isConsumerPowered('infirmary')?'électriques':'manuels'):''}.`);
   }
   function costText(cost){return Object.entries(cost).map(([id,num])=>`${num} ${ITEMS[id].label}`).join(' · ')}
   function maxFort(){return BASE_TIERS[clamp(game.baseLevel,1,5)-1].max}
+  function electricCapacity(){return buildingLevel('generator')?2+buildingLevel('generator'):0}
+  function electricLoad(){
+    if(!hasBuilding('generator'))return 0;
+    return ELECTRIC_CONSUMERS.reduce((sum,c)=>sum+(game.electricSwitches?.[c.id]&&c.requirements()?c.draw:0),0);
+  }
+  function fuelRate(){return GENERATOR_FUEL_UNITS_PER_HOUR+0.12*electricLoad()}
+  // Mise à jour par temps réellement écoulé. Toujours appeler avant de changer les interrupteurs.
+  // La consommation d'énergie et l'usure s'arrêtent au moment précis de la panne sèche/casse.
   function advanceGenerator(now=Date.now()){
     const g=game.generatorState;
     if(!g || !Number.isFinite(now))return false;
     const last=Number.isFinite(g.updatedAt)?Math.min(g.updatedAt,now):now;
     g.updatedAt=now;
-    if(!g.running)return false; // Éteint : aucune consommation, même hors ligne.
-    if(!game.buildings.generator || !(g.fuel>0)){
-      g.fuel=0;g.running=false;return true;
+    if(!g.running)return false;
+    if(!game.buildings.generator||!(g.fuel>0)||!(g.condition>0)){
+      g.fuel=Math.max(0,g.fuel);g.running=false;return true;
     }
     const elapsed=Math.max(0,now-last);
-    if(elapsed===0)return false;
-    g.fuel=Math.max(0,g.fuel-elapsed/GENERATOR_MS_PER_UNIT);
-    if(g.fuel<0.000001){
-      g.fuel=0;g.running=false;
-      log('⚡ Générateur arrêté automatiquement : réservoir vide.');
+    if(!elapsed)return false;
+    const secondsUntilDry=g.fuel/(fuelRate()/3600000);
+    const secondsUntilBreak=g.condition/(GENERATOR_WEAR_PER_HOUR/3600000);
+    const actual=Math.min(elapsed,secondsUntilDry,secondsUntilBreak);
+    g.fuel=Math.max(0,g.fuel-actual*fuelRate()/3600000);
+    g.condition=Math.max(0,g.condition-actual*GENERATOR_WEAR_PER_HOUR/3600000);
+    if(g.fuel<0.000001||g.condition<0.000001){
+      const dry=g.fuel<0.000001;
+      g.fuel=Math.max(0,g.fuel);g.condition=Math.max(0,g.condition);g.running=false;
+      log(dry?'⛽ Panne sèche : tous les appareils sont hors tension.':'⚠ Générateur en panne : les installations électriques sont coupées.');
       return true;
     }
     return false;
   }
-  function powered(){advanceGenerator();return Boolean(game.buildings.generator&&game.generatorState.running&&game.generatorState.fuel>0)}
+  function powered(){advanceGenerator();return Boolean(game.buildings.generator&&game.generatorState.running&&game.generatorState.fuel>0&&game.generatorState.condition>0)}
+  function isConsumerPowered(id){
+    const consumer=ELECTRIC_CONSUMERS.find(c=>c.id===id);
+    return Boolean(consumer&&game.electricSwitches?.[id]&&consumer.requirements()&&electricLoad()<=electricCapacity()&&powered());
+  }
   function generatorRuntimeText(){
-    const minutes=Math.floor(game.generatorState.fuel*GENERATOR_MS_PER_UNIT/60000);
+    const minutes=Math.max(0,Math.floor(game.generatorState.fuel/fuelRate()*60));
     if(minutes<60)return minutes+' min';
     return Math.floor(minutes/60)+' h '+String(minutes%60).padStart(2,'0')+' min';
   }
+  function switchElectric(id){
+    const consumer=ELECTRIC_CONSUMERS.find(c=>c.id===id);
+    if(!consumer||!hasBuilding('generator')||!consumer.requirements())return toast('Construis les installations nécessaires.');
+    advanceGenerator();
+    const next=!game.electricSwitches[id];
+    if(next&&electricLoad()+consumer.draw>electricCapacity())return toast('Puissance insuffisante : coupe un autre appareil ou améliore le générateur.');
+    game.electricSwitches[id]=next;
+    map?.queueDraw();
+    commit(`${consumer.label} : ${next?'circuit activé':'circuit coupé'}.`);
+  }
+  function repairGenerator(){
+    if(!hasBuilding('generator'))return toast('Construis le générateur.');
+    advanceGenerator();
+    if(game.generatorState.running)return toast('Arrête le générateur avant de le réparer.');
+    if(game.generatorState.condition>=100)return toast('Générateur déjà en parfait état.');
+    const cost={metal:2,parts:2};
+    if(!canPayBase(cost))return toast('Réparation : 2 ferrailles et 2 pièces nécessaires.');
+    payBase(cost);game.generatorState.condition=clamp(game.generatorState.condition+45);
+    commit('🔧 Générateur réparé : état '+Math.round(game.generatorState.condition)+' %.');
+  }
+  function advancedMedicalCare(){
+    if(!isConsumerPowered('infirmary'))return toast('L’infirmerie niveau 2+ doit être alimentée.');
+    if(game.hp>=100)return toast('Santé déjà maximale.');
+    const cost={bandage:1,water:1};
+    if(!canPayBase(cost))return toast('Soins électriques : 1 bandage et 1 eau nécessaires.');
+    payBase(cost);game.hp=clamp(game.hp+40+5*(buildingLevel('infirmary')-2));xpGain(8);
+    commit('✚ Soins électriques avancés effectués.');
+  }
+  // Définition consultée par la carte Canvas sans transférer de données GPS exactes.
+  window.DEAD_EARTH_NIGHT_VIEW=()=>({night:!realRestCycle().isDay,
+    light:isConsumerPowered('lighting')&&Boolean(game.safeZone?.center),home:game.safeZone?.center||null});
   function hasBuilding(id){return Boolean(game.buildings[id])}
   function buildStructure(id){
     if(!game.safeZone)return toast('Installe d’abord ton refuge avant les constructions.');
@@ -2365,9 +2470,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
     advanceGenerator();
     const g=game.generatorState;
     if(running && g.fuel<=0)return toast('Réservoir vide : ajoute de l’essence. Fouille une station-service !');
+    if(running && g.condition<=0)return toast('Générateur en panne : répare-le avant de redémarrer.');
+    if(running && electricLoad()>electricCapacity())return toast('Trop d’appareils demandent du courant : coupe un circuit.');
     if(g.running===running)return;
     g.running=running;g.updatedAt=Date.now();
-    commit(running?'⚡ Générateur démarré : le carburant diminue tant que le moteur tourne.':'⏹ Générateur arrêté : le carburant est conservé.');
+    commit(running?'⚡ Générateur démarré : équipements alimentés selon les interrupteurs.':'⏹ Générateur arrêté : toutes les installations électriques s’arrêtent et le carburant est conservé.');
+    map?.queueDraw();
   }
   function refuelGenerator(amount){
     if(!hasBuilding('generator'))return toast('Construis d’abord le générateur.');
@@ -2387,6 +2495,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function makeWeapon(id){
     const w=BASE_WEAPONS.find(x=>x.id===id);
     if(!w||w.basic||!hasBuilding('workbench')||game.weapons[id]?.owned)return;
+    if(!isConsumerPowered('workbench'))return toast('Atelier hors tension : démarre le générateur et active son circuit.');
     if(game.workbenchLevel<w.workbench)return toast('Améliore ton atelier pour cette arme.');
     if(w.power&&!powered())return toast('Active le générateur pour fabriquer cette arme.');
     if(!canPayBase(w.cost))return toast('Pas assez de ressources pour cette arme.');
@@ -2400,6 +2509,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   function repairWeapon(id){
     if(!hasBuilding('workbench')||!game.weapons[id]?.owned)return;
+    if(!isConsumerPowered('workbench'))return toast('Atelier hors tension : réparation impossible.');
     if(game.weapons[id].durability>=100)return toast('Cette arme est déjà en bon état.');
     const cost=id==='rifle'?{metal:2,parts:2}:{metal:1,parts:1};
     if(!canPayBase(cost))return toast('Ressources insuffisantes pour réparer cette arme.');
@@ -2494,12 +2604,14 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   function setRadioState(entries){game.radioOps={day:localDay(),entries:entries.map(e=>({id:e.id,accepted:e.accepted,claimed:e.claimed,baseline:e.baseline}))};}
   function acceptRadio(id){
+    if(!isConsumerPowered('radio'))return toast('Allume le générateur et alimente la station radio.');
     const list=todayRadioEntries(),entry=list.find(e=>e.id===id);
     if(!entry||entry.accepted||entry.claimed)return;
     entry.accepted=true;entry.baseline=radioProgress(entry.signal.kind);
     setRadioState(list);commit(`📻 Mission radio acceptée : ${entry.signal.title}.`);
   }
   function claimRadio(id){
+    if(!isConsumerPowered('radio'))return toast('La station radio doit être alimentée pour réclamer la récompense.');
     const list=todayRadioEntries(),entry=list.find(e=>e.id===id);
     if(!entry||!entry.accepted||entry.claimed)return;
     const done=radioProgress(entry.signal.kind)-entry.baseline;
@@ -2510,7 +2622,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     commit(`📻 ${entry.signal.title} : mission terminée, +${entry.signal.xp} XP et récompenses.`);
   }
   function resolveRadioEvent(){
-    if(buildingLevel('radio')<4)return;
+    if(buildingLevel('radio')<4||!isConsumerPowered('radio'))return toast('Station radio hors tension.');
     if(game.radioEvent?.day===localDay()&&game.radioEvent?.resolved)return;
     // Événement fictionnel quotidien, sans obligation de déplacement.
     const n=[...localDay()].reduce((a,c)=>a+c.charCodeAt(0),0)%3;
@@ -2528,9 +2640,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const node=$('baseRadio'),level=buildingLevel('radio');
     if(!level){node.innerHTML='<p>Construis la station radio pour capter des transmissions quotidiennes et débloquer des objectifs de secours, des signaux mystérieux et des récompenses.</p>';return;}
     const entries=todayRadioEntries();
+    const radioOn=isConsumerPowered('radio');
     const eventReady=level>=4&&!(game.radioEvent?.day===localDay()&&game.radioEvent?.resolved);
-    node.innerHTML=`<p><strong>📡 NIV. ${level}/5</strong> · ${entries.length} fréquence(s) du jour · missions renouvelées à minuit (heure locale).</p>
-      ${level>=4?`<div class="radio-message"><strong>⚡ ÉVÉNEMENT RADIO QUOTIDIEN</strong><p>${eventReady?'Un signal inhabituel peut modifier la menace locale.':'Signal du jour déjà décodé.'}</p><button class="pixel-button" id="radioEventBtn" ${eventReady?'':'disabled'}>${eventReady?'DÉCODER LE SIGNAL':'DÉJÀ DÉCODÉ'}</button></div>`:''}
+    node.innerHTML=`<p><strong>📡 NIV. ${level}/5 · ${radioOn?'🟢 ALIMENTÉE':'🔴 HORS TENSION'}</strong> · ${entries.length} fréquence(s) du jour · missions renouvelées à minuit (heure locale).</p>
+      ${level>=4?`<div class="radio-message"><strong>⚡ ÉVÉNEMENT RADIO QUOTIDIEN</strong><p>${eventReady?'Un signal inhabituel peut modifier la menace locale.':'Signal du jour déjà décodé.'}</p><button class="pixel-button" id="radioEventBtn" ${eventReady&&radioOn?'':'disabled'}>${eventReady?'DÉCODER LE SIGNAL':'DÉJÀ DÉCODÉ'}</button></div>`:''}
+      ${!radioOn?'<p class="electric-alert">⚡ Pas de courant : démarre le générateur, active la radio et libère 1 kW de puissance.</p>':''}
       ${entries.map(e=>{
         const s=e.signal,progress=e.accepted?Math.min(s.target,Math.max(0,radioProgress(s.kind)-e.baseline)):0;
         const missing=Object.entries(s.reward).map(([id,n])=>`${n} ${ITEMS[id].label}`).join(', ');
@@ -2538,13 +2652,36 @@ const DEAD_EARTH_ICONS = Object.freeze({
         return `<div class="radio-message"><strong>${safe(s.title)}</strong><p>${safe(s.subtitle)}</p>
           <small>${s.kind==='kills'?'Éliminations':'Fouilles'} : ${progress}/${s.target}</small><div class="progress"><div style="width:${100*progress/s.target}%"></div></div>
           <small>Récompense : ${safe(missing)} · ${s.xp} XP</small><br>
-          <button type="button" class="pixel-button" data-radio="${e.id}" ${e.claimed||(e.accepted&&progress<s.target)?'disabled':''}>${action}</button></div>`;
+          <button type="button" class="pixel-button" data-radio="${e.id}" ${!radioOn||e.claimed||(e.accepted&&progress<s.target)?'disabled':''}>${action}</button></div>`;
       }).join('')}`;
     $('radioEventBtn')?.addEventListener('click',resolveRadioEvent);
     node.querySelectorAll('[data-radio]').forEach(btn=>btn.addEventListener('click',()=>{
       const entry=todayRadioEntries().find(e=>e.id===btn.dataset.radio);
       if(entry?.accepted)claimRadio(entry.id);else acceptRadio(btn.dataset.radio);
     }));
+  }
+  function renderElectricPanel(){
+    const box=$('electricPanel');if(!box)return;
+    const on=powered(),load=electricLoad(),cap=electricCapacity();
+    box.innerHTML=`<div class="pixel-heading" style="margin-top:14px">⚡ TABLEAU ÉLECTRIQUE</div>
+      <div class="electric-status" id="electricStatus">${on?'🟢 COURANT DISPONIBLE':'🔴 GÉNÉRATEUR ÉTEINT'} · ${load}/${cap} kW sélectionnés</div>
+      <div class="electric-meter" role="progressbar" aria-label="Puissance électrique utilisée" aria-valuemin="0" aria-valuemax="${cap||1}" aria-valuenow="${load}"><i style="width:${cap?100*load/cap:0}%"></i></div>
+      <p class="help-text">La puissance augmente avec le niveau du générateur. Coupe certains circuits si tu veux en activer d’autres.</p>
+      <div class="electric-grid">${ELECTRIC_CONSUMERS.map(c=>{
+        const exists=c.requirements(),selected=Boolean(game.electricSwitches[c.id]),energized=on&&selected&&exists;
+        const canTurnOn=exists&&!selected&&load+c.draw<=cap;
+        return `<div class="electric-consumer"><div><strong>${c.label}</strong><small>${c.desc}</small><small class="${energized?'state-on':'state-off'}">${!exists?'🔒 Installation indisponible':energized?'● SOUS TENSION':selected?'○ EN ATTENTE DE COURANT':'○ CIRCUIT COUPÉ'} · ${c.draw} kW</small></div>
+          <button class="pixel-button" type="button" data-circuit="${c.id}" ${!exists||(!selected&&!canTurnOn)?'disabled':''}>${selected?'COUPER':'ACTIVER'}</button></div>`;
+      }).join('')}</div>
+      <p class="electric-alert" id="electricHint">${load>cap?'⚠ Surcharge : désactive un circuit.':on?'✅ Réseau opérationnel.':'⚠ Démarre le générateur pour alimenter les équipements.'}</p>`;
+    box.querySelectorAll('[data-circuit]').forEach(btn=>btn.addEventListener('click',()=>switchElectric(btn.dataset.circuit)));
+  }
+  function updateElectricLive(){
+    const el=$('electricStatus');if(!el)return;
+    const on=powered(),load=electricLoad(),cap=electricCapacity();
+    el.textContent=`${on?'🟢 COURANT DISPONIBLE':'🔴 GÉNÉRATEUR ÉTEINT'} · ${load}/${cap} kW sélectionnés`;
+    const hint=$('electricHint');if(hint)hint.textContent=on?'✅ Réseau opérationnel.':'⚠ Les équipements électriques sont hors service.';
+    $('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(isConsumerPowered('lighting')?' · 💡 REFUGE ÉCLAIRÉ':'');
   }
   function renderBase(){
     const tier=BASE_TIERS[game.baseLevel-1];
@@ -2584,6 +2721,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
       else buildStructure(btn.dataset.build);
     }));
     renderLookout();renderStorage();renderRadio();
+    const med=$('advancedMedical');
+    if(med){const level=buildingLevel('infirmary');const ready=level>=2&&isConsumerPowered('infirmary');
+      med.innerHTML=`<p class="help-text">${level<2?'Niveau 2 d’infirmerie requis pour les soins électriques.':ready?'⚡ Soins accélérés disponibles.':'🔴 Infirmerie hors tension : niveau 2+ et circuit médical alimenté nécessaires.'} Les bandages ordinaires restent utilisables depuis Perso sans courant.</p>
+      <button id="medicalCareBtn" class="pixel-button" type="button" ${!ready||game.hp>=100||!canPayBase({bandage:1,water:1})?'disabled':''}>⚡ SOINS AVANCÉS +${40+5*Math.max(0,level-2)} PV · 1 bandage + 1 eau</button>`;
+      $('medicalCareBtn').addEventListener('click',advancedMedicalCare);
+    }
 
     const collectorReady=hasBuilding('collector')&&game.productionDays.collector!==localDay(),gardenReady=hasBuilding('garden')&&game.productionDays.garden!==localDay();
     $('baseProduction').innerHTML=`
@@ -2593,23 +2736,25 @@ const DEAD_EARTH_ICONS = Object.freeze({
         <div class="generator-meter-head"><b id="generatorFuelLabel">⛽ ${game.generatorState.fuel.toFixed(2)} / ${GENERATOR_TANK_CAPACITY} unités</b><span id="generatorFuelPercent">${Math.round(game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100)} %</span></div>
         <div class="generator-meter" role="progressbar" aria-label="Essence du générateur" aria-valuemin="0" aria-valuemax="${GENERATOR_TANK_CAPACITY}" aria-valuenow="${game.generatorState.fuel.toFixed(2)}" id="generatorFuelMeter"><i id="generatorFuelFill" style="width:${game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100}%"></i></div>
         <p class="generator-time" id="generatorTimeLeft">Autonomie si démarré : ${generatorRuntimeText()}</p>
-        <p>Réservoir de ${GENERATOR_TANK_CAPACITY} unités · 1 unité = 2 h de marche. Arrêt = aucune consommation. L’essence se trouve notamment en station-service, puis se verse depuis le sac ou la réserve.</p>
+        <p>Réservoir de ${GENERATOR_TANK_CAPACITY} unités. Consommation à vide : 0,5 unité/h + 0,12 unité/h par kW activé. Éteint : aucune perte. Essence trouvable en station-service.</p>
         <p class="generator-stock">⛽ En stock : <strong id="generatorStock">${quantity('fuel')} dans le sac + ${storageQuantity('fuel')} en réserve</strong></p>
         <div class="generator-buttons"><button class="pixel-button" id="generatorRefuelOne" ${!hasBuilding('generator')||quantity('fuel')+storageQuantity('fuel')<1||game.generatorState.fuel>GENERATOR_TANK_CAPACITY-1?'disabled':''}>⛽ +1 UNITÉ</button>
         <button class="pixel-button" id="generatorRefuelMax" ${!hasBuilding('generator')||quantity('fuel')+storageQuantity('fuel')<1||game.generatorState.fuel>GENERATOR_TANK_CAPACITY-1?'disabled':''}>REMPLIR</button></div>
-        <button class="pixel-button generator-power-btn ${powered()?'generator-on':''}" id="generatorPowerBtn" ${!hasBuilding('generator')||(!powered()&&game.generatorState.fuel<=0)?'disabled':''}>${powered()?'⏹ ARRÊTER LE GÉNÉRATEUR':'▶ DÉMARRER LE GÉNÉRATEUR'}</button>
-        <p class="generator-hint">Effets déjà existants : défense renforcée et fabrication avancée à l’atelier lorsque le générateur est en marche. Nous choisirons les futurs équipements alimentés ensuite.</p></div>`;
+        <button class="pixel-button generator-power-btn ${powered()?'generator-on':''}" id="generatorPowerBtn" ${!hasBuilding('generator')||(!powered()&&(game.generatorState.fuel<=0||game.generatorState.condition<=0))?'disabled':''}>${powered()?'⏹ ARRÊTER LE GÉNÉRATEUR':'▶ DÉMARRER LE GÉNÉRATEUR'}</button>
+        <div id="electricPanel"></div><div class="generator-condition" id="generatorCondition"></div><button id="generatorRepair" class="pixel-button" type="button" ${game.generatorState.running||game.generatorState.condition>=100||!canPayBase({metal:2,parts:2})?'disabled':''}>🔧 RÉPARER · 2 ferrailles + 2 pièces (+45 %)</button><p class="generator-hint">Les circuits peuvent être coupés indépendamment. Une panne sèche ou mécanique coupe immédiatement toutes les installations électriques.</p></div>`;
     $('baseProduction').querySelectorAll('[data-produce]').forEach(btn=>btn.addEventListener('click',()=>collectProduction(btn.dataset.produce)));
     $('generatorRefuelOne').addEventListener('click',()=>refuelGenerator(1));
     $('generatorRefuelMax').addEventListener('click',()=>refuelGenerator(GENERATOR_TANK_CAPACITY));
     $('generatorPowerBtn').addEventListener('click',()=>setGeneratorRunning(!powered()));
+    $('generatorRepair').addEventListener('click',repairGenerator);
+    renderElectricPanel();
     const wb=hasBuilding('workbench');
-    $('baseWeapons').innerHTML=`<div class="base-production-row"><div class="base-production-head"><b>⚒ ATELIER</b><span>NIV. ${game.workbenchLevel} / ${MAX_BUILDING_LEVEL}</span></div><p>${!wb?'Construis un atelier pour fabriquer et réparer.':game.workbenchLevel>=2?`Hache et carabine débloquées · réparations +${Math.min(85,45+10*(game.workbenchLevel-1))} points.`:'La hache est disponible. L’atelier niveau 2 débloque la carabine.'}</p><p>Améliore l’atelier dans « Constructions de survie ».</p></div>`+
+    $('baseWeapons').innerHTML=`<div class="base-production-row"><div class="base-production-head"><b>⚒ ATELIER</b><span>NIV. ${game.workbenchLevel} / ${MAX_BUILDING_LEVEL}</span></div><p>${!wb?'Construis un atelier pour fabriquer et réparer.':game.workbenchLevel>=3?`Hache et carabine débloquées · réparations +${Math.min(85,45+10*(game.workbenchLevel-1))} points.`:'La hache est disponible. L’atelier niveau 3 débloque la carabine.'}</p><p>${isConsumerPowered('workbench')?'⚡ ATELIER ALIMENTÉ':'🔴 ATELIER INACTIF : GÉNÉRATEUR OU CIRCUIT ÉTEINT'} · Améliore l’atelier dans « Constructions de survie ».</p></div>`+
       BASE_WEAPONS.map(w=>{
         const item=game.weapons[w.id]||{owned:false,durability:0},equip=game.loadout[w.type==='melee'?'primary':'secondary']===w.id;
-        const buildable=wb&&!item.owned&&game.workbenchLevel>=w.workbench&&(!w.power||powered())&&canPayBase(w.cost||{});
-        return `<div class="base-weapon-card"><div class="base-weapon-head"><strong>${w.icon} ${safe(w.name)}</strong><span>${item.owned?'DUR. '+item.durability+'%':'À FABRIQUER'}</span></div><p>${w.type==='melee'?'Arme de mêlée':'Arme de tir'} · Bonus dégâts +${w.bonus}${w.power?' · générateur nécessaire pour fabriquer':''}</p>${item.owned?`<div class="base-weapon-bar"><i style="width:${item.durability}%"></i></div>`:''}
-          <div class="base-weapon-actions">${item.owned?`<button data-equip="${w.id}" ${equip?'disabled':''}>${equip?'ÉQUIPÉE':'ÉQUIPER'}</button><button data-repair-weapon="${w.id}" ${!wb||item.durability>=100||!canPayBase(w.id==='rifle'?{metal:2,parts:2}:{metal:1,parts:1})?'disabled':''}>RÉPARER +${Math.min(85,45+10*(buildingLevel('workbench')-1))}</button>`:`<button data-make-weapon="${w.id}" ${buildable?'':'disabled'}>${w.basic?'ARME DE BASE':`FABRIQUER · ${safe(costText(w.cost||{}))}`}</button>`}</div></div>`;
+        const buildable=wb&&isConsumerPowered('workbench')&&!item.owned&&game.workbenchLevel>=(w.workbench||0)&&canPayBase(w.cost||{});
+        return `<div class="base-weapon-card"><div class="base-weapon-head"><strong>${w.icon} ${safe(w.name)}</strong><span>${item.owned?'DUR. '+item.durability+'%':'À FABRIQUER'}</span></div><p>${w.type==='melee'?'Arme de mêlée':'Arme de tir'} · Bonus dégâts +${w.bonus} · ${isConsumerPowered('workbench')?'⚡ courant actif':'🔌 atelier hors tension'}</p>${item.owned?`<div class="base-weapon-bar"><i style="width:${item.durability}%"></i></div>`:''}
+          <div class="base-weapon-actions">${item.owned?`<button data-equip="${w.id}" ${equip?'disabled':''}>${equip?'ÉQUIPÉE':'ÉQUIPER'}</button><button data-repair-weapon="${w.id}" ${!wb||!isConsumerPowered('workbench')||item.durability>=100||!canPayBase(w.id==='rifle'?{metal:2,parts:2}:{metal:1,parts:1})?'disabled':''}>RÉPARER +${Math.min(85,45+10*(buildingLevel('workbench')-1))}</button>`:`<button data-make-weapon="${w.id}" ${buildable?'':'disabled'}>${w.basic?'ARME DE BASE':`FABRIQUER · ${safe(costText(w.cost||{}))}`}</button>`}</div></div>`;
       }).join('');
     $('baseWeapons').querySelectorAll('[data-equip]').forEach(b=>b.addEventListener('click',()=>equipWeapon(b.dataset.equip)));
     $('baseWeapons').querySelectorAll('[data-repair-weapon]').forEach(b=>b.addEventListener('click',()=>repairWeapon(b.dataset.repairWeapon)));
@@ -2632,30 +2777,34 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('generatorStock').textContent=`${quantity('fuel')} dans le sac + ${storageQuantity('fuel')} en réserve`;
     const p=$('generatorPowerBtn');
     p.textContent=on?'⏹ ARRÊTER LE GÉNÉRATEUR':'▶ DÉMARRER LE GÉNÉRATEUR';
-    p.disabled=!game.buildings.generator||(!on&&g.fuel<=0);
+    p.disabled=!game.buildings.generator||(!on&&(g.fuel<=0||g.condition<=0));
     p.classList.toggle('generator-on',on);
+    const cc=$('generatorCondition');if(cc)cc.innerHTML=`État mécanique : <strong>${g.condition.toFixed(1)} %</strong> · débit : <strong>${fuelRate().toFixed(2)} unités/h</strong>`;
+    if($('generatorRepair'))$('generatorRepair').disabled=g.running||g.condition>=100||!canPayBase({metal:2,parts:2});
+    updateElectricLive();
     for(const id of ['generatorRefuelOne','generatorRefuelMax']){
       $(id).disabled=!game.buildings.generator||quantity('fuel')+storageQuantity('fuel')<1||g.fuel>GENERATOR_TANK_CAPACITY-1;
     }
   }
   function defendBase(){
     if(!game.safeZone)return toast('Il faut d’abord libérer le territoire et installer le refuge.');
-    const horde=random(8,20),power=Math.round(game.fort*.60+game.baseLevel*12+(powered()?20+10*(buildingLevel('generator')-1):0)+random(0,30));
+    const horde=random(8,20),power=Math.round(game.fort*.60+game.baseLevel*12+(isConsumerPowered('defense')?20+10*(buildingLevel('generator')-1):0)+random(0,30));
     const damage=clamp(Math.round(horde*2.5-power*.24),3,55);
     game.fort=clamp(game.fort-damage,0,maxFort());game.threat=clamp(game.threat+8);game.energy=clamp(game.energy-12);
     const success=game.fort>0;xpGain(success?35:12);
     commit(`Horde de ${horde} infectés : barricades -${damage}, ${success?'refuge défendu !':'défenses détruites !'}`);
-    modal({tag:'RAPPORT DE DÉFENSE',title:success?'REFUGE DÉFENDU':'BARRICADES ROMPUES',text:`${horde} infectés ont attaqué ton refuge virtuel. Résistance restante : ${game.fort}/${maxFort()}${powered()?' · générateur actif':''}. Test lancé uniquement sur demande.`,actions:[{name:'CONTINUER',fn:closeModal}]});
+    modal({tag:'RAPPORT DE DÉFENSE',title:success?'REFUGE DÉFENDU':'BARRICADES ROMPUES',text:`${horde} infectés ont attaqué ton refuge virtuel. Résistance restante : ${game.fort}/${maxFort()}${isConsumerPowered('defense')?' · défenses électriques actives':''}. Test lancé uniquement sur demande.`,actions:[{name:'CONTINUER',fn:closeModal}]});
   }
   function renderInventory(){
     $('capacityText').textContent=`${inventoryWeight().toFixed(1)} / ${bagCapacity()} KG`;
     $('capacityBar').style.width=`${Math.min(100,inventoryWeight()/bagCapacity()*100)}%`;
     $('inventoryGrid').innerHTML=Object.entries(ITEMS).map(([id,item])=>`<div class="item-card ${quantity(id)===0?'empty':''}"><div class="item-symbol"><span class="item-emoji" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span></div><b>${safe(item.label)}</b><small>× ${quantity(id)} · ${item.weight} kg/u.</small></div>`).join('');
-    $('craftList').innerHTML=RECIPES.map(r=>`<div class="upgrade-card"><div><strong>${safe(r.name)}</strong><p>${safe(r.desc)}</p><p>${safe(costText(r.cost))}</p></div><button class="btn outlined" data-craft="${r.id}" ${canPay(r.cost)&&inventoryWeight()-Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)+Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)<=bagCapacity()?'':'disabled'}>FABRIQUER</button></div>`).join('');
+    $('craftList').innerHTML=RECIPES.map(r=>`<div class="upgrade-card"><div><strong>${safe(r.name)}</strong><p>${safe(r.desc)}</p><p>${safe(costText(r.cost))}</p></div><button class="btn outlined" data-craft="${r.id}" ${(!r.requiresWorkshop||isConsumerPowered('workbench'))&&canPay(r.cost)&&inventoryWeight()-Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)+Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)<=bagCapacity()?'':'disabled'}>FABRIQUER</button></div>`).join('');
     $('craftList').insertAdjacentHTML('beforeend',`<div class="pixel-heading gear-craft-card">◈ ÉQUIPEMENT À PORTER</div>`+GEAR_CRAFTS.map(g=>`<div class="upgrade-card gear-craft-card"><div><strong>${g.icon} ${safe(g.name)}</strong><p>${safe(g.desc)}</p><p class="gear-craft-cost">${safe(costText(g.cost))}</p></div><button type="button" class="pixel-button" data-craft-gear="${g.id}" ${game.craftedGear[g.id]||!canPay(g.cost)?'disabled':''}>${game.craftedGear[g.id]?'DÉJÀ FABRIQUÉ':'FABRIQUER'}</button></div>`).join(''));
     $('craftList').querySelectorAll('[data-craft-gear]').forEach(el=>el.addEventListener('click',()=>craftEquipment(el.dataset.craftGear)));
     $('craftList').querySelectorAll('[data-craft]').forEach(el=>el.addEventListener('click',()=>{
       const r=RECIPES.find(r=>r.id===el.dataset.craft);if(!r||!canPay(r.cost))return;
+      if(r.requiresWorkshop&&!isConsumerPowered('workbench'))return toast('Munitions : atelier électrique indispensable.');
       // Poids final vérifié avant de consommer les ingrédients.
       const gained=Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0);
       const spent=Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0);
@@ -2675,7 +2824,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }));
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
-  function renderAll(){advanceGenerator();renderHud();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
+  function renderAll(){advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(isConsumerPowered('lighting')?' · 💡 REFUGE ÉCLAIRÉ':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
   function switchTab(tab){window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
@@ -2807,9 +2956,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
     });
     window.addEventListener('pagehide',()=>{advanceGenerator();save();stopDetectionMic();persistZombieMotion(true);});
     // Mettre à jour et sauvegarder le carburant pendant le jeu, sans recharger les autres onglets.
-    setInterval(()=>{if(document.visibilityState==='visible' && game.generatorState.running){const empty=advanceGenerator();save();if(empty)renderAll();else if(currentTab==='base')updateGeneratorPanel();}},15000);
+    setInterval(()=>{if(document.visibilityState==='visible' && game.generatorState.running){const empty=advanceGenerator();save();if(empty){renderAll();map?.queueDraw();}else if(currentTab==='base')updateGeneratorPanel();}},15000);
     // La page peut rester ouverte pendant le changement de date.
-    setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();if(currentTab==='survivor')updateRestCycleUI();}},60000);
+    setInterval(()=>{if(document.visibilityState==='visible'&&!scanBusy){renderHud();renderSafe();if(currentTab==='survivor')updateRestCycleUI();if(currentTab==='base')updateElectricLive();map?.queueDraw();}},60000);
     /* Single-file edition: service worker deliberately not registered. */
     toast('Transmission ouverte. Prêt pour ta première expédition !');
   }

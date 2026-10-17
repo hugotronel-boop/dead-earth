@@ -1,30 +1,38 @@
-# DEAD EARTH — V2.2 LIGHT | Générateur à essence
+# DEAD EARTH — V2.3 LIGHT : réseau électrique
 
-## Installation
-1. Sur ton dépôt GitHub `hugotronel-boop/dead-earth`, remplace uniquement `index.html` par celui de cette archive.
-2. Valide la mise à jour dans GitHub et recharge GitHub Pages.
-3. Va dans Base > Production & Électricité.
+Une version autonome du jeu en un **seul `index.html`**. Elle prolonge DEAD EARTH V2.2 sans remettre les grandes images intégrées.
 
-## Nouveau générateur
-- Le générateur doit être construit au préalable dans Constructions de survie.
-- Réservoir de **8 unités** d'essence virtuelle.
-- **1 unité permet 2 heures de fonctionnement** (8 unités = 16 heures).
-- Remplir avec le carburant du **sac ou de la réserve** (`+1 unité` ou `Remplir`).
-- **Démarrer** : la jauge baisse pendant le fonctionnement.
-- **Arrêter** : la jauge reste figée, même après plusieurs heures.
-- Au réservoir vide, le générateur s'arrête automatiquement.
-- La consommation est enregistrée localement avec le reste de la partie et calculée selon le temps écoulé pendant la fermeture du jeu si le générateur est laissé en marche.
-- Essence disponible notamment en fouillant des stations-service virtuelles référencées sur OpenStreetMap.
-- Les effets déjà présents (défense / fabrication avancée) continuent à exiger un générateur en marche. On décidera ensuite ensemble quels autres équipements sont alimentés.
+## Installer sur GitHub Pages
 
-## Préservation des sauvegardes
-Clé de sauvegarde inchangée : `dead-earth-alpha-v1`. Les anciennes parties sont chargées. Lors de la migration depuis V2.1, le générateur est initialement **éteint et vide**, car le système précédent utilisait une activation quotidienne. Il faut le ravitailler pour le redémarrer.
+1. Dans le dépôt `hugotronel-boop/dead-earth`, remplace **uniquement** `index.html` par le fichier livré.
+2. Valide avec **Commit changes**.
+3. Ouvre `https://hugotronel-boop.github.io/dead-earth/` ; si l’ancienne version s'affiche, recharge la page en ignorant le cache.
 
-## Limites
-Simulation solo basée sur l'horloge du téléphone. Les données sont conservées dans le stockage du navigateur, et ne sont pas anti-triche côté serveur. Ne jamais pénétrer dans un commerce pour jouer : tous les pillages sont virtuels.
+Les autres fichiers du dépôt peuvent rester. Le jeu continue d'utiliser sa sauvegarde `localStorage` de la même origine. Une sauvegarde stockée sur un autre appareil ou navigateur n'est pas transférée automatiquement.
 
-## Vérifications
-- Vérification syntaxique de tous les scripts JS : OK.
-- Test du panneau sur un navigateur mobile simulé : OK.
-- Tests moteur (2 heures allumé, 8 heures arrêté, panne sèche, remplissage depuis sac et réserve, marche/arrêt, réservoir plein) : OK.
-- Le rendu complet sur iPhone et les véritables données GPS restent à vérifier après publication HTTPS.
+## Système électrique
+
+- **Cycle jour/nuit :** avec GPS, calcul solaire approximatif d'après la position ; sinon jour 07:00–20:00 selon l'horloge locale du téléphone.
+- **Éclairage :** la carte s'assombrit la nuit ; un cercle de **300 m de rayon** autour du refuge est plus clair si le générateur ET son circuit d’éclairage fonctionnent. La lumière **ne chasse pas les zombies**.
+- **Générateur :** capacité de carburant **8 unités** ; consommation de base **0,50 unité/heure**, plus **0,12 unité/heure par kW de circuits activés** ; usure mécanique **0,6 point de durabilité/heure** de marche. Aucune essence consommée à l’arrêt.
+- **Panne :** réservoir vide ou état mécanique nul => arrêt automatique, tous les consommateurs électriques hors service. Le moteur peut être réparé **à l'arrêt**, pour 2 ferrailles et 2 pièces, soit +45 points mécaniques.
+- **Puissance du générateur :** de **3 kW virtuels** au niveau 1 à **7 kW virtuels** au niveau 5.
+
+| Circuit | Puissance | Condition | Fonction |
+| --- | ---: | --- | --- |
+| 💡 Éclairage extérieur | 1 kW | Refuge posé | Zone éclairée de 300 m de rayon pendant la nuit |
+| ⚒ Atelier d'armes | 2 kW | Atelier construit | Fabrication/réparation seulement sous tension, outils avancés à l'atelier niveau 3 |
+| 📻 Station radio | 1 kW | Station construite | Missions, transmissions et récompenses seulement si alimentée |
+| ✚ Infirmerie avancée | 2 kW | Infirmerie niveau 2+ | Soins électriques améliorés ; bandages simples possibles sans électricité |
+
+Tous les circuits sont **indépendants**. Si leur demande dépasse la puissance disponible, il faut en couper un ou améliorer le générateur. Les circuits activés restent mémorisés pendant les coupures : ils reprennent seulement lorsque le moteur fournit de nouveau de l'électricité.
+
+Le récupérateur d’eau, le potager, la réserve de stockage et les bandages simples ne nécessitent pas de courant. Les circuits fonctionnent même lorsque tu ne regardes pas la page Base.
+
+## Vérifications réalisées
+
+- Contrôle de syntaxe des trois scripts inclus.
+- Tests automatisés navigateur : arrêt/démarrage, arrêt des armes/radio/soins avancés, puissance maximale, panne sèche après plusieurs heures, usure, pas de consommation à l'arrêt.
+- Test visuel sur une carte centrée sur le refuge, la nuit : zone éclairée quand le circuit est alimenté, obscurcie quand il est coupé.
+
+**À vérifier encore sur iPhone :** localisation et heure de coucher du soleil, rafraîchissement de l'affichage avec le GPS réel et confort des panneaux sur écran réduit.
