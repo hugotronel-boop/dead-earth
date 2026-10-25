@@ -830,7 +830,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
         if(m.kind==='home'||m.selected){ctx.font='bold 10px monospace';ctx.fillStyle='#151b1c';const label=(m.label||'').slice(0,18);ctx.fillRect(px-label.length*3.2-4,py+19,label.length*6.4+8,14);ctx.fillStyle='#fff0d0';ctx.fillText(label,px,py+26)}
       }
       ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#2e2e2a';ctx.globalAlpha=.7;ctx.font='9px monospace';ctx.fillText(this.tileTemplate?'DÉTAILS EN CHARGEMENT...':'CARTE EN MODE TERRAIN',9,14);ctx.globalAlpha=1;
-      // V2.7 : brouillard nocturne progressif, ancré aux coordonnées GPS.
+      // V2.8 : brouillard nocturne progressif, rayons élargis et ancrés aux coordonnées GPS.
       // On dessine un masque séparé pour ne jamais effacer les tuiles ou les marqueurs.
       const vision=window.DEAD_EARTH_NIGHT_VIEW?.();
       if(vision?.night){
@@ -855,15 +855,15 @@ const DEAD_EARTH_ICONS = Object.freeze({
           light.addColorStop(1,'rgba(0,0,0,0)');
           fog.fillStyle=light;fog.fillRect(p.x-r,p.y-r,2*r,2*r);
         };
-        // 300 m autour du refuge, seulement si le circuit d'éclairage est sous tension.
-        if(vision.light)carve(vision.home,300,.52,.98);
-        // Une lampe équipée et allumée étend la vision du joueur à 75 m.
-        if(vision.flashlight)carve(vision.player,75,.38,.99);
-        // Sans lampe, environ 10 m de visibilité autour du carré jaune.
-        carve(vision.player,10,.50,1);
+        // 600 m autour du refuge, seulement si le circuit d'éclairage est sous tension.
+        if(vision.light)carve(vision.home,600,.52,.98);
+        // Une lampe équipée et allumée étend la vision du joueur à 150 m.
+        if(vision.flashlight)carve(vision.player,150,.38,.99);
+        // Sans lampe, environ 50 m de visibilité autour du carré jaune.
+        carve(vision.player,50,.50,1);
         fog.globalCompositeOperation='source-over';
         ctx.drawImage(this.nightMask,0,0,W,H);
-        // Le marqueur GPS doit rester repérable même quand son halo réel ne mesure que 10 m.
+        // Le marqueur GPS reste repérable dans son halo de 50 m.
         if(Array.isArray(vision.player)){
           const pin=this.position(vision.player[0],vision.player[1]);
           if(pin.x>-15&&pin.x<W+15&&pin.y>-15&&pin.y<H+15){
@@ -947,7 +947,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   // Réseau électrique : puissance arbitraire du jeu (kW virtuels), pas des valeurs électriques réelles.
   // Niveau de générateur 1 à 5 : 3 à 7 kW ; veille 0,5 unité/h + 0,12 unité/h par kW utilisé.
   const ELECTRIC_CONSUMERS=[
-    {id:'lighting',label:'💡 Éclairage extérieur',draw:1,requirements:()=>true,desc:'Éclaire un rayon de 300 m autour du refuge la nuit (ne repousse pas les zombies).'},
+    {id:'lighting',label:'💡 Éclairage extérieur',draw:1,requirements:()=>true,desc:'Éclaire un rayon de 600 m autour du refuge la nuit (ne repousse pas les zombies).'},
     {id:'workbench',label:'⚒ Atelier d’armes',draw:2,requirements:()=>buildingLevel('workbench')>=1,desc:'Fabrication et réparation, outils électriques à partir du niveau 3.'},
     {id:'radio',label:'📻 Station radio',draw:1,requirements:()=>buildingLevel('radio')>=1,desc:'Transmissions, missions, événements et récompenses.'},
     {id:'infirmary',label:'✚ Infirmerie avancée',draw:2,requirements:()=>buildingLevel('infirmary')>=2,desc:'Soins accélérés dès le niveau 2 ; bandages simples utilisables sans courant.'},
@@ -2155,7 +2155,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function toggleFlashlight(){
     if(game.loadout.flashlight!=='torch'||quantity('flashlight')<1)return toast('Trouve une lampe torche en fouille et équipe-la dans Perso.');
     game.flashlightOn=!game.flashlightOn;
-    commit(game.flashlightOn?'🔦 Lampe torche allumée : visibilité 75 m la nuit.':'🔦 Lampe torche éteinte : visibilité 10 m la nuit.');
+    commit(game.flashlightOn?'🔦 Lampe torche allumée : visibilité 150 m la nuit.':'🔦 Lampe torche éteinte : visibilité 50 m la nuit.');
   }
   function renderFlashlightButton(){
     const btn=$('flashlightToggle'),msg=$('flashlightHelp');if(!btn)return;
@@ -2163,7 +2163,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     btn.disabled=!owned||!equipped;
     btn.textContent=!owned?'🔦 LAMPE À TROUVER':!equipped?'🔦 ÉQUIPE LA LAMPE (PERSO)':game.flashlightOn?'🔦 ÉTEINDRE LA LAMPE':'🔦 ALLUMER LA LAMPE';
     btn.setAttribute('aria-pressed',String(flashlightActive()));
-    msg.textContent=!owned?'Facile à trouver dans les commerces et les fouilles GPS.':!equipped?'Ouvre Perso et sélectionne le cinquième équipement.':'Lampe : 75 m la nuit · sans lampe : 10 m.';
+    msg.textContent=!owned?'Facile à trouver dans les commerces et les fouilles GPS.':!equipped?'Ouvre Perso et sélectionne le cinquième équipement.':'Lampe : 150 m la nuit · sans lampe : 50 m.';
   }
   function renderHud(){
     $('hudHp').textContent=game.hp;$('hpBar').style.width=`${game.hp}%`;
@@ -2403,7 +2403,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }
     if(slot==='bag')return game.loadout.bag==='reinforced'&&game.craftedGear.reinforced?{icon:'▣',label:'Sac renforcé',desc:'40 kg maximum'}:{icon:'▣',label:'Sac usé',desc:'30 kg maximum'};
     if(slot==='armor')return game.loadout.armor==='padded'&&game.craftedGear.padded?{icon:'⛨',label:'Gilet rembourré',desc:'−25 % de dégâts'}:null;
-    if(slot==='flashlight')return game.loadout.flashlight==='torch'&&quantity('flashlight')>0?{icon:'🔦',label:'Lampe torche',desc:`Vision nocturne de 75 m · ${flashlightActive()?'allumée':'éteinte'}`} : null;
+    if(slot==='flashlight')return game.loadout.flashlight==='torch'&&quantity('flashlight')>0?{icon:'🔦',label:'Lampe torche',desc:`Vision nocturne de 150 m · ${flashlightActive()?'allumée':'éteinte'}`} : null;
     return null;
   }
   function renderEquipment(){
@@ -2446,7 +2446,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(slot==='secondary')options=[{id:'',label:'Aucune arme',icon:'—',desc:'Emplacement libre'},...BASE_WEAPONS.filter(w=>w.type==='ranged'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Dégâts ${weaponDamageRange(w).join('–')} · Usure −${w.wear} · Niveau ${game.weapons[w.id].level||1}/5 · État ${game.weapons[w.id].durability}/100${game.weapons[w.id].durability<=0?' · CASSÉE':''}`}))];
     if(slot==='bag')options=[{id:'basic',label:'Sac usé',icon:'▣',desc:'Capacité : 30 kg'},...(game.craftedGear.reinforced?[{id:'reinforced',label:'Sac renforcé',icon:'▣',desc:'Capacité : 40 kg'}]:[])];
     if(slot==='armor')options=[{id:'none',label:'Aucune protection',icon:'—',desc:'Sans bonus'},...(game.craftedGear.padded?[{id:'padded',label:'Gilet rembourré',icon:'⛨',desc:'−25 % dégâts des zombies'}]:[])];
-    if(slot==='flashlight')options=[{id:'',label:'Ranger la lampe',icon:'—',desc:'Vision nocturne sans équipement : 10 m'},...(quantity('flashlight')>0?[{id:'torch',label:'Lampe torche',icon:'🔦',desc:'Vision de 75 m la nuit, marche/arrêt dans Options'}]:[])];
+    if(slot==='flashlight')options=[{id:'',label:'Ranger la lampe',icon:'—',desc:'Vision nocturne sans équipement : 50 m'},...(quantity('flashlight')>0?[{id:'torch',label:'Lampe torche',icon:'🔦',desc:'Vision de 150 m la nuit, marche/arrêt dans Options'}]:[])];
     if(!options.length)return;
     const detail=slot==='flashlight'?'Trouve une lampe pendant les fouilles de commerces. Elle apparaît également dans le Sac.':slot==='secondary'?'Fabrique une arme de tir à l’atelier pour débloquer cet emplacement.':slot==='bag'||slot==='armor'?'Tu peux fabriquer de nouveaux équipements dans le menu Sac.':'Fabrique d’autres armes à la Base pour les équiper.';
     const content=`<div class="gear-option-list">${options.map(o=>`<button type="button" class="gear-option ${game.loadout[slot]===o.id?'active':''}" data-gear-choice="${safe(o.id)}"><span class="gear-icon" aria-hidden="true">${o.icon}</span><span><b>${safe(o.label)} ${game.loadout[slot]===o.id?'✓':''}</b><small>${safe(o.desc)}</small></span></button>`).join('')}</div><p class="help-text">${detail}</p>`;
