@@ -346,6 +346,12 @@
 #page-survivor .equip-slot:active{transform:translateY(2px);box-shadow:none}
 #page-survivor .equip-slot:focus-visible{outline:3px solid #edca79;outline-offset:2px}
 #page-survivor .equip-slot.is-broken{border-color:#d89976 #331a18 #331a18 #d89976}
+#page-survivor .equip-slot.lamp-equip-slot{grid-column:span 2;min-height:62px;display:grid;grid-template-columns:42px 1fr auto;gap:6px;text-align:left;padding:7px 10px}
+#page-survivor .lamp-equip-slot .equip-symbol{font-size:26px}
+#page-survivor .lamp-equip-slot .equip-equipped{font-size:11px}
+#page-map .lamp-quick-setting{display:grid;gap:7px;padding:9px 2px 4px;border-top:2px solid #617270}
+#page-map .lamp-quick-setting strong{font:10px monospace;color:#e9d6ac}
+#page-map .lamp-quick-setting small{font:10px/1.4 monospace;color:#adbab4}
 .gear-option-list{display:grid;gap:8px;margin:11px 0}
 .gear-option{display:flex;gap:9px;align-items:center;padding:9px;background:#202f35;border:2px solid #536d70;color:#f2e2c4;font:11px monospace;text-align:left;width:100%;cursor:pointer}
 .gear-option[disabled]{opacity:.5;cursor:not-allowed}
@@ -381,7 +387,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.5 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.7 · LIGHT</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -416,6 +422,11 @@
               <label for="micSensitivity">SENSIBILITÉ <output id="micSensitivityValue" for="micSensitivity">5/10</output></label>
               <input type="range" id="micSensitivity" min="1" max="10" step="1" value="5" aria-label="Sensibilité du microphone">
               <p>Micro facultatif, actif seulement lorsque le jeu reste à l'écran. Analyse locale, aucun son enregistré. Reste en sécurité : ne cours jamais pour échapper à un zombie virtuel.</p>
+            </div>
+            <div class="lamp-quick-setting">
+              <strong>🔦 VISION NOCTURNE</strong>
+              <button id="flashlightToggle" class="pixel-button utility" type="button" aria-pressed="false" disabled>🔦 LAMPE NON POSSÉDÉE</button>
+              <small id="flashlightHelp">Une lampe trouvée en fouille se place dans le 5ᵉ emplacement du survivant.</small>
             </div>
             <span class="menu-mode" id="mapModeLabel">MODE DÉMO</span>
           </div>
@@ -458,6 +469,7 @@
             <button type="button" class="equip-slot" data-equip-slot="bag" aria-label="Choisir sac à dos"><span class="equip-symbol">▣</span><small>SAC</small></button>
             <button type="button" class="equip-slot" data-equip-slot="secondary" aria-label="Choisir arme secondaire"><span class="equip-symbol">⌁</span><small>TIR</small></button>
             <button type="button" class="equip-slot" data-equip-slot="armor" aria-label="Choisir protection"><span class="equip-symbol">⛨</span><small>ARMURE</small></button>
+            <button type="button" class="equip-slot lamp-equip-slot" data-equip-slot="flashlight" aria-label="Choisir lampe torche"><span class="equip-symbol">🔦</span><small>LAMPE</small></button>
           </div>
         </div><div class="character-summary">
           <div class="survivor-name-heading">
@@ -593,7 +605,7 @@
 // Le futur dossier d'illustrations pourra utiliser ces mêmes identifiants.
 const DEAD_EARTH_ICONS = Object.freeze({
   water:'💧',food:'🥫',bandage:'🩹',wood:'🪵',metal:'⚙️',cloth:'🧵',
-  ammo:'🔸',parts:'🔩',medkit:'🧰',fuel:'⛽'
+  ammo:'🔸',parts:'🔩',medkit:'🧰',fuel:'⛽',flashlight:'🔦'
 });
 /* DEAD EARTH — cartographie Canvas légère. Inspirée de l'architecture Gpsmine :
    fond immédiat, tuiles vectorielles OpenFreeMap décodées une seule fois,
@@ -818,25 +830,49 @@ const DEAD_EARTH_ICONS = Object.freeze({
         if(m.kind==='home'||m.selected){ctx.font='bold 10px monospace';ctx.fillStyle='#151b1c';const label=(m.label||'').slice(0,18);ctx.fillRect(px-label.length*3.2-4,py+19,label.length*6.4+8,14);ctx.fillStyle='#fff0d0';ctx.fillText(label,px,py+26)}
       }
       ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#2e2e2a';ctx.globalAlpha=.7;ctx.font='9px monospace';ctx.fillText(this.tileTemplate?'DÉTAILS EN CHARGEMENT...':'CARTE EN MODE TERRAIN',9,14);ctx.globalAlpha=1;
-      // Même cycle jour/nuit que le repos. Un seul voile sur le Canvas = rendu rapide.
+      // V2.7 : brouillard nocturne progressif, ancré aux coordonnées GPS.
+      // On dessine un masque séparé pour ne jamais effacer les tuiles ou les marqueurs.
       const vision=window.DEAD_EARTH_NIGHT_VIEW?.();
       if(vision?.night){
-        ctx.save();ctx.fillStyle='rgba(5,10,22,.70)';ctx.beginPath();ctx.rect(0,0,W,H);
-        if(vision.light && Array.isArray(vision.home)){
-          const p=this.position(vision.home[0],vision.home[1]);
-          const edge=this.position(vision.home[0]+300/111195,vision.home[1]);
-          const r=Math.abs(p.y-edge.y);
-          if(r>0){ctx.moveTo(p.x+r,p.y);ctx.arc(p.x,p.y,r,0,Math.PI*2,true)}
+        if(!this.nightMask){this.nightMask=document.createElement('canvas');this.nightCtx=this.nightMask.getContext('2d')}
+        if(this.nightMask.width!==Math.ceil(W)||this.nightMask.height!==Math.ceil(H)){
+          this.nightMask.width=Math.ceil(W);this.nightMask.height=Math.ceil(H);
         }
-        ctx.fill('evenodd');
-        if(vision.light && Array.isArray(vision.home)){
-          const p=this.position(vision.home[0],vision.home[1]);
-          const edge=this.position(vision.home[0]+300/111195,vision.home[1]);
-          const r=Math.abs(p.y-edge.y);
-          ctx.fillStyle='rgba(16,22,33,.16)';ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();
-          ctx.strokeStyle='rgba(246,209,122,.65)';ctx.lineWidth=2;ctx.stroke();
+        const fog=this.nightCtx;fog.globalCompositeOperation='source-over';
+        fog.clearRect(0,0,W,H);
+        fog.fillStyle='rgba(2,5,13,.985)';fog.fillRect(0,0,W,H);
+        fog.globalCompositeOperation='destination-out';
+        const carve=(loc,meters,solidFraction=0.45,clarity=1)=>{
+          if(!Array.isArray(loc)||!Number.isFinite(loc[0])||!Number.isFinite(loc[1]))return;
+          const p=this.position(loc[0],loc[1]);
+          const edge=this.position(loc[0]+meters/111195,loc[1]);
+          const r=Math.abs(edge.y-p.y);
+          if(r<.25||p.x+r<0||p.y+r<0||p.x-r>W||p.y-r>H)return;
+          const light=fog.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
+          light.addColorStop(0,`rgba(0,0,0,${clarity})`);
+          light.addColorStop(Math.min(.96,solidFraction),`rgba(0,0,0,${clarity})`);
+          light.addColorStop(.79,`rgba(0,0,0,${clarity*.65})`);
+          light.addColorStop(1,'rgba(0,0,0,0)');
+          fog.fillStyle=light;fog.fillRect(p.x-r,p.y-r,2*r,2*r);
+        };
+        // 300 m autour du refuge, seulement si le circuit d'éclairage est sous tension.
+        if(vision.light)carve(vision.home,300,.52,.98);
+        // Une lampe équipée et allumée étend la vision du joueur à 75 m.
+        if(vision.flashlight)carve(vision.player,75,.38,.99);
+        // Sans lampe, environ 10 m de visibilité autour du carré jaune.
+        carve(vision.player,10,.50,1);
+        fog.globalCompositeOperation='source-over';
+        ctx.drawImage(this.nightMask,0,0,W,H);
+        // Le marqueur GPS doit rester repérable même quand son halo réel ne mesure que 10 m.
+        if(Array.isArray(vision.player)){
+          const pin=this.position(vision.player[0],vision.player[1]);
+          if(pin.x>-15&&pin.x<W+15&&pin.y>-15&&pin.y<H+15){
+            ctx.save();ctx.fillStyle='#0c1118';ctx.fillRect(Math.round(pin.x)-8,Math.round(pin.y)-8,16,16);
+            ctx.fillStyle='#ffe36e';ctx.fillRect(Math.round(pin.x)-6,Math.round(pin.y)-6,12,12);
+            ctx.fillStyle='#fff1a3';ctx.fillRect(Math.round(pin.x)-4,Math.round(pin.y)-4,8,3);
+            ctx.restore();
+          }
         }
-        ctx.restore();
       }
       
     }
@@ -880,6 +916,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     wood:{label:'Bois',icon:'▥',weight:1.2},metal:{label:'Ferraille',icon:'⚙',weight:.8},cloth:{label:'Tissu',icon:'▤',weight:.2},
     ammo:{label:'Munitions',icon:'✧',weight:.04},parts:{label:'Pièces',icon:'⌘',weight:.25},medkit:{label:'Trousse de secours',icon:'✛',weight:1.1},
     fuel:{label:'Essence (virtuelle)',icon:'⛽',weight:.8},
+    flashlight:{label:'Lampe torche',icon:'🔦',weight:.4},
     rifle_stock:{label:'Crosse (carabine)',icon:'🪵',weight:.65},rifle_trigger:{label:'Gâchette (carabine)',icon:'🔩',weight:.35},rifle_barrel:{label:'Canon (carabine)',icon:'⚙',weight:.75},
     bolts:{label:'Carreaux (arbalète)',icon:'➶',weight:.08}
   };
@@ -887,8 +924,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     {id:'reinforced',name:'Sac renforcé',icon:'▣',desc:'Capacité du sac : 40 kg (au lieu de 30 kg).',cost:{cloth:4,wood:2,parts:1}},
     {id:'padded',name:'Gilet rembourré',icon:'⛨',desc:'Réduit de 25 % les dégâts infligés par les zombies.',cost:{cloth:5,metal:2,parts:1}}
   ];
-  const LOADOUT_LABELS={primary:'ARME',bag:'SAC',secondary:'TIR',armor:'ARMURE'};
-  const GEAR_DEFAULTS={primary:'knife',bag:'basic',secondary:'',armor:'none'};
+  const LOADOUT_LABELS={primary:'ARME',bag:'SAC',secondary:'TIR',armor:'ARMURE',flashlight:'LAMPE'};
+  const GEAR_DEFAULTS={primary:'knife',bag:'basic',secondary:'',armor:'none',flashlight:''};
   const RECIPES = [
     {id:'bandage',name:'Bandage',cost:{cloth:2},gain:{bandage:1},desc:'Soigne 30 points de vie.'},
     {id:'medkit',name:'Trousse de secours',cost:{cloth:3,bandage:2,parts:1},gain:{medkit:1},desc:'Soigne 70 points de vie.'},
@@ -1002,8 +1039,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     buildingLevels:{collector:0,workbench:0,garden:0,generator:0,infirmary:0,watchtower:0,storage:0,radio:0},
     storageInventory:{},radioOps:{day:'',entries:[]},radioEvent:{day:'',resolved:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',generatorState:{running:false,fuel:0,condition:100,updatedAt:Date.now()},electricSwitches:{...ELECTRIC_DEFAULTS},
     weapons:Object.fromEntries(BASE_WEAPONS.map(w=>[w.id,{owned:!!w.basic,durability:w.basic?100:0,level:w.basic?1:0}])),equippedWeapon:'knife',
-    craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},
-    inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0},
+    craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},flashlightOn:false,
+    inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0,flashlight:0},
     claimed:[],cooldowns:{},logs:[{time:Date.now(),message:'Transmission reçue. Bienvenue dans DEAD EARTH.'}]});
   function load(){
     try {
@@ -1025,6 +1062,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       if(!weapons[loadout.secondary]?.owned || BASE_WEAPONS.find(w=>w.id===loadout.secondary)?.type!=='ranged')loadout.secondary='';
       if(!craftedGear.reinforced)loadout.bag='basic';
       if(!craftedGear.padded)loadout.armor='none';
+      if(loadout.flashlight!=='torch'||Number(obj.inventory.flashlight||0)<1)loadout.flashlight='';
       // Migration V2.0 : les constructions déjà acquises commencent au niveau 1 ;
       // l'ancien atelier niveau 2 conserve son rang et ses armes débloquées.
       const buildings={...base.buildings,...(obj.buildings||{})};
@@ -1052,7 +1090,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
             baseline:Math.max(0,Number(e.baseline)||0)
           }))
         }:{...base.radioOps},
-        weapons,loadout,craftedGear,equippedWeapon:weapons[obj.equippedWeapon]?.owned?obj.equippedWeapon:'knife',
+        weapons,loadout,craftedGear,flashlightOn:loadout.flashlight==='torch'&&obj.flashlightOn===true,equippedWeapon:weapons[obj.equippedWeapon]?.owned?obj.equippedWeapon:'knife',
         workbenchLevel:buildingLevels.workbench,
         productionDays:{...base.productionDays,...(obj.productionDays||{})},generatorDay:obj.generatorDay||'',
         // Migration ancienne version : la journée payée ne démarre pas automatiquement un moteur.
@@ -1080,7 +1118,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),name:previous?.name||'Mon village',kind:previous?.kind||'village',center:[...home],radius,spatialCampaign:true};
     }
   }else game.territory=null;
-  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),weaponCatalog:BASE_WEAPONS.map(w=>({id:w.id,family:w.family,type:w.type,workbench:w.workbench,bonus:weaponBonus(w),damage:weaponDamageRange(w),wear:w.wear})),buildingRequirements:Object.fromEntries(BASE_BUILDINGS.map(b=>[b.id,b.minLevel])),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
+  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),weaponCatalog:BASE_WEAPONS.map(w=>({id:w.id,family:w.family,type:w.type,workbench:w.workbench,bonus:weaponBonus(w),damage:weaponDamageRange(w),wear:w.wear})),buildingRequirements:Object.fromEntries(BASE_BUILDINGS.map(b=>[b.id,b.minLevel])),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,flashlightOn:flashlightActive(),flashlightCount:quantity('flashlight'),electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
@@ -2114,6 +2152,19 @@ const DEAD_EARTH_ICONS = Object.freeze({
       },120);
     });
   }
+  function toggleFlashlight(){
+    if(game.loadout.flashlight!=='torch'||quantity('flashlight')<1)return toast('Trouve une lampe torche en fouille et équipe-la dans Perso.');
+    game.flashlightOn=!game.flashlightOn;
+    commit(game.flashlightOn?'🔦 Lampe torche allumée : visibilité 75 m la nuit.':'🔦 Lampe torche éteinte : visibilité 10 m la nuit.');
+  }
+  function renderFlashlightButton(){
+    const btn=$('flashlightToggle'),msg=$('flashlightHelp');if(!btn)return;
+    const owned=quantity('flashlight')>0,equipped=game.loadout.flashlight==='torch';
+    btn.disabled=!owned||!equipped;
+    btn.textContent=!owned?'🔦 LAMPE À TROUVER':!equipped?'🔦 ÉQUIPE LA LAMPE (PERSO)':game.flashlightOn?'🔦 ÉTEINDRE LA LAMPE':'🔦 ALLUMER LA LAMPE';
+    btn.setAttribute('aria-pressed',String(flashlightActive()));
+    msg.textContent=!owned?'Facile à trouver dans les commerces et les fouilles GPS.':!equipped?'Ouvre Perso et sélectionne le cinquième équipement.':'Lampe : 75 m la nuit · sans lampe : 10 m.';
+  }
   function renderHud(){
     $('hudHp').textContent=game.hp;$('hpBar').style.width=`${game.hp}%`;
     $('hudEnergy').textContent=game.energy;$('energyBar').style.width=`${game.energy}%`;
@@ -2130,6 +2181,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     // Le journal est uniquement sur la page Missions.
     
     $('gpsMode').classList.toggle('selected',game.mode==='gps');
+    renderFlashlightButton();
   }
   function renderPois(){
     $('poiCount').textContent=String(pois.length).padStart(2,'0');
@@ -2191,6 +2243,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
     game.noise=clamp(game.noise+m.noise+Math.round(soundLevel*.45));game.threat=clamp(game.threat+Math.round((m.noise+soundLevel*.55)*.25));
     game.totalSearches++;game.cooldowns[p.id]=Date.now()+90000;
     const amount=1+m.bonus+random(0,2),loot={};for(let i=0;i<amount;i++){let id=pick(p.loot);loot[id]=(loot[id]||0)+1;}
+    // Lampe facilement trouvable dans les vrais lieux accessibles à moins de 10 m au GPS.
+    // Une fois acquise, les doublons restent rares pour ne pas saturer le sac.
+    if(quantity('flashlight')+storageQuantity('flashlight')===0 && Math.random()<.55){loot.flashlight=1;}
     // Pièces de carabine virtuelles : trouvailles rares, uniquement dans de vrais lieux fouillés au GPS.
     // Le joueur cherche d'abord les composants manquants, mais les doublons restent possibles.
     const fragmentChance=p.loot.includes('parts')?.32:.11;
@@ -2348,6 +2403,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }
     if(slot==='bag')return game.loadout.bag==='reinforced'&&game.craftedGear.reinforced?{icon:'▣',label:'Sac renforcé',desc:'40 kg maximum'}:{icon:'▣',label:'Sac usé',desc:'30 kg maximum'};
     if(slot==='armor')return game.loadout.armor==='padded'&&game.craftedGear.padded?{icon:'⛨',label:'Gilet rembourré',desc:'−25 % de dégâts'}:null;
+    if(slot==='flashlight')return game.loadout.flashlight==='torch'&&quantity('flashlight')>0?{icon:'🔦',label:'Lampe torche',desc:`Vision nocturne de 75 m · ${flashlightActive()?'allumée':'éteinte'}`} : null;
     return null;
   }
   function renderEquipment(){
@@ -2358,8 +2414,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
       const display=slot==='primary'||slot==='secondary'?
         (gear?.label||'VIDE'):
         slot==='bag'?(game.loadout.bag==='reinforced'?'Sac 40 kg':'Sac 30 kg'):
+        slot==='flashlight'?(gear?(flashlightActive()?'LAMPE ALLUMÉE':'LAMPE ÉTEINTE'):'LAMPE À TROUVER'):
         (gear?'Gilet':'VIDE');
-      btn.innerHTML=`<span class="equip-symbol" aria-hidden="true">${gear?.icon||{primary:'⚔',secondary:'⌁',bag:'▣',armor:'⛨'}[slot]}</span><span class="equip-equipped">${safe(display)}</span><small>${label}</small>`;
+      btn.innerHTML=`<span class="equip-symbol" aria-hidden="true">${gear?.icon||{primary:'⚔',secondary:'⌁',bag:'▣',armor:'⛨',flashlight:'🔦'}[slot]}</span><span class="equip-equipped">${safe(display)}</span><small>${label}</small>`;
       btn.setAttribute('aria-label',`${label} : ${gear?.label||'vide'}. Appuyer pour modifier.`);
       btn.title=gear?gear.label+' · '+gear.desc:label+' : emplacement vide';
     });
@@ -2374,6 +2431,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
       if(id==='basic'&&inventoryWeight()>30)return toast('Allège ton sac sous 30 kg avant de changer.');
     }else if(slot==='armor'){
       if(!['none','padded'].includes(id)||(id==='padded'&&!game.craftedGear.padded))return;
+    }else if(slot==='flashlight'){
+      if(!['','torch'].includes(id)||(id==='torch'&&quantity('flashlight')<1))return;
+      game.flashlightOn=id==='torch';
     }else return;
     game.loadout[slot]=id;
     if(slot==='primary'||slot==='secondary')game.equippedWeapon=id||game.loadout.primary;
@@ -2386,10 +2446,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(slot==='secondary')options=[{id:'',label:'Aucune arme',icon:'—',desc:'Emplacement libre'},...BASE_WEAPONS.filter(w=>w.type==='ranged'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Dégâts ${weaponDamageRange(w).join('–')} · Usure −${w.wear} · Niveau ${game.weapons[w.id].level||1}/5 · État ${game.weapons[w.id].durability}/100${game.weapons[w.id].durability<=0?' · CASSÉE':''}`}))];
     if(slot==='bag')options=[{id:'basic',label:'Sac usé',icon:'▣',desc:'Capacité : 30 kg'},...(game.craftedGear.reinforced?[{id:'reinforced',label:'Sac renforcé',icon:'▣',desc:'Capacité : 40 kg'}]:[])];
     if(slot==='armor')options=[{id:'none',label:'Aucune protection',icon:'—',desc:'Sans bonus'},...(game.craftedGear.padded?[{id:'padded',label:'Gilet rembourré',icon:'⛨',desc:'−25 % dégâts des zombies'}]:[])];
+    if(slot==='flashlight')options=[{id:'',label:'Ranger la lampe',icon:'—',desc:'Vision nocturne sans équipement : 10 m'},...(quantity('flashlight')>0?[{id:'torch',label:'Lampe torche',icon:'🔦',desc:'Vision de 75 m la nuit, marche/arrêt dans Options'}]:[])];
     if(!options.length)return;
-    const detail=slot==='secondary'?'Fabrique une arme de tir à l’atelier pour débloquer cet emplacement.':slot==='bag'||slot==='armor'?'Tu peux fabriquer de nouveaux équipements dans le menu Sac.':'Fabrique d’autres armes à la Base pour les équiper.';
+    const detail=slot==='flashlight'?'Trouve une lampe pendant les fouilles de commerces. Elle apparaît également dans le Sac.':slot==='secondary'?'Fabrique une arme de tir à l’atelier pour débloquer cet emplacement.':slot==='bag'||slot==='armor'?'Tu peux fabriquer de nouveaux équipements dans le menu Sac.':'Fabrique d’autres armes à la Base pour les équiper.';
     const content=`<div class="gear-option-list">${options.map(o=>`<button type="button" class="gear-option ${game.loadout[slot]===o.id?'active':''}" data-gear-choice="${safe(o.id)}"><span class="gear-icon" aria-hidden="true">${o.icon}</span><span><b>${safe(o.label)} ${game.loadout[slot]===o.id?'✓':''}</b><small>${safe(o.desc)}</small></span></button>`).join('')}</div><p class="help-text">${detail}</p>`;
-    modal({tag:'ÉQUIPEMENT DU SURVIVANT',title:LOADOUT_LABELS[slot],text:'Sélectionne ton équipement pour cet emplacement.',content,actions:[{name:'FERMER',fn:closeModal,alt:true},...(slot==='bag'||slot==='armor'?[{name:'VOIR LE SAC',fn:()=>{closeModal();switchTab('inventory')}}]:[{name:'VOIR LA BASE',fn:()=>{closeModal();switchTab('base')}}])]});
+    modal({tag:'ÉQUIPEMENT DU SURVIVANT',title:LOADOUT_LABELS[slot],text:'Sélectionne ton équipement pour cet emplacement.',content,actions:[{name:'FERMER',fn:closeModal,alt:true},...(slot==='flashlight'?[{name:'EXPLORER LA CARTE',fn:()=>{closeModal();switchTab('map')}}]:(slot==='bag'||slot==='armor'?[{name:'VOIR LE SAC',fn:()=>{closeModal();switchTab('inventory')}}]:[{name:'VOIR LA BASE',fn:()=>{closeModal();switchTab('base')}}]))]});
     $('modalContent').querySelectorAll('[data-gear-choice]').forEach(btn=>btn.addEventListener('click',()=>chooseGear(slot,btn.dataset.gearChoice)));
   }
   function craftEquipment(id){
@@ -2503,8 +2564,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
     commit('✚ Soins électriques avancés effectués.');
   }
   // Définition consultée par la carte Canvas sans transférer de données GPS exactes.
+  function flashlightActive(){return game.loadout.flashlight==='torch' && quantity('flashlight')>0 && game.flashlightOn===true;}
   window.DEAD_EARTH_NIGHT_VIEW=()=>({night:!realRestCycle().isDay,
-    light:isConsumerPowered('lighting')&&Boolean(game.safeZone?.center),home:game.safeZone?.center||null});
+    player:game.mode==='gps'&&Number.isFinite(game.lat)&&Number.isFinite(game.lon)?[game.lat,game.lon]:[...center],
+    flashlight:flashlightActive(),light:isConsumerPowered('lighting')&&Boolean(game.safeZone?.center),home:game.safeZone?.center||null});
   function hasBuilding(id){return Boolean(game.buildings[id])}
   function buildStructure(id){
     if(!game.safeZone)return toast('Installe d’abord ton refuge avant les constructions.');
@@ -2787,7 +2850,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const on=powered(),load=electricLoad(),cap=electricCapacity();
     el.textContent=`${on?'🟢 COURANT DISPONIBLE':'🔴 GÉNÉRATEUR ÉTEINT'} · ${load}/${cap} kW sélectionnés`;
     const hint=$('electricHint');if(hint)hint.textContent=on?'✅ Réseau opérationnel.':'⚠ Les équipements électriques sont hors service.';
-    $('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(isConsumerPowered('lighting')?' · 💡 REFUGE ÉCLAIRÉ':'');
+    $('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');
   }
   function renderBase(){
     const tier=BASE_TIERS[game.baseLevel-1];
@@ -2949,7 +3012,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }));
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
-  function renderAll(){advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(isConsumerPowered('lighting')?' · 💡 REFUGE ÉCLAIRÉ':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
+  function renderAll(){advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
   function switchTab(tab){window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
@@ -3059,6 +3122,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       commit(`Survivant renommé : ${name}.`);
     });
     $('detectionToggle').addEventListener('click',toggleDetectionMic);
+    $('flashlightToggle').addEventListener('click',toggleFlashlight);
     $('micSensitivity').addEventListener('input',event=>setDetectionSensitivity(event.target.value));
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));

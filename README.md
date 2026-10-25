@@ -1,38 +1,35 @@
-# DEAD EARTH V2.6 — Dégâts et usure des armes
+# DEAD EARTH V2.7 LIGHT — Vision nocturne
 
-Mise à jour depuis la V2.5 LIGHT. Le jeu tient dans **un seul fichier `index.html`**, que tu peux remplacer directement à la racine de ton dépôt GitHub Pages.
+## Mise à jour GitHub Pages
 
-## Nouveautés
+Télécharge `index.html` et remplace **uniquement** le fichier `index.html` à la racine du dépôt GitHub `hugotronel-boop/dead-earth`. Les autres fichiers peuvent rester en place.
 
-Chaque arme a sa **plage de dégâts** et sa **perte de durabilité par attaque**, sur 100 points au départ. Valeurs au niveau 1 :
+## Nouvelles règles
 
-| Arme | Dégâts / attaque | Durabilité perdue / utilisation |
-|---|---:|---:|
-| Couteau usé | 7–11 | 4 |
-| Batte renforcée | 9–15 | 5 |
-| Lance de fortune | 13–20 | 7 |
-| Hache de récupération | 16–24 | 8 |
-| Machette de récupération | 18–27 | 6 |
-| Pistolet récupéré | 22–32 | 5 |
-| Arbalète artisanale | 24–36 | 4 |
-| Carabine rafistolée | 32–46 | 7 |
-| Fusil à pompe de récupération | 42–60 | 9 |
-| Matraque électrique | 20–33 | 6 |
+- **Cycle jour/nuit réel** : conserve le système existant fondé sur le GPS et le soleil lorsqu'il est actif, et l'heure locale du téléphone autrement.
+- **Nuit sans éclairage** : masque sombre avec dégradé, visibilité d'environ **10 mètres** de rayon autour du marqueur du joueur.
+- **Lampe torche** : nouvel objet `flashlight` dans le sac (0,4 kg), assez facile à obtenir lors des fouilles de lieux réels répertoriés, sans fouille à distance. Tant qu'une lampe n'est pas possédée, le bouton reste désactivé.
+- **Équiper** : page **Perso**, cinquième emplacement sous les quatre cases actuelles, intitulé **LAMPE**. Sélectionner la lampe l'allume.
+- **Allumer / éteindre** : page **Carte → ⚙ Options → Vision nocturne**. Lampe équipée et allumée : **75 mètres** de portée (avec fondu progressif).
+- **Éclairage extérieur du refuge** : les **300 mètres** existants sont maintenus, uniquement quand le refuge existe, que le générateur tourne, qu'il contient du carburant, et que le circuit d'éclairage a de la puissance. Il n'éclaire pas une autre position ou une zone SAFE sans refuge.
+- **Aucun éclairage** : si le générateur s'arrête ou manque d'essence, ses 300 mètres d'éclairage disparaissent. La lampe personnelle reste indépendante du générateur.
+- Le gradient suit les coordonnées géographiques, donc déplacer la carte ne déplace pas magiquement la lumière du joueur.
+- Les sauvegardes V2.6 restent lisibles : ajout de nouveaux champs avec valeurs par défaut.
 
-- Au **niveau 0 de durabilité**, l'arme est **cassée** et ne peut plus servir. Un survivant dont l'arme de mêlée est cassée peut uniquement donner de faibles coups à mains nues (2–5 dégâts). Une arme à distance cassée ne peut pas tirer et ne consomme aucune munition.
-- Après chaque attaque avec une arme fonctionnelle, sa durabilité diminue selon son modèle. L'attaque qui termine la durabilité à 0 inflige encore ses dégâts, puis l'arme casse.
-- Les améliorations jusqu'au niveau 5 ajoutent **+2 dégâts min/max par niveau** en mêlée ou **+3 dégâts min/max par niveau** à distance. Elles **ne restaurent pas** la durabilité.
-- Les réparations sont réalisées à l'atelier électriquement alimenté, en consommant les matériaux du sac ou de la réserve. Une arme réparée peut de nouveau servir.
-- Les statistiques et l'état de l'arme sont visibles dans l'atelier, la fiche d'équipement et les combats.
+### Simplifications de cette version
 
-## Sauvegarde
+- La lampe n'a pas encore de système de piles ou de batterie : elle fonctionne une fois trouvée, équipée et allumée. Ce sera un choix d'équilibrage ultérieur.
+- Les tuiles vectorielles de la carte demandent toujours une connexion. Le fond schématique fonctionne même sans données de carte.
+- Le brouillard réduit **la visibilité graphique**, mais les interactions existantes conservent leurs vérifications de distance GPS (10 m pour fouiller, 20 m pour combattre, 35 m pour construire).
+- Ne joue pas en marchant sans regarder devant toi et ne te rends pas dans des lieux interdits pour les actions virtuelles.
 
-Les anciennes sauvegardes V2.5 et antérieures sont conservées. La durabilité déjà enregistrée des armes reste intacte ; seuls les dégâts et l'usure par utilisation sont mis à jour.
+## Tests réalisés
 
-## Installation
+- Vérification de syntaxe des 3 scripts JavaScript intégrés avec Node.js.
+- Interface navigateur mobile Chromium, aucune erreur JavaScript au chargement.
+- Cinquième emplacement d'équipement présent, sélection d'une lampe possédée, activation/désactivation via Options, et persistance dans la sauvegarde simulée.
+- Aperçu des trois portées nocturnes (10 m, 75 m et 300 m) sur la carte Canvas.
 
-1. Télécharge `index.html`.
-2. Remplace le fichier `index.html` situé à la racine de ton dépôt GitHub `dead-earth`.
-3. Enregistre avec **Commit changes** puis recharge GitHub Pages. Aucun autre fichier n'est requis pour cette version.
+## Poids
 
-Le jeu demeure un prototype solo avec sauvegarde locale sur le téléphone. Les autres pages n'ont pas été repensées.
+Un seul `index.html` léger, sans images de jeu intégrées.
