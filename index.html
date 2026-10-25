@@ -127,6 +127,9 @@
 .base-production-row button,.base-weapon-card button{min-height:31px}
 .base-weapon-bar{height:8px;border:2px solid #172125;background:#0f1719}
 .base-weapon-bar>i{height:100%;display:block;background:#d0a56b;transition:width .2s}
+.base-weapon-card.is-broken{border-color:#a45c55 #0e171b #0e171b #a45c55}
+.base-weapon-card.is-broken .base-weapon-head{color:#ffb2a5}
+.base-weapon-bar.is-broken{border-color:#a45c55;background:repeating-linear-gradient(90deg,#481f22 0 5px,#20181b 5px 10px)}
 .base-weapon-actions{display:flex;gap:6px;flex-wrap:wrap}
 .base-weapon-actions button{flex:1;font:10px monospace;padding:7px;background:#30464d;color:#eedbb6;border:3px solid;border-color:#859998 #101b20 #101b20 #859998}
 .base-weapon-actions button:disabled{opacity:.45}
@@ -225,6 +228,14 @@
 .generator-condition .progress{margin-top:6px}
 #page-map #nightClock{position:absolute;z-index:8;left:10px;bottom:10px;font:10px monospace;background:#0c171dc9;border:1px solid #8e9274;padding:4px 6px;color:#f3dda0;pointer-events:none}
 @media(max-width:360px){.electric-consumer button{min-width:66px;font-size:10px}}
+
+/* V2.5 · Lisibilité de la grille des armes et déblocages */
+.base-build-status small{color:#d2bc91;font-size:9px;line-height:1.3}
+.base-weapon-card .base-cost-line{display:flex;gap:4px;flex-wrap:wrap}
+.base-weapon-card .cost-tag{display:inline-block;margin:2px;padding:3px 4px;font-size:9px}
+.base-weapon-card .base-weapon-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.base-weapon-card .base-weapon-actions button{width:100%;min-width:0;overflow-wrap:anywhere;font-size:10px}
+@media(max-width:360px){.base-weapon-card .base-weapon-actions{grid-template-columns:1fr}}
 </style>
 <style>
 
@@ -370,7 +381,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.4 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.5 · LIGHT</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -514,7 +525,7 @@
 <p class="help-text">Les hordes ne frappent pas hors ligne : le test de défense est lancé uniquement avec ce bouton.</p>
 </div></div></details><details class="pixel-frame base-accordion" data-base-section="constructions"><summary class="base-accordion-summary"><span class="base-accordion-title">🔨 CONSTRUCTIONS DE SURVIE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
 
-<p class="base-section-hint">Bâtis des installations dans ton refuge. Les ressources proviennent des fouilles et sont retirées du sac.</p>
+<p class="base-section-hint">Débloque les bâtiments en améliorant ton refuge. Les ressources viennent du sac ou de la réserve. Les constructions déjà possédées restent acquises.</p>
 <div class="base-build-grid" id="baseBuildList"></div>
 </div></div></details><details class="pixel-frame base-accordion" data-base-section="surveillance"><summary class="base-accordion-summary"><span class="base-accordion-title">🔭 SURVEILLANCE DU REFUGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="watchtowerPanel">
 
@@ -868,7 +879,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
     water:{label:'Eau potable',icon:'◉',weight:.5},food:{label:'Conserve',icon:'▣',weight:.4},bandage:{label:'Bandage',icon:'✚',weight:.1},
     wood:{label:'Bois',icon:'▥',weight:1.2},metal:{label:'Ferraille',icon:'⚙',weight:.8},cloth:{label:'Tissu',icon:'▤',weight:.2},
     ammo:{label:'Munitions',icon:'✧',weight:.04},parts:{label:'Pièces',icon:'⌘',weight:.25},medkit:{label:'Trousse de secours',icon:'✛',weight:1.1},
-    fuel:{label:'Essence (virtuelle)',icon:'⛽',weight:.8}
+    fuel:{label:'Essence (virtuelle)',icon:'⛽',weight:.8},
+    rifle_stock:{label:'Crosse (carabine)',icon:'🪵',weight:.65},rifle_trigger:{label:'Gâchette (carabine)',icon:'🔩',weight:.35},rifle_barrel:{label:'Canon (carabine)',icon:'⚙',weight:.75},
+    bolts:{label:'Carreaux (arbalète)',icon:'➶',weight:.08}
   };
   const GEAR_CRAFTS = [
     {id:'reinforced',name:'Sac renforcé',icon:'▣',desc:'Capacité du sac : 40 kg (au lieu de 30 kg).',cost:{cloth:4,wood:2,parts:1}},
@@ -879,7 +892,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const RECIPES = [
     {id:'bandage',name:'Bandage',cost:{cloth:2},gain:{bandage:1},desc:'Soigne 30 points de vie.'},
     {id:'medkit',name:'Trousse de secours',cost:{cloth:3,bandage:2,parts:1},gain:{medkit:1},desc:'Soigne 70 points de vie.'},
-    {id:'ammo',name:'Munitions de fortune',cost:{metal:2,parts:1},gain:{ammo:4},requiresWorkshop:true,desc:'Fabriquées à l’atelier alimenté en électricité.'}
+    {id:'ammo',name:'Munitions de fortune',cost:{metal:2,parts:1},gain:{ammo:4},requiresWorkshop:true,desc:'Munitions virtuelles pour les armes à feu.'},
+    {id:'bolts',name:'Carreaux (arbalète)',cost:{wood:1,metal:1},gain:{bolts:5},requiresWorkshop:true,desc:'Projectiles virtuels de l’arbalète.'}
   ];
   // Progression indépendante des objets construits : une amélioration = un niveau supplémentaire.
   const BASE_TIERS = [
@@ -909,13 +923,13 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const MAX_BUILDING_LEVEL = 5;
   const BASE_BUILDINGS = [
     {id:'collector',icon:'◉',name:'Récupérateur d’eau',minLevel:1,cost:{wood:3,cloth:2,parts:1},desc:'Produit 2 eaux potables virtuelles par jour.'},
-    {id:'workbench',icon:'⚒',name:'Atelier d’armes',minLevel:1,cost:{wood:3,metal:2,parts:2},desc:'Nécessite le courant pour fabriquer ou réparer ; outils avancés au niveau 3.'},
-    {id:'garden',icon:'♣',name:'Potager',minLevel:2,cost:{wood:4,cloth:2,water:1},desc:'Produit 1 ration par jour.'},
+    {id:'workbench',icon:'⚒',name:'Atelier d’armes',minLevel:4,cost:{wood:3,metal:2,parts:2},desc:'Nécessite le courant pour fabriquer ou réparer ; outils avancés au niveau 3.'},
+    {id:'garden',icon:'♣',name:'Potager',minLevel:1,cost:{wood:4,cloth:2,water:1},desc:'Produit 1 ration par jour.'},
     {id:'generator',icon:'ϟ',name:'Générateur',minLevel:2,cost:{metal:4,parts:3},desc:'Réservoir 8 unités · puissance limitée · consommation d’essence et usure selon les équipements activés.'},
-    {id:'infirmary',icon:'✚',name:'Coin médical',minLevel:3,cost:{cloth:4,bandage:2,parts:2},desc:'Soins simples sans courant au niveau 1 ; soins accélérés alimentés dès le niveau 2.'},
-    {id:'watchtower',icon:'🔭',name:'Tour de guet',minLevel:1,cost:{wood:5,metal:3,parts:2},desc:'Détecte les infectés autour du refuge et signale les groupes en approche.'},
-    {id:'storage',icon:'📦',name:'Réserve de stockage',minLevel:1,cost:{wood:4,metal:2,cloth:2,parts:2},desc:'Stocke les ressources séparément du sac, 50 kg par niveau.'},
-    {id:'radio',icon:'📻',name:'Station radio',minLevel:2,cost:{metal:4,parts:3,cloth:2},desc:'Nécessite 1 kW du générateur pour recevoir les missions et messages.'}
+    {id:'infirmary',icon:'✚',name:'Coin médical',minLevel:2,cost:{cloth:4,bandage:2,parts:2},desc:'Soins simples sans courant au niveau 1 ; soins accélérés alimentés dès le niveau 2.'},
+    {id:'watchtower',icon:'🔭',name:'Tour de guet',minLevel:3,cost:{wood:5,metal:3,parts:2},desc:'Détecte les infectés autour du refuge et signale les groupes en approche.'},
+    {id:'storage',icon:'📦',name:'Réserve de stockage',minLevel:2,cost:{wood:4,metal:2,cloth:2,parts:2},desc:'Stocke les ressources séparément du sac, 50 kg par niveau.'},
+    {id:'radio',icon:'📻',name:'Station radio',minLevel:4,cost:{metal:4,parts:3,cloth:2},desc:'Nécessite 1 kW du générateur pour recevoir les missions et messages.'}
   ];
   const RADIO_MESSAGES = [
     {id:'sos',title:'APPEL DE DÉTRESSE',subtitle:'Un groupe de survivants réclame du ravitaillement.',kind:'search',target:2,reward:{bandage:2,food:1},xp:45},
@@ -925,11 +939,43 @@ const DEAD_EARTH_ICONS = Object.freeze({
     {id:'frequency',title:'FRÉQUENCE INCONNUE',subtitle:'Rassemble des informations en fouillant des sites.',kind:'search',target:4,reward:{medkit:1,parts:2},xp:80}
   ];
 
+  // 10 armes jouables : 5 mêlée, 3 à feu, 2 spéciales.
+  // Tous les composants sont des objets de jeu fictifs, récupérés en fouille.
+  // La valeur workbench correspond au niveau d'atelier (une fois construit au refuge niv. 4).
   const BASE_WEAPONS = [
-    {id:'knife',name:'Couteau usé',type:'melee',bonus:2,icon:'╱',basic:true},
-    {id:'axe',name:'Hache de récupération',type:'melee',bonus:9,icon:'⚒',cost:{wood:2,metal:3,parts:1},workbench:1},
-    {id:'rifle',name:'Carabine rafistolée',type:'ranged',bonus:13,icon:'⌁',cost:{metal:4,parts:4,wood:1},workbench:3,power:true}
+    // damage: dégâts par coup [min,max] au niveau 1 ; wear: usure / utilisation (durabilité sur 100).
+    {id:'knife',name:'Couteau usé',type:'melee',family:'melee',damage:[7,11],wear:4,icon:'🗡',basic:true,workbench:1,upgradeCost:{metal:1,parts:1}},
+    {id:'axe',name:'Hache de récupération',type:'melee',family:'melee',damage:[16,24],wear:8,icon:'🪓',cost:{wood:2,metal:3,parts:1},workbench:1,upgradeCost:{wood:1,metal:2,parts:1}},
+    {id:'bat',name:'Batte renforcée',type:'melee',family:'melee',damage:[9,15],wear:5,icon:'🏏',cost:{wood:3,metal:2,cloth:1},workbench:1,upgradeCost:{wood:1,metal:1,parts:1}},
+    {id:'spear',name:'Lance de fortune',type:'melee',family:'melee',damage:[13,20],wear:7,icon:'🔱',cost:{wood:4,metal:2,cloth:1},workbench:2,upgradeCost:{wood:2,metal:1,parts:1}},
+    {id:'machete',name:'Machette de récupération',type:'melee',family:'melee',damage:[18,27],wear:6,icon:'⚔',cost:{metal:5,parts:3,cloth:1},workbench:3,upgradeCost:{metal:3,parts:2}},
+    {id:'pistol',name:'Pistolet récupéré',type:'ranged',family:'firearm',damage:[22,32],wear:5,icon:'🔫',cost:{metal:3,parts:3,cloth:1},workbench:3,upgradeCost:{metal:2,parts:2},ammo:'ammo'},
+    {id:'rifle',name:'Carabine rafistolée',type:'ranged',family:'firearm',damage:[32,46],wear:7,icon:'⌁',cost:{rifle_stock:1,rifle_trigger:1,rifle_barrel:1,metal:2,parts:2},workbench:4,upgradeCost:{metal:3,parts:3},ammo:'ammo',power:true},
+    {id:'shotgun',name:'Fusil à pompe de récupération',type:'ranged',family:'firearm',damage:[42,60],wear:9,icon:'💥',cost:{metal:6,parts:5,wood:2},workbench:5,upgradeCost:{metal:4,parts:3},ammo:'ammo'},
+    {id:'crossbow',name:'Arbalète artisanale',type:'ranged',family:'special',damage:[24,36],wear:4,icon:'🏹',cost:{wood:4,metal:2,cloth:2,parts:2},workbench:2,upgradeCost:{wood:2,metal:1,parts:2},ammo:'bolts'},
+    {id:'shock_baton',name:'Matraque électrique',type:'melee',family:'special',damage:[20,33],wear:6,icon:'⚡',cost:{metal:4,parts:5,cloth:1},workbench:4,upgradeCost:{metal:2,parts:3}}
   ];
+  const MAX_WEAPON_LEVEL=5;
+  function weaponUpgradeCost(w,level){
+    // level = niveau actuel : passer du niveau 1 au 2 multiplie le coût par 1 ;
+    // les niveaux avancés sont progressivement plus chers.
+    const factor=Math.max(1,level);
+    return Object.fromEntries(Object.entries(w.upgradeCost||{metal:1,parts:1}).map(([id,n])=>[id,n*factor]));
+  }
+  function weaponRepairCost(w){
+    const tier=game.weapons[w.id]?.level||1;
+    return {metal:(w.type==='ranged'?2:1)+Math.floor((tier-1)/2),parts:(w.type==='ranged'?2:1)+Math.floor((tier-1)/2)};
+  }
+  // Chaque amélioration accroît les dégâts, mais ne répare JAMAIS l'arme.
+  function weaponBonus(w){return (Math.max(1,game.weapons[w.id]?.level||1)-1)*(w.type==='ranged'?3:2)}
+  function weaponDamageRange(w){
+    const bonus=weaponBonus(w);
+    return [w.damage[0]+bonus,w.damage[1]+bonus];
+  }
+  function weaponStatus(w){
+    const durability=clamp(Number(game.weapons[w.id]?.durability)||0,0,100);
+    return durability===0?'⛔ CASSÉE — réparation obligatoire':durability<=25?'⚠ Très usée':durability<=50?'Usée':'Opérationnelle';
+  }
   const ZOMBIES = [
     {name:'Rôdeur',hp:30,damage:[5,13],xp:18},
     {name:'Coureur',hp:42,damage:[8,17],xp:26},
@@ -940,7 +986,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     {id:'pharmacy',name:'Pharmacie de quartier',type:'Pharmacie',symbol:'✚',dx:-.004,dy:.005,danger:38,loot:['bandage','cloth','medkit']},
     {id:'workshop',name:'Dépôt de bricolage',type:'Bricolage',symbol:'⚙',dx:.007,dy:-.004,danger:42,loot:['wood','metal','parts']},
     {id:'forest',name:'Lisière boisée',type:'Nature',symbol:'♣',dx:-.006,dy:-.004,danger:33,loot:['wood','cloth','water']},
-    {id:'warehouse',name:'Entrepôt désaffecté',type:'Entrepôt',symbol:'▥',dx:.012,dy:.008,danger:71,loot:['metal','parts','ammo']},
+    {id:'warehouse',name:'Entrepôt désaffecté',type:'Entrepôt',symbol:'▥',dx:.012,dy:.008,danger:71,loot:['metal','parts','ammo','bolts']},
     {id:'station',name:'Station-service vide',type:'Station',symbol:'◈',dx:-.010,dy:.008,danger:51,loot:['water','fuel','parts']}
   ];
   const missions = [
@@ -955,7 +1001,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     buildings:{collector:false,workbench:false,garden:false,generator:false,infirmary:false,watchtower:false,storage:false,radio:false},
     buildingLevels:{collector:0,workbench:0,garden:0,generator:0,infirmary:0,watchtower:0,storage:0,radio:0},
     storageInventory:{},radioOps:{day:'',entries:[]},radioEvent:{day:'',resolved:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',generatorState:{running:false,fuel:0,condition:100,updatedAt:Date.now()},electricSwitches:{...ELECTRIC_DEFAULTS},
-    weapons:{knife:{owned:true,durability:100},axe:{owned:false,durability:0},rifle:{owned:false,durability:0}},equippedWeapon:'knife',
+    weapons:Object.fromEntries(BASE_WEAPONS.map(w=>[w.id,{owned:!!w.basic,durability:w.basic?100:0,level:w.basic?1:0}])),equippedWeapon:'knife',
     craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},
     inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0},
     claimed:[],cooldowns:{},logs:[{time:Date.now(),message:'Transmission reçue. Bienvenue dans DEAD EARTH.'}]});
@@ -964,7 +1010,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
       const obj=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
       if(!obj || obj.version!==1 || !obj.inventory || !Array.isArray(obj.logs))return fresh();
       const base=fresh();
-      const weapons={};for(const [id,v] of Object.entries(base.weapons))weapons[id]={...v,...(obj.weapons?.[id]||{})};
+      const weapons={};for(const [id,v] of Object.entries(base.weapons)){
+        const old=obj.weapons?.[id]||{};
+        weapons[id]={...v,...old,level:old.owned?clamp(Math.floor(Number(old.level)||1),1,MAX_WEAPON_LEVEL):v.level,durability:clamp(Number(old.durability??v.durability)||0,0,100)};
+      }
       const baseLevel=clamp(Math.floor(Number(obj.baseLevel)||1),1,BASE_TIERS.length);
       // Migration sans perte : un ancien objet équipé reste dans la bonne case.
       const oldEquipped=BASE_WEAPONS.find(w=>w.id===obj.equippedWeapon&&weapons[w.id]?.owned);
@@ -1031,7 +1080,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),name:previous?.name||'Mon village',kind:previous?.kind||'village',center:[...home],radius,spatialCampaign:true};
     }
   }else game.territory=null;
-  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
+  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),weaponCatalog:BASE_WEAPONS.map(w=>({id:w.id,family:w.family,type:w.type,workbench:w.workbench,bonus:weaponBonus(w),damage:weaponDamageRange(w),wear:w.wear})),buildingRequirements:Object.fromEntries(BASE_BUILDINGS.map(b=>[b.id,b.minLevel])),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
@@ -1828,10 +1877,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
     greengrocer:{name:'Primeur',symbol:'▣',loot:['food','water'],danger:25},
     general:{name:'Commerce général',symbol:'▣',loot:['food','water','cloth'],danger:32},
     grocery:{name:'Épicerie',symbol:'▣',loot:['food','water'],danger:24},
-    hardware:{name:'Quincaillerie',symbol:'⚙',loot:['wood','metal','parts'],danger:44},
+    hardware:{name:'Quincaillerie',symbol:'⚙',loot:['wood','metal','parts','bolts'],danger:44},
     doityourself:{name:'Bricolage',symbol:'⚙',loot:['wood','metal','parts'],danger:44},
     car_parts:{name:'Pièces automobiles',symbol:'⚙',loot:['metal','parts'],danger:46},
-    outdoor:{name:'Équipement outdoor',symbol:'▣',loot:['cloth','parts','bandage'],danger:39},
+    outdoor:{name:'Équipement outdoor',symbol:'▣',loot:['cloth','parts','bandage','bolts'],danger:39},
     pharmacy:{name:'Pharmacie',symbol:'✚',loot:['bandage','cloth','medkit'],danger:39},
     chemist:{name:'Parapharmacie',symbol:'✚',loot:['bandage','cloth'],danger:30},
     fuel:{name:'Station-service',symbol:'◈',loot:['water','fuel','parts'],danger:46},
@@ -2142,6 +2191,15 @@ const DEAD_EARTH_ICONS = Object.freeze({
     game.noise=clamp(game.noise+m.noise+Math.round(soundLevel*.45));game.threat=clamp(game.threat+Math.round((m.noise+soundLevel*.55)*.25));
     game.totalSearches++;game.cooldowns[p.id]=Date.now()+90000;
     const amount=1+m.bonus+random(0,2),loot={};for(let i=0;i<amount;i++){let id=pick(p.loot);loot[id]=(loot[id]||0)+1;}
+    // Pièces de carabine virtuelles : trouvailles rares, uniquement dans de vrais lieux fouillés au GPS.
+    // Le joueur cherche d'abord les composants manquants, mais les doublons restent possibles.
+    const fragmentChance=p.loot.includes('parts')?.32:.11;
+    if(Math.random()<fragmentChance){
+      const fragmentIds=['rifle_stock','rifle_trigger','rifle_barrel'];
+      const missing=fragmentIds.filter(id=>quantity(id)+storageQuantity(id)===0);
+      const fragment=pick(missing.length?missing:fragmentIds);
+      loot[fragment]=(loot[fragment]||0)+1;
+    }
     const found=takeLoot(loot);xpGain(12+(p.danger>>3));
     const risk=clamp(8+p.danger*.45+m.risk+game.noise*.16+soundLevel*.40,0,92);
     log(`Fouille ${m.name.toLowerCase()} · ${p.name} : ${found.length?found.join(', '):'sac plein'}${mic.hasMic?` · bruit ${soundLevel}/100`:''}.`);
@@ -2172,8 +2230,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(!combat)return;
     const z=combat.z;
     modal({tag:'⚠ CONTACT HOSTILE',title:`${z.name.toUpperCase()} DÉTECTÉ`,text:note,
-      content:`<div class="combat-meter"><div><b>☣ ${z.name}</b><strong>${Math.max(0,z.hp)} / ${z.maxHp} PV</strong></div><div class="progress"><div style="width:${100*clamp(z.hp,0,z.maxHp)/z.maxHp}%"></div></div></div><div class="target-info"><span>♥ Tes PV : ${game.hp}</span><span>ϟ Endurance : ${game.energy}</span><span>✧ Munitions : ${quantity('ammo')}</span></div>`,
-      actions:[{name:'⚔ ATTAQUER',fn:()=>combatAction('attack')},{name:'✧ TIRER',fn:()=>combatAction('shoot')},{name:'◈ ESQUIVER',fn:()=>combatAction('dodge'),alt:true},{name:'↗ FUIR',fn:()=>combatAction('flee'),alt:true}]
+      content:`<div class="combat-meter"><div><b>☣ ${z.name}</b><strong>${Math.max(0,z.hp)} / ${z.maxHp} PV</strong></div><div class="progress"><div style="width:${100*clamp(z.hp,0,z.maxHp)/z.maxHp}%"></div></div></div><div class="target-info"><span>♥ Tes PV : ${game.hp}</span><span>ϟ Endurance : ${game.energy}</span><span>✧ ${safe(ITEMS[equippedWeaponFor('ranged')?.ammo||'ammo'].label)} : ${quantity(equippedWeaponFor('ranged')?.ammo||'ammo')}</span></div><p class="help-text">⚔ ${equippedWeaponFor('melee')?safe(equippedWeaponFor('melee').name)+' · '+game.weapons[equippedWeaponFor('melee').id].durability+'/100':'Mains nues'} · ✧ ${equippedWeaponFor('ranged')?safe(equippedWeaponFor('ranged').name)+' · '+game.weapons[equippedWeaponFor('ranged').id].durability+'/100':'Aucune arme à distance'}</p>`,
+      actions:[{name:equippedWeaponFor('melee')&&game.weapons[equippedWeaponFor('melee').id]?.durability>0?'⚔ ATTAQUER':'👊 MAINS NUES',fn:()=>combatAction('attack')},{name:'✧ TIRER',fn:()=>combatAction('shoot')},{name:'◈ ESQUIVER',fn:()=>combatAction('dodge'),alt:true},{name:'↗ FUIR',fn:()=>combatAction('flee'),alt:true}]
     });
   }
   function combatAction(action){
@@ -2189,12 +2247,24 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const z=combat.z;let note='';
     if(action==='attack'){
       if(game.energy<8){showCombat('Tu es trop épuisé pour attaquer. Tente de fuir.');return;}
-      game.energy-=8;const bonus=wearWeapon('melee');const dmg=random(10,20)+Math.floor(game.level*.9)+bonus;z.hp-=dmg;game.noise=clamp(game.noise+6);
-      note=`Tu frappes le ${z.name.toLowerCase()} et infliges ${dmg} dégâts.`;
+      const weapon=equippedWeaponFor('melee');
+      const usable=weapon&&game.weapons[weapon.id].durability>0;
+      game.energy-=8;
+      const dmg=usable?random(...weaponDamageRange(weapon)):random(2,5);
+      const wear=usable?wearWeapon('melee'):0;
+      z.hp-=dmg;game.noise=clamp(game.noise+6);
+      note=usable?`${weapon.name} : ${dmg} dégâts, −${wear} de durabilité.${game.weapons[weapon.id].durability===0?' ⚠ ARME CASSÉE !':''}`:
+        `Ton arme est cassée : tu frappes à mains nues (${dmg} dégâts). Répare ton arme à l’atelier.`;
     }else if(action==='shoot'){
-      if(quantity('ammo')===0){showCombat('Tu n’as plus de munitions.');return;}
-      game.inventory.ammo--;const bonus=wearWeapon('ranged');const dmg=random(24,38)+Math.floor(game.level*.8)+bonus;z.hp-=dmg;
-      game.noise=clamp(game.noise+30);game.threat=clamp(game.threat+12);note=`Coup de feu ! ${dmg} dégâts. Le bruit attire les infectés.`;
+      const activeRanged=equippedWeaponFor('ranged');
+      if(!activeRanged||game.weapons[activeRanged.id].durability<=0){showCombat('Équipe une arme de tir en bon état dans Perso.');return;}
+      const projectile=activeRanged.ammo||'ammo';
+      if(quantity(projectile)===0){showCombat(`Plus de ${ITEMS[projectile].label.toLowerCase()}.`);return;}
+      game.inventory[projectile]--;
+      const dmg=random(...weaponDamageRange(activeRanged));
+      const wear=wearWeapon('ranged');z.hp-=dmg;
+      game.noise=clamp(game.noise+(activeRanged.id==='crossbow'?7:30));game.threat=clamp(game.threat+(activeRanged.id==='crossbow'?3:12));
+      note=`${activeRanged.name} : ${dmg} dégâts, −${wear} de durabilité.${game.weapons[activeRanged.id].durability===0?' ⚠ ARME CASSÉE !':''} ${activeRanged.id==='crossbow'?'Tir discret.':'Le bruit attire les infectés.'}`;
     }else if(action==='dodge'){
       if(game.energy<8){showCombat('Pas assez d’endurance pour esquiver.');return;}
       game.energy-=8;combat.guard=true;note='Tu anticipes son attaque et réduis les dégâts.';
@@ -2274,7 +2344,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function gearDetails(slot){
     if(slot==='primary'||slot==='secondary'){
       const id=game.loadout[slot],w=BASE_WEAPONS.find(x=>x.id===id&&game.weapons[id]?.owned);
-      return w?{icon:w.icon,label:w.name,desc:`Durabilité : ${game.weapons[id].durability}/100`,broken:game.weapons[id].durability<=0}:null;
+      return w?{icon:w.icon,label:w.name,desc:`Dégâts : ${weaponDamageRange(w).join('–')} · Usure : −${w.wear}/attaque · État : ${game.weapons[id].durability}/100${game.weapons[id].durability<=0?' · CASSÉE':''}`,broken:game.weapons[id].durability<=0}:null;
     }
     if(slot==='bag')return game.loadout.bag==='reinforced'&&game.craftedGear.reinforced?{icon:'▣',label:'Sac renforcé',desc:'40 kg maximum'}:{icon:'▣',label:'Sac usé',desc:'30 kg maximum'};
     if(slot==='armor')return game.loadout.armor==='padded'&&game.craftedGear.padded?{icon:'⛨',label:'Gilet rembourré',desc:'−25 % de dégâts'}:null;
@@ -2286,7 +2356,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       btn.classList.toggle('is-empty',!gear);
       btn.classList.toggle('is-broken',!!gear?.broken);
       const display=slot==='primary'||slot==='secondary'?
-        (gear?.label.startsWith('Couteau')?'Couteau':gear?.label.startsWith('Hache')?'Hache':gear?.label.startsWith('Carabine')?'Carabine':gear?.label||'VIDE'):
+        (gear?.label||'VIDE'):
         slot==='bag'?(game.loadout.bag==='reinforced'?'Sac 40 kg':'Sac 30 kg'):
         (gear?'Gilet':'VIDE');
       btn.innerHTML=`<span class="equip-symbol" aria-hidden="true">${gear?.icon||{primary:'⚔',secondary:'⌁',bag:'▣',armor:'⛨'}[slot]}</span><span class="equip-equipped">${safe(display)}</span><small>${label}</small>`;
@@ -2312,12 +2382,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function openEquipment(slot){
     if(combat)return toast('Termine d’abord ton combat.');
     let options=[];
-    if(slot==='primary')options=BASE_WEAPONS.filter(w=>w.type==='melee'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Bonus +${w.bonus} · État ${game.weapons[w.id].durability}/100`}));
-    if(slot==='secondary')options=[{id:'',label:'Aucune arme',icon:'—',desc:'Emplacement libre'},...BASE_WEAPONS.filter(w=>w.type==='ranged'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Bonus +${w.bonus} · État ${game.weapons[w.id].durability}/100`}))];
+    if(slot==='primary')options=BASE_WEAPONS.filter(w=>w.type==='melee'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Dégâts ${weaponDamageRange(w).join('–')} · Usure −${w.wear} · Niveau ${game.weapons[w.id].level||1}/5 · État ${game.weapons[w.id].durability}/100${game.weapons[w.id].durability<=0?' · CASSÉE':''}`}));
+    if(slot==='secondary')options=[{id:'',label:'Aucune arme',icon:'—',desc:'Emplacement libre'},...BASE_WEAPONS.filter(w=>w.type==='ranged'&&game.weapons[w.id]?.owned).map(w=>({id:w.id,label:w.name,icon:w.icon,desc:`Dégâts ${weaponDamageRange(w).join('–')} · Usure −${w.wear} · Niveau ${game.weapons[w.id].level||1}/5 · État ${game.weapons[w.id].durability}/100${game.weapons[w.id].durability<=0?' · CASSÉE':''}`}))];
     if(slot==='bag')options=[{id:'basic',label:'Sac usé',icon:'▣',desc:'Capacité : 30 kg'},...(game.craftedGear.reinforced?[{id:'reinforced',label:'Sac renforcé',icon:'▣',desc:'Capacité : 40 kg'}]:[])];
     if(slot==='armor')options=[{id:'none',label:'Aucune protection',icon:'—',desc:'Sans bonus'},...(game.craftedGear.padded?[{id:'padded',label:'Gilet rembourré',icon:'⛨',desc:'−25 % dégâts des zombies'}]:[])];
     if(!options.length)return;
-    const detail=slot==='secondary'?'Fabrique une carabine à la Base pour débloquer l’arme à feu.':slot==='bag'||slot==='armor'?'Tu peux fabriquer de nouveaux équipements dans le menu Sac.':'Fabrique d’autres armes à la Base pour les équiper.';
+    const detail=slot==='secondary'?'Fabrique une arme de tir à l’atelier pour débloquer cet emplacement.':slot==='bag'||slot==='armor'?'Tu peux fabriquer de nouveaux équipements dans le menu Sac.':'Fabrique d’autres armes à la Base pour les équiper.';
     const content=`<div class="gear-option-list">${options.map(o=>`<button type="button" class="gear-option ${game.loadout[slot]===o.id?'active':''}" data-gear-choice="${safe(o.id)}"><span class="gear-icon" aria-hidden="true">${o.icon}</span><span><b>${safe(o.label)} ${game.loadout[slot]===o.id?'✓':''}</b><small>${safe(o.desc)}</small></span></button>`).join('')}</div><p class="help-text">${detail}</p>`;
     modal({tag:'ÉQUIPEMENT DU SURVIVANT',title:LOADOUT_LABELS[slot],text:'Sélectionne ton équipement pour cet emplacement.',content,actions:[{name:'FERMER',fn:closeModal,alt:true},...(slot==='bag'||slot==='armor'?[{name:'VOIR LE SAC',fn:()=>{closeModal();switchTab('inventory')}}]:[{name:'VOIR LA BASE',fn:()=>{closeModal();switchTab('base')}}])]});
     $('modalContent').querySelectorAll('[data-gear-choice]').forEach(btn=>btn.addEventListener('click',()=>chooseGear(slot,btn.dataset.gearChoice)));
@@ -2514,32 +2584,50 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const w=BASE_WEAPONS.find(x=>x.id===id);
     if(!w||w.basic||!hasBuilding('workbench')||game.weapons[id]?.owned)return;
     if(!isConsumerPowered('workbench'))return toast('Atelier hors tension : démarre le générateur et active son circuit.');
-    if(game.workbenchLevel<w.workbench)return toast('Améliore ton atelier pour cette arme.');
-    if(w.power&&!powered())return toast('Active le générateur pour fabriquer cette arme.');
-    if(!canPayBase(w.cost))return toast('Pas assez de ressources pour cette arme.');
-    payBase(w.cost);game.weapons[id]={owned:true,durability:100};game.equippedWeapon=id;game.loadout[w.type==='melee'?'primary':'secondary']=id;xpGain(35);
-    commit(`${w.name} fabriquée et équipée. Durabilité : 100/100.`);
+    if(buildingLevel('workbench')<w.workbench)return toast(`Atelier niveau ${w.workbench} requis pour cette arme.`);
+    if(!canPayBase(w.cost))return toast('Pièces ou ressources manquantes (sac + réserve).');
+    if(!payBase(w.cost))return;
+    game.weapons[id]={owned:true,durability:100,level:1};
+    game.equippedWeapon=id;game.loadout[w.type==='melee'?'primary':'secondary']=id;xpGain(35);
+    commit(`${w.name} fabriquée et équipée · arme niveau 1/5, durabilité 100/100.`);
   }
   function equipWeapon(id){
     if(!game.weapons[id]?.owned)return;
-    const w=BASE_WEAPONS.find(w=>w.id===id);if(!w)return;
+    const w=BASE_WEAPONS.find(x=>x.id===id);if(!w)return;
     game.loadout[w.type==='melee'?'primary':'secondary']=id;game.equippedWeapon=id;commit(`${w.name} équipée.`);
   }
+  function upgradeWeapon(id){
+    const w=BASE_WEAPONS.find(x=>x.id===id),item=game.weapons[id];
+    if(!w||!item?.owned)return;
+    if(!isConsumerPowered('workbench'))return toast('Atelier hors tension : amélioration impossible.');
+    const tier=clamp(Math.floor(Number(item.level)||1),1,MAX_WEAPON_LEVEL);
+    if(tier>=MAX_WEAPON_LEVEL)return toast('Arme déjà au niveau maximum.');
+    const required=Math.min(MAX_BUILDING_LEVEL,w.workbench+Math.floor(tier/2));
+    if(buildingLevel('workbench')<required)return toast(`Atelier niveau ${required} requis pour cette amélioration.`);
+    const cost=weaponUpgradeCost(w,tier);
+    if(!canPayBase(cost))return toast('Matériaux insuffisants pour améliorer cette arme.');
+    if(!payBase(cost))return;
+    item.level=tier+1;xpGain(22);
+    commit(`${w.name} améliorée au niveau ${item.level}/${MAX_WEAPON_LEVEL} · dégâts ${weaponDamageRange(w).join('–')}. Durabilité inchangée : ${item.durability}/100.`);
+  }
   function repairWeapon(id){
-    if(!hasBuilding('workbench')||!game.weapons[id]?.owned)return;
+    const w=BASE_WEAPONS.find(x=>x.id===id),item=game.weapons[id];
+    if(!w||!hasBuilding('workbench')||!item?.owned)return;
     if(!isConsumerPowered('workbench'))return toast('Atelier hors tension : réparation impossible.');
-    if(game.weapons[id].durability>=100)return toast('Cette arme est déjà en bon état.');
-    const cost=id==='rifle'?{metal:2,parts:2}:{metal:1,parts:1};
+    if(item.durability>=100)return toast('Cette arme est déjà en bon état.');
+    const cost=weaponRepairCost(w);
     if(!canPayBase(cost))return toast('Ressources insuffisantes pour réparer cette arme.');
-    payBase(cost);game.weapons[id].durability=clamp(game.weapons[id].durability+Math.min(85,45+10*(buildingLevel('workbench')-1)));xpGain(12);
-    commit(`${BASE_WEAPONS.find(w=>w.id===id).name} réparée (${game.weapons[id].durability}/100).`);
+    if(!payBase(cost))return;
+    item.durability=clamp(item.durability+Math.min(85,45+10*(buildingLevel('workbench')-1)));xpGain(12);
+    commit(`${w.name} réparée (${item.durability}/100).`);
   }
   function wearWeapon(type){
     const weapon=equippedWeaponFor(type),status=weapon&&game.weapons[weapon.id];
     if(!weapon||!status?.owned||status.durability<=0||weapon.type!==type)return 0;
-    status.durability=clamp(status.durability-(weapon.id==='knife'?3:7));
-    if(status.durability===0)log(`${weapon.name} usée : atelier nécessaire pour la réparer.`);
-    return weapon.bonus;
+    const before=status.durability;
+    status.durability=clamp(before-weapon.wear,0,100);
+    if(status.durability===0)log(`⛔ ${weapon.name} cassée : inutilisable jusqu’à sa réparation à l’atelier.`);
+    return before-status.durability;
   }
   // --- SURVEILLANCE, RÉSERVE ET RADIO : fonctionnalités de la Base ---
   let lookoutCache={time:0,home:'',level:0,result:null};
@@ -2725,10 +2813,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('baseBuildList').innerHTML=BASE_BUILDINGS.map(b=>{
       const level=buildingLevel(b.id),locked=game.baseLevel<b.minLevel,max=level>=MAX_BUILDING_LEVEL;
       const next=level+1,cost=max?null:nextBuildingCost(b,next),enough=cost?canPayBase(cost):false;
-      const msg=locked?`🔒 REFUGE NIV. ${b.minLevel}`:max?'★ NIVEAU MAXIMAL':`<div class="base-cost-line">${baseCostStock(cost)}</div>`;
+      const msg=locked?`🔒 REFUGE NIV. ${b.minLevel} REQUIS`:max?'★ NIVEAU MAXIMAL':`<div class="base-cost-line">${baseCostStock(cost)}</div>`;
       return `<div class="base-build ${level?'is-built':''}"><div class="base-build-top"><span class="base-build-symbol">${b.icon}</span><span class="base-build-name">${safe(b.name)}</span></div>
         <div class="base-build-desc">${safe(b.desc)}</div>
-        <div class="base-build-status"><strong>${level?'NIV. '+level+'/'+MAX_BUILDING_LEVEL:'NON CONSTRUIT'}</strong></div>
+        <div class="base-build-status"><strong>${level?'NIV. '+level+'/'+MAX_BUILDING_LEVEL:'NON CONSTRUIT'}</strong><small> · Déblocage refuge niveau ${b.minLevel}</small></div>
         <div class="base-progress-line"><i style="width:${level*20}%"></i></div>
         <div class="base-build-desc">${safe(buildingEffect(b.id,level))}</div>
         <div class="base-build-status">${msg}</div>
@@ -2749,7 +2837,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const collectorReady=hasBuilding('collector')&&game.productionDays.collector!==localDay(),gardenReady=hasBuilding('garden')&&game.productionDays.garden!==localDay();
     $('baseProduction').innerHTML=`
       <div class="base-production-row"><div class="base-production-head"><b>◉ RÉCUPÉRATEUR D’EAU</b><span>${hasBuilding('collector')?'+'+(2*buildingLevel('collector'))+' / jour':'NON CONSTRUIT'}</span></div><p>${collectorReady?(2*buildingLevel('collector'))+' eaux disponibles pour ton sac.':hasBuilding('collector')?'Récolte du jour déjà récupérée.':'Construis le récupérateur pour obtenir de l’eau.'}</p><button class="pixel-button" data-produce="collector" ${!collectorReady?'disabled':''}>${collectorReady?'RÉCUPÉRER '+(2*buildingLevel('collector'))+' EAUX':'INDISPONIBLE'}</button></div>
-      <div class="base-production-row"><div class="base-production-head"><b>♣ POTAGER</b><span>${hasBuilding('garden')?'+'+buildingLevel('garden')+' / jour':'NON CONSTRUIT'}</span></div><p>${gardenReady?buildingLevel('garden')+' ration(s) disponibles.':hasBuilding('garden')?'Récolte du jour déjà récupérée.':'Construis le potager au niveau 2.'}</p><button class="pixel-button" data-produce="garden" ${!gardenReady?'disabled':''}>${gardenReady?'RÉCUPÉRER '+buildingLevel('garden')+' RATION(S)':'INDISPONIBLE'}</button></div>
+      <div class="base-production-row"><div class="base-production-head"><b>♣ POTAGER</b><span>${hasBuilding('garden')?'+'+buildingLevel('garden')+' / jour':'NON CONSTRUIT'}</span></div><p>${gardenReady?buildingLevel('garden')+' ration(s) disponibles.':hasBuilding('garden')?'Récolte du jour déjà récupérée.':'Construis le potager dès le niveau 1.'}</p><button class="pixel-button" data-produce="garden" ${!gardenReady?'disabled':''}>${gardenReady?'RÉCUPÉRER '+buildingLevel('garden')+' RATION(S)':'INDISPONIBLE'}</button></div>
       <div class="base-production-row generator-box" id="generatorPanel"><div class="base-production-head"><b>⚡ GÉNÉRATEUR</b><span id="generatorPowerStatus">${powered()?'● EN MARCHE':'○ ÉTEINT'}</span></div>
         <div class="generator-meter-head"><b id="generatorFuelLabel">⛽ ${game.generatorState.fuel.toFixed(2)} / ${GENERATOR_TANK_CAPACITY} unités</b><span id="generatorFuelPercent">${Math.round(game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100)} %</span></div>
         <div class="generator-meter" role="progressbar" aria-label="Essence du générateur" aria-valuemin="0" aria-valuemax="${GENERATOR_TANK_CAPACITY}" aria-valuenow="${game.generatorState.fuel.toFixed(2)}" id="generatorFuelMeter"><i id="generatorFuelFill" style="width:${game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100}%"></i></div>
@@ -2766,16 +2854,35 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('generatorPowerBtn').addEventListener('click',()=>setGeneratorRunning(!powered()));
     $('generatorRepair').addEventListener('click',repairGenerator);
     renderElectricPanel();
-    const wb=hasBuilding('workbench');
-    $('baseWeapons').innerHTML=`<div class="base-production-row"><div class="base-production-head"><b>⚒ ATELIER</b><span>NIV. ${game.workbenchLevel} / ${MAX_BUILDING_LEVEL}</span></div><p>${!wb?'Construis un atelier pour fabriquer et réparer.':game.workbenchLevel>=3?`Hache et carabine débloquées · réparations +${Math.min(85,45+10*(game.workbenchLevel-1))} points.`:'La hache est disponible. L’atelier niveau 3 débloque la carabine.'}</p><p>${isConsumerPowered('workbench')?'⚡ ATELIER ALIMENTÉ':'🔴 ATELIER INACTIF : GÉNÉRATEUR OU CIRCUIT ÉTEINT'} · Améliore l’atelier dans « Constructions de survie ».</p></div>`+
+    const wb=hasBuilding('workbench'),benchLevel=buildingLevel('workbench'),benchOn=isConsumerPowered('workbench');
+    $('baseWeapons').innerHTML=`<div class="base-production-row"><div class="base-production-head"><b>⚒ ATELIER D’ARMES</b><span>NIV. ${benchLevel} / ${MAX_BUILDING_LEVEL}</span></div>
+      <p>${!wb?'🔒 Construis l’atelier après avoir atteint le refuge niveau 4.':'10 armes au total : 5 de mêlée, 3 armes à feu et 2 spéciales. Chaque arme va du niveau 1 au niveau 5.'}</p>
+      <p>${benchOn?'⚡ ATELIER ALIMENTÉ':'🔴 ATELIER INACTIF : démarre le générateur et active son circuit.'}</p>
+      <p>⌕ Carabine : récupère en fouille les 3 pièces virtuelles (crosse, gâchette et canon), puis fabrique-la à l’atelier niveau 4.</p>
+      <p>Chaque arme a ses propres dégâts et son usure par coup. À 0/100, elle se casse et devient inutilisable jusqu’à réparation. Améliorer n’effectue aucune réparation.</p>
+      <p>Les fabrications, réparations et améliorations consomment les ressources du sac ou de la réserve.</p></div>`+
       BASE_WEAPONS.map(w=>{
-        const item=game.weapons[w.id]||{owned:false,durability:0},equip=game.loadout[w.type==='melee'?'primary':'secondary']===w.id;
-        const buildable=wb&&isConsumerPowered('workbench')&&!item.owned&&game.workbenchLevel>=(w.workbench||0)&&canPayBase(w.cost||{});
-        return `<div class="base-weapon-card"><div class="base-weapon-head"><strong>${w.icon} ${safe(w.name)}</strong><span>${item.owned?'DUR. '+item.durability+'%':'À FABRIQUER'}</span></div><p>${w.type==='melee'?'Arme de mêlée':'Arme de tir'} · Bonus dégâts +${w.bonus} · ${isConsumerPowered('workbench')?'⚡ courant actif':'🔌 atelier hors tension'}</p>${item.owned?`<div class="base-weapon-bar"><i style="width:${item.durability}%"></i></div>`:''}
-          <div class="base-weapon-actions">${item.owned?`<button data-equip="${w.id}" ${equip?'disabled':''}>${equip?'ÉQUIPÉE':'ÉQUIPER'}</button><button data-repair-weapon="${w.id}" ${!wb||!isConsumerPowered('workbench')||item.durability>=100||!canPayBase(w.id==='rifle'?{metal:2,parts:2}:{metal:1,parts:1})?'disabled':''}>RÉPARER +${Math.min(85,45+10*(buildingLevel('workbench')-1))}</button>`:`<button data-make-weapon="${w.id}" ${buildable?'':'disabled'}>${w.basic?'ARME DE BASE':`FABRIQUER · ${safe(costText(w.cost||{}))}`}</button>`}</div></div>`;
+        const item=game.weapons[w.id]||{owned:false,durability:0,level:0},equip=game.loadout[w.type==='melee'?'primary':'secondary']===w.id;
+        const tier=clamp(item.level||1,1,MAX_WEAPON_LEVEL),repairCost=weaponRepairCost(w),improveCost=weaponUpgradeCost(w,tier);
+        const nextWorkbench=Math.min(MAX_BUILDING_LEVEL,w.workbench+Math.floor(tier/2));
+        const buildable=!w.basic&&wb&&benchOn&&!item.owned&&benchLevel>=w.workbench&&canPayBase(w.cost||{});
+        const canRepair=item.owned&&benchOn&&item.durability<100&&canPayBase(repairCost);
+        const canImprove=item.owned&&tier<MAX_WEAPON_LEVEL&&benchOn&&benchLevel>=nextWorkbench&&canPayBase(improveCost);
+        return `<div class="base-weapon-card ${item.owned&&item.durability<=0?'is-broken':''}"><div class="base-weapon-head"><strong>${w.icon} ${safe(w.name)}</strong><span>${item.owned?`NIV. ${tier}/5`:'À DÉBLOQUER'}</span></div>
+          <p>${w.family==='firearm'?'🔫 ARME À FEU':w.family==='special'?'✨ SPÉCIALE':'⚔ MÊLÉE'} · ${w.type==='ranged'?'Tir':'Corps à corps'} · <strong>Dégâts : ${weaponDamageRange(w).join('–')}</strong> · Usure : −${w.wear}/attaque · Atelier niveau ${w.workbench} requis</p>
+          ${item.owned?`<div class="base-weapon-bar ${item.durability<=0?'is-broken':''}"><i style="width:${item.durability}%"></i></div><p><strong>${weaponStatus(w)}</strong> · État : ${item.durability}/100 · ≈ ${Math.ceil(item.durability/w.wear)} utilisation(s) restantes</p>`:`<p>Fabrication : ${w.basic?'Arme de départ':baseCostStock(w.cost)}</p>`}
+          ${item.owned&&tier<MAX_WEAPON_LEVEL?`<p>Amélioration vers niveau ${tier+1} · Atelier niveau ${nextWorkbench} : ${baseCostStock(improveCost)}</p>`:''}
+          ${item.owned&&item.durability<100?`<p>Réparation : ${baseCostStock(repairCost)}</p>`:''}
+          <div class="base-weapon-actions">${item.owned?
+            `<button data-equip="${w.id}" ${equip?'disabled':''}>${equip?'ÉQUIPÉE':'ÉQUIPER'}</button>
+             <button data-upgrade-weapon="${w.id}" ${canImprove?'':'disabled'}>${tier>=MAX_WEAPON_LEVEL?'NIV. MAX':'AMÉLIORER ↑ '+(tier+1)}</button>
+             <button data-repair-weapon="${w.id}" ${canRepair?'':'disabled'}>RÉPARER</button>`:
+            `<button data-make-weapon="${w.id}" ${buildable?'':'disabled'}>${w.basic?'ARME DE DÉPART':`FABRIQUER · ATELIER NIV. ${w.workbench}`}</button>`}</div>
+        </div>`;
       }).join('');
     $('baseWeapons').querySelectorAll('[data-equip]').forEach(b=>b.addEventListener('click',()=>equipWeapon(b.dataset.equip)));
     $('baseWeapons').querySelectorAll('[data-repair-weapon]').forEach(b=>b.addEventListener('click',()=>repairWeapon(b.dataset.repairWeapon)));
+    $('baseWeapons').querySelectorAll('[data-upgrade-weapon]').forEach(b=>b.addEventListener('click',()=>upgradeWeapon(b.dataset.upgradeWeapon)));
     $('baseWeapons').querySelectorAll('[data-make-weapon]').forEach(b=>b.addEventListener('click',()=>makeWeapon(b.dataset.makeWeapon)));
   }
   function updateGeneratorPanel(){
