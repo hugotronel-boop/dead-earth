@@ -830,8 +830,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
         if(m.kind==='home'||m.selected){ctx.font='bold 10px monospace';ctx.fillStyle='#151b1c';const label=(m.label||'').slice(0,18);ctx.fillRect(px-label.length*3.2-4,py+19,label.length*6.4+8,14);ctx.fillStyle='#fff0d0';ctx.fillText(label,px,py+26)}
       }
       ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#2e2e2a';ctx.globalAlpha=.7;ctx.font='9px monospace';ctx.fillText(this.tileTemplate?'DÉTAILS EN CHARGEMENT...':'CARTE EN MODE TERRAIN',9,14);ctx.globalAlpha=1;
-      // V2.8 : brouillard nocturne progressif, rayons élargis et ancrés aux coordonnées GPS.
-      // On dessine un masque séparé pour ne jamais effacer les tuiles ou les marqueurs.
+      // V2.9 : halo nocturne à chute de visibilité prononcée, fixé au GPS.
+      // Profil commun aux trois sources : sur un rayon nominal de 50 m,
+      // 10 m = nettement visible, 20 m = presque noir, 30 m = obscurité.
+      // Même dégradé proportionnel pour la lampe (150 m) et le refuge (600 m).
       const vision=window.DEAD_EARTH_NIGHT_VIEW?.();
       if(vision?.night){
         if(!this.nightMask){this.nightMask=document.createElement('canvas');this.nightCtx=this.nightMask.getContext('2d')}
@@ -840,27 +842,33 @@ const DEAD_EARTH_ICONS = Object.freeze({
         }
         const fog=this.nightCtx;fog.globalCompositeOperation='source-over';
         fog.clearRect(0,0,W,H);
-        fog.fillStyle='rgba(2,5,13,.985)';fog.fillRect(0,0,W,H);
+        fog.fillStyle='rgba(2,5,13,.99)';fog.fillRect(0,0,W,H);
         fog.globalCompositeOperation='destination-out';
-        const carve=(loc,meters,solidFraction=0.45,clarity=1)=>{
+        const carve=(loc,meters)=>{
           if(!Array.isArray(loc)||!Number.isFinite(loc[0])||!Number.isFinite(loc[1]))return;
           const p=this.position(loc[0],loc[1]);
           const edge=this.position(loc[0]+meters/111195,loc[1]);
           const r=Math.abs(edge.y-p.y);
           if(r<.25||p.x+r<0||p.y+r<0||p.x-r>W||p.y-r>H)return;
           const light=fog.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
-          light.addColorStop(0,`rgba(0,0,0,${clarity})`);
-          light.addColorStop(Math.min(.96,solidFraction),`rgba(0,0,0,${clarity})`);
-          light.addColorStop(.79,`rgba(0,0,0,${clarity*.65})`);
+          // alpha = fraction du brouillard qu'on retire : 1 = vue claire ; 0 = noir.
+          // Le bord externe de chaque portée reste sombre pour simuler la nuit.
+          light.addColorStop(0,'rgba(0,0,0,1)');
+          light.addColorStop(.20,'rgba(0,0,0,1)');
+          light.addColorStop(.27,'rgba(0,0,0,.82)');
+          light.addColorStop(.34,'rgba(0,0,0,.44)');
+          light.addColorStop(.40,'rgba(0,0,0,.10)');
+          light.addColorStop(.50,'rgba(0,0,0,.025)');
+          light.addColorStop(.60,'rgba(0,0,0,0)');
           light.addColorStop(1,'rgba(0,0,0,0)');
           fog.fillStyle=light;fog.fillRect(p.x-r,p.y-r,2*r,2*r);
         };
-        // 600 m autour du refuge, seulement si le circuit d'éclairage est sous tension.
-        if(vision.light)carve(vision.home,600,.52,.98);
-        // Une lampe équipée et allumée étend la vision du joueur à 150 m.
-        if(vision.flashlight)carve(vision.player,150,.38,.99);
-        // Sans lampe, environ 50 m de visibilité autour du carré jaune.
-        carve(vision.player,50,.50,1);
+        // Eclairage alimenté : 600 m théoriques, mais chute rapide à partir de 120 m.
+        if(vision.light)carve(vision.home,600);
+        // Lampe allumée : 150 m théoriques, clairement visible sur environ 30 m.
+        if(vision.flashlight)carve(vision.player,150);
+        // Vision naturelle : 50 m théoriques, nette jusque 10 m et noire après ~30 m.
+        carve(vision.player,50);
         fog.globalCompositeOperation='source-over';
         ctx.drawImage(this.nightMask,0,0,W,H);
         // Le marqueur GPS reste repérable dans son halo de 50 m.

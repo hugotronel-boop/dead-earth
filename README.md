@@ -1,11 +1,25 @@
-# DEAD EARTH — V2.8 Vision nocturne
+# DEAD EARTH — V2.9 · Dégradé nocturne renforcé
 
-Modification ciblée des distances d’éclairage :
+Version légère en un seul `index.html`, dérivée de la V2.8.
 
-- Sans lampe : halo progressif de 50 m autour de la position GPS.
-- Lampe torche allumée et équipée : halo progressif de 150 m.
-- Éclairage du refuge sous tension : rayon de 600 m.
+## Changement unique
 
-La carte et les mécaniques des autres menus restent inchangées.
+Le brouillard nocturne conserve les sources de lumière de la V2.8, mais le halo tombe désormais rapidement vers le noir. La visibilité se calcule réellement en mètres sur la carte :
 
-Pour GitHub Pages : remplacez uniquement le fichier `index.html` de votre dépôt par celui-ci.
+| Mode | Vision claire environ | Presque noir environ | Noir à partir d'environ |
+|---|---:|---:|---:|
+| Sans lampe | 10 m | 20 m | 30 m |
+| Lampe allumée | 30 m | 60 m | 90 m |
+| Refuge éclairé par le générateur | 120 m | 240 m | 360 m |
+
+Les rayons nominaux de la V2.8 restent 50/150/600 m, mais leurs bords sont maintenant pratiquement invisibles : il s'agit d'un effet de halo lumineux beaucoup plus abrupt.
+
+## Installation
+
+Remplacer uniquement le fichier `index.html` à la racine du dépôt GitHub Pages. Aucune autre modification nécessaire. Les données sauvegardées sur le même domaine restent inchangées.
+
+## Vérifications
+
+- Syntaxe des trois blocs JavaScript : OK.
+- Rendu du halo naturel, de la lampe et de l'éclairage du refuge dans Chromium avec l'heure de nuit simulée : OK, aucune erreur de page.
+- Le GPS réel de l'iPhone et la disponibilité des données cartographiques sont à vérifier sur l'appareil.
