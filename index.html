@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.0 Sac de survie</title>
+  <title>DEAD EARTH — V3.1 Fonds externes</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -407,12 +407,83 @@
 #page-base .base-accordion-content>#territoryBaseCard>.pixel-heading{display:none;}
 @media(prefers-reduced-motion:reduce){#page-base .base-chevron{transition:none}}
 </style>
+
+<!-- DEAD EARTH V3.1 — fonds externes dans le dossier « image jeux » -->
+<style id="dead-earth-v31-backgrounds">
+:root {
+  /* Un seul emplacement à modifier pour changer un fond ultérieurement. */
+  --de-bg-carte: url("./image%20jeux/fond-carte.jpg");
+  --de-bg-base: url("./image%20jeux/fond-base.jpg");
+  --de-bg-sac: url("./image%20jeux/fond-sac.jpg");
+  --de-bg-quetes: url("./image%20jeux/fond-quetes.jpg");
+}
+/* Les fonds suivent la surface de chaque page; pas de déformation. */
+#page-base {
+  background-color: #282b29;
+  background-image:
+    linear-gradient(180deg, rgba(12,19,18,.18), rgba(12,18,18,.47)),
+    var(--de-bg-base);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+}
+#page-inventory {
+  background-color: #464739;
+  background-image:
+    linear-gradient(180deg, rgba(16,20,18,.12),rgba(14,18,16,.38)),
+    var(--de-bg-sac);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+}
+#page-missions {
+  background-color: #24282c;
+  background-image:
+    linear-gradient(180deg, rgba(6,14,24,.15),rgba(7,13,22,.42)),
+    var(--de-bg-quetes);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center top;
+}
+/* Des panneaux légèrement transparents maintiennent la lisibilité des informations. */
+#page-inventory .page-panel,
+#page-missions .page-panel,
+#page-base .base-accordion {
+  background-color: rgba(24,35,39,.88);
+}
+#page-base .base-accordion-summary {
+  background: linear-gradient(120deg, rgba(52,70,80,.90),rgba(39,56,64,.90));
+}
+#page-base .base-accordion[open] > .base-accordion-summary {
+  background: linear-gradient(120deg,rgba(71,95,104,.94),rgba(48,68,74,.94));
+}
+/* Carte GPS : le visuel reste une ambiance translucide, il ne remplace PAS les rues et points GPS.
+   Le canvas et ses gestes restent entièrement actifs, même si l'image n'est pas encore uploadée. */
+#page-map {
+  background-color: #6e665b;
+  background-image: var(--de-bg-carte);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+#page-map .map-art-filter {
+  background-image:
+    var(--de-bg-carte),
+    repeating-linear-gradient(135deg,#261e1a25 0 2px,transparent 2px 13px);
+  background-position: center,center;
+  background-size: cover,auto;
+  background-repeat: no-repeat,repeat;
+  opacity: .19;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+</style>
 </head>
 <body>
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V3.0 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V3.1 · FONDS</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">

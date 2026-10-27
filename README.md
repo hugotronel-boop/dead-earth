@@ -1,25 +1,37 @@
-# DEAD EARTH — V2.9 · Dégradé nocturne renforcé
+# DEAD EARTH — V3.1 • Fonds externes
 
-Version légère en un seul `index.html`, dérivée de la V2.8.
+Cette mise à jour part de la V3.0 (inventaire de 66 objets) et ne change aucune règle du jeu. Les images ne sont plus incorporées au fichier HTML : elles sont chargées dans un dossier séparé.
 
-## Changement unique
+## À placer à la racine du dépôt GitHub `dead-earth`
 
-Le brouillard nocturne conserve les sources de lumière de la V2.8, mais le halo tombe désormais rapidement vers le noir. La visibilité se calcule réellement en mètres sur la carte :
+```
+dead-earth/
+├── index.html                  ← remplacer l’ancien fichier
+└── image jeux/                 ← ajouter le dossier avec LES QUATRE images
+    ├── fond-carte.jpg          ← ambiance de la page Carte, carte GPS toujours interactive
+    ├── fond-base.jpg           ← arrière-plan de la Base
+    ├── fond-sac.jpg            ← arrière-plan du Sac
+    └── fond-quetes.jpg         ← arrière-plan des Quêtes
+```
 
-| Mode | Vision claire environ | Presque noir environ | Noir à partir d'environ |
-|---|---:|---:|---:|
-| Sans lampe | 10 m | 20 m | 30 m |
-| Lampe allumée | 30 m | 60 m | 90 m |
-| Refuge éclairé par le générateur | 120 m | 240 m | 360 m |
+**Attention** : il faut maintenant mettre le dossier des images sur GitHub en plus de remplacer `index.html`. Sans les images, le jeu reste jouable, mais les arrière-plans ne s’afficheront pas.
 
-Les rayons nominaux de la V2.8 restent 50/150/600 m, mais leurs bords sont maintenant pratiquement invisibles : il s'agit d'un effet de halo lumineux beaucoup plus abrupt.
+## Liens relatifs utilisés dans `index.html`
 
-## Installation
+- `./image%20jeux/fond-carte.jpg`
+- `./image%20jeux/fond-base.jpg`
+- `./image%20jeux/fond-sac.jpg`
+- `./image%20jeux/fond-quetes.jpg`
 
-Remplacer uniquement le fichier `index.html` à la racine du dépôt GitHub Pages. Aucune autre modification nécessaire. Les données sauvegardées sur le même domaine restent inchangées.
+`%20` correspond à l'espace dans le nom du dossier `image jeux`. Respecter les minuscules, les traits d'union et les extensions `.jpg`.
 
-## Vérifications
+## Pour les futurs visuels
 
-- Syntaxe des trois blocs JavaScript : OK.
-- Rendu du halo naturel, de la lampe et de l'éclairage du refuge dans Chromium avec l'heure de nuit simulée : OK, aucune erreur de page.
-- Le GPS réel de l'iPhone et la disponibilité des données cartographiques sont à vérifier sur l'appareil.
+Déposer les nouvelles illustrations dans `image jeux/` avec des noms simples, en minuscules, sans accents ni espaces. Les quatre liens ci-dessus sont centralisés dans les variables CSS `--de-bg-carte`, `--de-bg-base`, `--de-bg-sac`, `--de-bg-quetes` en haut de `index.html`. La page Perso garde son ancien fond pour le moment.
+
+## GitHub Pages
+
+Une fois les fichiers ajoutés sur la branche publiée, l'adresse est normalement : `https://hugotronel-boop.github.io/dead-earth/`.
+Si les images ne s'affichent pas, vérifier les chemins directement : `https://hugotronel-boop.github.io/dead-earth/image%20jeux/fond-sac.jpg` (par exemple).
+
+Les noms des images ont été simplifiés, mais les fichiers jpg originaux n'ont pas été recompressés. Aucun changement des autres fonctionnalités ou des sauvegardes.
