@@ -1,29 +1,15 @@
-DEAD EARTH V3.3 — TELEPHONE ET LAMPE
+DEAD EARTH — V3.7 · Nouveau téléphone
 
-Contenu :
-- index.html : jeu complet avec les commandes visuelles modifiées.
-- image jeux/telephone-hud.png : le téléphone de survie vierge fourni par toi, détouré pour le site.
-- image jeux/lampe-fouille.png : la lampe fournie par toi, redressée à la verticale.
+Fichiers à envoyer dans https://github.com/hugotronel-boop/dead-earth :
 
-INSTALLATION SUR GITHUB (iPhone)
-1. Décompresse le ZIP dans l’application Fichiers.
-2. Sur github.com/hugotronel-boop/dead-earth, remplace le fichier index.html à la racine.
-3. Ouvre ton dossier déjà existant « image jeux » sur GitHub.
-4. Ajoute les deux fichiers telephone-hud.png et lampe-fouille.png (pas le dossier lui-même).
-5. Valide chaque mise en ligne avec Commit changes.
-6. Actualise https://hugotronel-boop.github.io/dead-earth/?v=33
+1. Remplacer index.html à la RACINE du dépôt.
+2. Ouvrir le dossier "image jeux" et y ajouter "telephone-hud-v37.png".
 
-NE SUPPRIME PAS tes fonds existants ! Le code conserve les liens vers :
-- Fond carte.PNG
-- Fond base .jpg
-- Fond sac .PNG
-- Fond quêtes .jpg (le ê peut être composé de deux caractères Unicode)
+Ne pas envoyer le ZIP tel quel à GitHub. Décompresse-le d'abord.
+Ne pas supprimer les fonds ni "lampe-fouille.png" déjà présents.
+Pas besoin de remplacer l'ancien "telephone-hud.png" ; le code V3.7 pointe directement vers le nouveau fichier.
 
-INTERACTIONS
-- Téléphone : touche du haut = Village ; touche du bas = Options.
-- Écran du téléphone : santé, endurance, soif, niveau + jour et son, liés à la partie.
-- Options : GPS, recentrage, zoom, détection micro, lampe, et Refuge déplacé ici.
-- Lampe (bas gauche de la carte) : cliquer/toucher la lampe ouvre les fouilles GPS (10 m maximum).
-- Base, Perso, Sac, Quêtes, zombies et sauvegarde restent dans le code existant.
+L'image fournie a été convertie en PNG à fond transparent, puis les zones tactiles Village / Options
+et les jauges ont été réalignées sur sa nouvelle composition.
 
-Note : les premières images de la carte sont téléchargées en ligne ; le jeu dépend de GitHub Pages, d’OpenStreetMap et du GPS pour les fonctions de terrain. Ne pas jouer en traversant la route.
+Toute la mécanique de jeu V3.6 est conservée. Le GPS réel doit être vérifié sur iPhone.

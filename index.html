@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.6 Dégradé nocturne</title>
+  <title>DEAD EARTH — V3.7 Nouveau téléphone</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -523,7 +523,7 @@
 }
 .de-phone-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;user-select:none;z-index:0}
 /* Original touch panels of the user's rugged survival phone. */
-.de-phone-controls{position:absolute;z-index:5;left:16.3%;top:16%;width:13.7%;height:69%;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.de-phone-controls{position:absolute;z-index:5;left:19.1%;top:21.3%;width:13.5%;height:58.1%;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
 .de-phone-village,.de-phone-options{width:100%;height:43.5%;position:relative;pointer-events:auto}
 #phoneVillageSlot #territoryCampaign{position:relative!important;inset:auto!important;width:100%!important;max-height:none!important;height:100%;min-height:0;overflow:visible!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;z-index:60}
 #phoneVillageSlot .village-toggle{width:100%;height:100%;min-height:0!important;display:flex;align-items:center;justify-content:center;padding:2px 0!important;border:0!important;border-radius:0;background:transparent!important;font:700 clamp(5px,1.55vw,8px)/1.35 'Courier New',monospace!important;color:#172018;text-shadow:0 1px #d8d49b;text-align:center;letter-spacing:-.1px;word-break:normal}
@@ -536,7 +536,7 @@
 .de-phone-option-button[aria-expanded="true"]{color:#473520;filter:brightness(1.12)}
 #phoneVillageSlot .village-toggle:focus-visible,.de-phone-option-button:focus-visible{outline:2px solid #ffe1a1;outline-offset:2px}
 /* Four live stats, laid out on the original LCD, no fake numbers baked into the asset. */
-.de-phone-screen{position:absolute;z-index:2;left:34.2%;top:17.5%;width:39.2%;height:65%;display:flex;flex-direction:column;gap:2px;color:#d1dbbd;pointer-events:none}
+.de-phone-screen{position:absolute;z-index:2;left:37.3%;top:20.9%;width:38.6%;height:60.8%;display:flex;flex-direction:column;gap:2px;color:#d1dbbd;pointer-events:none}
 .de-phone-status{height:16%;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:2px;font:clamp(6px,1.45vw,8px)/1 'Courier New',monospace;letter-spacing:.2px;text-shadow:0 0 4px #b7d4b255}
 .de-phone-status #soundToggle{pointer-events:auto;border:0;box-shadow:none;background:transparent;padding:0 2px;color:#cce8ab;font:700 11px monospace;min-height:18px;cursor:pointer}
 .de-phone-screen .stats-strip{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(4,minmax(0,1fr));width:100%;height:82%;min-height:0;gap:3px;padding:0}
@@ -569,7 +569,7 @@
   .de-phone-shell{width:min(94%,430px) !important;}
 }
 @media(max-height:700px){#page-map .de-flashlight-dock{bottom:2px!important;height:clamp(132px,35vh,200px)}#phoneVillageSlot .village-panel{max-height:57dvh}}
-@media(max-width:355px){.de-phone-controls{left:16.4%;width:14%}.de-phone-screen{left:34%;width:40%}.de-phone-screen .stat{gap:1px}.de-phone-screen .stat-title span{font-size:6px}}
+@media(max-width:355px){.de-phone-controls{left:19.1%;width:13.5%}.de-phone-screen{left:37.3%;width:38.6%}.de-phone-screen .stat{gap:1px}.de-phone-screen .stat-title span{font-size:6px}}
 </style>
 <style id="dead-earth-v35-wide-phone">
 /* V3.5 : le téléphone occupe toute la largeur visuelle du mobile,
@@ -636,13 +636,15 @@
   .de-phone-screen .stat { gap: 2px; }
   .de-phone-screen .stats-strip { gap: 1px; }
 }
+/* V3.7: le nouveau boîtier a des touches et un écran légèrement décalés ;
+   leurs positions sont ajustées ci-dessus et restent interactives. */
 </style>
 </head>
 <body>
 <div id="app">
   <header class="topbar de-phone-topbar" aria-label="Téléphone de survie : village, options et statistiques">
     <div class="de-phone-shell">
-      <img class="de-phone-art" src="./image%20jeux/telephone-hud.png" alt="" aria-hidden="true">
+      <img class="de-phone-art" src="./image%20jeux/telephone-hud-v37.png" alt="" aria-hidden="true">
       <div class="de-phone-controls">
         <div class="de-phone-village" id="phoneVillageSlot">
           <div id="territoryCampaign" class="territory-campaign" aria-live="polite"></div>
