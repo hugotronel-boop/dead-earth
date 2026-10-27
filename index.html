@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — Pixel Survival</title>
+  <title>DEAD EARTH — V3.0 Sac de survie</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -236,6 +236,31 @@
 .base-weapon-card .base-weapon-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
 .base-weapon-card .base-weapon-actions button{width:100%;min-width:0;overflow-wrap:anywhere;font-size:10px}
 @media(max-width:360px){.base-weapon-card .base-weapon-actions{grid-template-columns:1fr}}
+
+/* V3.0 — Inventaire dynamique, 50 objets supplémentaires, mobile d’abord. */
+.bag-catalog{margin-top:13px;margin-bottom:7px;display:grid;gap:10px}
+.bag-mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.bag-mode-buttons .pixel-button{font-size:10px;min-height:38px;padding:7px 4px}
+.bag-mode-buttons .pixel-button.selected{background:#4a6150;color:#ffefc6;border-color:#c4b989 #13201a #13201a #c4b989}
+.bag-filter-row{display:grid;gap:7px}
+.bag-filter-row select,.bag-filter-row input{width:100%;min-width:0;background:#18282d;color:#f5e8c8;border:2px solid #78918b;border-radius:2px;padding:9px;font:13px monospace;min-height:42px}
+.bag-filter-row select:focus,.bag-filter-row input:focus{outline:2px solid #d9aa72;outline-offset:1px}
+.bag-count{color:#b9d2c0;font:10px/1.5 monospace;margin:0 2px}
+.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.item-card{min-width:0;width:100%;min-height:126px;position:relative;padding:6px 4px;text-align:center;cursor:pointer;appearance:none;-webkit-appearance:none}
+.item-card:focus-visible{outline:3px solid #ffdb95;outline-offset:2px}.item-card:active{filter:brightness(1.13)}
+.item-card small{line-height:1.4;color:#c0bca8;text-align:center}.item-card.empty{opacity:.68}
+.item-card .item-symbol{height:53px}.item-card .item-emoji{font-size:29px}
+.item-card .bag-rarity{display:block;width:100%;font:9px monospace;line-height:1.2;text-align:center;color:#d8bf92;margin:2px 0}
+.item-card.rarity-rare .bag-rarity{color:#91caff}.item-card.rarity-legendaire .bag-rarity{color:#edd386}
+.item-card .bag-equipped{position:absolute;top:3px;right:3px;color:#bbefb6;font-size:11px}
+.bag-detail{display:grid;gap:9px;margin:10px 0;font:12px/1.55 monospace}
+.bag-detail>div{border-bottom:1px dashed #5d7878;padding-bottom:6px}
+.bag-detail strong{color:#f3dfaf}.bag-meta{color:#bed0be}
+.bag-detail .bag-bonus{color:#a4dcb4}.bag-actions{display:flex;gap:6px;flex-wrap:wrap}
+.bag-actions button{min-height:40px}
+.bag-empty{grid-column:1/-1;padding:18px;text-align:center;color:#c3bfaa;font:12px/1.6 monospace}
+
 </style>
 <style>
 
@@ -387,7 +412,7 @@
 <div id="app">
   <header class="topbar" aria-label="État du survivant">
     <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V2.7 · LIGHT</small></div>
+      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V3.0 · LIGHT</small></div>
       <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
     </div>
     <div class="stats-strip">
@@ -562,7 +587,10 @@
 </section>
 
     <section id="page-inventory" class="page scroll-page" aria-label="Inventaire">
-      <h1>▦ INVENTAIRE</h1><div class="pixel-frame page-panel"><div class="metric-row"><span>CHARGE DU SAC</span><strong id="capacityText">0/30 KG</strong></div><div class="pixel-track dark"><i id="capacityBar" class="gold"></i></div><div id="inventoryGrid" class="inventory-grid"></div></div>
+      <h1>▦ INVENTAIRE</h1><div class="pixel-frame page-panel"><div class="metric-row"><span>CHARGE DU SAC</span><strong id="capacityText">0/30 KG</strong></div><div class="pixel-track dark"><i id="capacityBar" class="gold"></i></div>
+      <div class="bag-catalog"><div class="bag-mode-buttons"><button id="bagOwned" class="pixel-button selected" type="button">🎒 POSSÉDÉS</button><button id="bagCatalogue" class="pixel-button" type="button">📖 CATALOGUE</button></div>
+      <div class="bag-filter-row"><label class="sr-only" for="bagCategory">Catégorie d’objets</label><select id="bagCategory"><option value="all">Toutes catégories</option><option value="nourriture">🥫 Nourriture et eau</option><option value="soins">🩹 Santé et soins</option><option value="materiaux">🪵 Matériaux</option><option value="outils">🔧 Outils</option><option value="electricite">🔋 Électricité</option><option value="equipements">🎒 Survie</option></select><label class="sr-only" for="bagRarity">Rareté des objets</label><select id="bagRarity"><option value="all">Toutes raretés</option><option value="commun">Commun</option><option value="peu commun">Peu commun</option><option value="rare">Rare</option><option value="legendaire">Légendaire</option></select><label class="sr-only" for="bagSearch">Rechercher un objet</label><input id="bagSearch" type="search" placeholder="🔍 Rechercher un objet…" autocomplete="off" spellcheck="false" maxlength="50"></div>
+      <p id="bagCount" class="bag-count" aria-live="polite"></p></div><div id="inventoryGrid" class="inventory-grid"></div></div>
       <div class="pixel-frame page-panel"><div class="pixel-heading">ATELIER DE FABRICATION</div><div id="craftList" class="item-list"></div></div>
     </section>
 
@@ -865,6 +893,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
         };
         // Eclairage alimenté : 600 m théoriques, mais chute rapide à partir de 120 m.
         if(vision.light)carve(vision.home,600);
+        if(vision.flare)carve(vision.flare,180);
         // Lampe allumée : 150 m théoriques, clairement visible sur environ 30 m.
         if(vision.flashlight)carve(vision.player,150);
         // Vision naturelle : 50 m théoriques, nette jusque 10 m et noire après ~30 m.
@@ -928,6 +957,76 @@ const DEAD_EARTH_ICONS = Object.freeze({
     rifle_stock:{label:'Crosse (carabine)',icon:'🪵',weight:.65},rifle_trigger:{label:'Gâchette (carabine)',icon:'🔩',weight:.35},rifle_barrel:{label:'Canon (carabine)',icon:'⚙',weight:.75},
     bolts:{label:'Carreaux (arbalète)',icon:'➶',weight:.08}
   };
+  // V3.0 : 50 objets inédits, plus une eau trouble servant à la purification.
+  // Les objets sont des ressources de jeu fictives, jamais des instructions réelles de fabrication.
+  const EXTRA_ITEM_LIST = [
+    {"id":"cereal_bar","label":"Barre de céréales","icon":"🍫","weight":0.06,"category":"nourriture","rarity":"commun","desc":"Rend 15 points de satiété.","sources":["food","general","outdoors"]},
+    {"id":"biscuits","label":"Paquet de biscuits","icon":"🍪","weight":0.24,"category":"nourriture","rarity":"commun","desc":"Trois portions par paquet ; chaque portion restaure 8 de satiété.","sources":["food","general"]},
+    {"id":"canned_soup","label":"Soupe en conserve","icon":"🥣","weight":0.45,"category":"nourriture","rarity":"commun","desc":"Rend 25 de satiété et 8 d’hydratation.","sources":["food","general"]},
+    {"id":"soda","label":"Soda","icon":"🥤","weight":0.4,"category":"nourriture","rarity":"commun","desc":"Rend 12 d’hydratation et 8 d’endurance.","sources":["food","general"]},
+    {"id":"energy_drink","label":"Boisson énergisante","icon":"⚡","weight":0.32,"category":"nourriture","rarity":"peu commun","desc":"Rend 35 d’endurance, suivis d’une fatigue après 20 minutes.","sources":["food","general","outdoors"]},
+    {"id":"empty_canteen","label":"Gourde vide","icon":"🫙","weight":0.28,"category":"nourriture","rarity":"peu commun","desc":"Contient jusqu’à 2 charges d’eau, à remplir depuis tes bouteilles.","sources":["outdoors","general"]},
+    {"id":"purification_tablets","label":"Pastilles purifiantes","icon":"💊","weight":0.03,"category":"nourriture","rarity":"peu commun","desc":"Purifie une unité d’eau trouble en eau potable.","sources":["medical","outdoors","food"]},
+    {"id":"seeds","label":"Sachet de graines","icon":"🌱","weight":0.12,"category":"nourriture","rarity":"commun","desc":"Ajoute une plantation pour augmenter la prochaine récolte du potager.","sources":["nature","outdoors","general"]},
+    {"id":"sterile_compress","label":"Compresses stériles","icon":"🩹","weight":0.06,"category":"soins","rarity":"commun","desc":"Premiers soins : restaure 10 PV ; matériau de soin.","sources":["medical","general"]},
+    {"id":"antiseptic","label":"Désinfectant","icon":"🧴","weight":0.2,"category":"soins","rarity":"peu commun","desc":"Réduit le niveau d’infection du survivant.","sources":["medical","general"]},
+    {"id":"medical_alcohol","label":"Alcool médical","icon":"🧪","weight":0.25,"category":"soins","rarity":"peu commun","desc":"Utilisé pour le soin et certaines fabrications fictives.","sources":["medical"]},
+    {"id":"painkillers","label":"Antidouleurs","icon":"💊","weight":0.08,"category":"soins","rarity":"peu commun","desc":"Réduit les dégâts subis pendant quelques minutes.","sources":["medical"]},
+    {"id":"antibiotics","label":"Antibiotiques","icon":"💉","weight":0.12,"category":"soins","rarity":"rare","desc":"Traite une infection du survivant.","sources":["medical"]},
+    {"id":"splint","label":"Attelle","icon":"🦴","weight":0.45,"category":"soins","rarity":"peu commun","desc":"Traite les blessures immobilisantes.","sources":["medical","outdoors"]},
+    {"id":"filter_mask","label":"Masque filtrant","icon":"😷","weight":0.3,"category":"soins","rarity":"peu commun","desc":"Accessoire activable ; petit bonus défensif aux fouilles.","sources":["medical","hardware","outdoors"]},
+    {"id":"suture_kit","label":"Kit de suture","icon":"🧰","weight":0.35,"category":"soins","rarity":"rare","desc":"Soins avancés à l’infirmerie de niveau 2+, alimentée.","sources":["medical"]},
+    {"id":"planks","label":"Planches de bois","icon":"🪵","weight":0.55,"category":"materiaux","rarity":"commun","desc":"Renforce les barricades et sert à certaines réparations.","sources":["hardware","nature","general"]},
+    {"id":"rope","label":"Corde","icon":"🪢","weight":0.4,"category":"materiaux","rarity":"commun","desc":"Composant de fabrications et d’équipements de survie.","sources":["hardware","outdoors","general"]},
+    {"id":"nails","label":"Clous","icon":"📍","weight":0.08,"category":"materiaux","rarity":"commun","desc":"Fixations de barricades et d’équipements.","sources":["hardware","general"]},
+    {"id":"screws","label":"Vis","icon":"🔩","weight":0.06,"category":"materiaux","rarity":"commun","desc":"Visserie pour réparations et équipements.","sources":["hardware","electronics"]},
+    {"id":"tarp","label":"Bâche plastique","icon":"🟦","weight":0.85,"category":"materiaux","rarity":"peu commun","desc":"Matériau d’abri et d’installations de récupération d’eau.","sources":["hardware","outdoors"]},
+    {"id":"wire_mesh","label":"Grillage métallique","icon":"🕸️","weight":1.0,"category":"materiaux","rarity":"peu commun","desc":"Renfort de clôtures et d’abris.","sources":["hardware","general"]},
+    {"id":"sheet_metal","label":"Plaque de tôle","icon":"🛡️","weight":1.8,"category":"materiaux","rarity":"peu commun","desc":"Renfort lourd pour les barricades.","sources":["hardware","auto"]},
+    {"id":"metal_pipe","label":"Tuyau métallique","icon":"🔧","weight":0.95,"category":"materiaux","rarity":"peu commun","desc":"Pièce de structures et d’outils du jeu.","sources":["hardware","auto"]},
+    {"id":"window_glass","label":"Vitre récupérée","icon":"🪟","weight":1.2,"category":"materiaux","rarity":"rare","desc":"Utile à une future serre et aux réparations.","sources":["hardware","general"]},
+    {"id":"electrical_cable","label":"Câble électrique","icon":"🔌","weight":0.35,"category":"materiaux","rarity":"peu commun","desc":"Matériau du circuit électrique et de démontage.","sources":["electronics","auto","hardware"]},
+    {"id":"hammer","label":"Marteau","icon":"🔨","weight":0.8,"category":"outils","rarity":"commun","desc":"Répare les barricades avec des planches et des clous.","sources":["hardware","general"]},
+    {"id":"screwdriver","label":"Tournevis","icon":"🪛","weight":0.22,"category":"outils","rarity":"commun","desc":"Permet de démonter des appareils électroniques.","sources":["hardware","electronics","auto"]},
+    {"id":"multi_pliers","label":"Pince multifonction","icon":"🗜️","weight":0.35,"category":"outils","rarity":"peu commun","desc":"Permet de démonter des objets pour récupérer des composants.","sources":["hardware","electronics","auto"]},
+    {"id":"crowbar","label":"Pied-de-biche","icon":"🪝","weight":1.65,"category":"outils","rarity":"peu commun","desc":"Augmente un peu le butin en fouille, mais fait plus de bruit.","sources":["hardware","auto","general"]},
+    {"id":"shovel","label":"Pelle","icon":"🛠️","weight":1.8,"category":"outils","rarity":"commun","desc":"Permet de récupérer davantage de matériaux dans la nature.","sources":["hardware","nature"]},
+    {"id":"handsaw","label":"Scie à main","icon":"🪚","weight":0.75,"category":"outils","rarity":"peu commun","desc":"Transforme le bois récupéré en planches.","sources":["hardware","general"]},
+    {"id":"multitool","label":"Couteau multifonction","icon":"🔪","weight":0.25,"category":"outils","rarity":"rare","desc":"Outil compact : démontage et entretien.","sources":["outdoors","hardware","electronics"]},
+    {"id":"binoculars","label":"Jumelles","icon":"🔭","weight":0.65,"category":"outils","rarity":"peu commun","desc":"Repère les zombies autour du GPS sans les affronter.","sources":["outdoors","general"]},
+    {"id":"lighter","label":"Briquet","icon":"🔥","weight":0.08,"category":"outils","rarity":"commun","desc":"Permet un petit repos près d’un feu de camp virtuel.","sources":["food","outdoors","general"]},
+    {"id":"batteries","label":"Piles","icon":"🔋","weight":0.1,"category":"electricite","rarity":"commun","desc":"Alimente la radio portable sans utiliser le générateur.","sources":["electronics","general","outdoors"]},
+    {"id":"rechargeable_battery","label":"Batterie rechargeable","icon":"🔋","weight":0.45,"category":"electricite","rarity":"peu commun","desc":"Rechargeable avec un chargeur solaire, alimente la radio.","sources":["electronics","outdoors"]},
+    {"id":"light_bulb","label":"Ampoule","icon":"💡","weight":0.12,"category":"electricite","rarity":"commun","desc":"Élément utile aux installations d’éclairage.","sources":["electronics","hardware"]},
+    {"id":"fuse","label":"Fusible","icon":"🧷","weight":0.03,"category":"electricite","rarity":"commun","desc":"Composant pour dépanner les circuits électriques.","sources":["electronics","auto","hardware"]},
+    {"id":"portable_radio","label":"Radio portable","icon":"📻","weight":0.85,"category":"electricite","rarity":"rare","desc":"Écoute les signaux locaux avec piles, sans station radio.","sources":["electronics","general"]},
+    {"id":"solar_panel","label":"Panneau solaire","icon":"☀️","weight":2.2,"category":"electricite","rarity":"legendaire","desc":"Réduit la consommation du générateur le jour après installation.","sources":["electronics","hardware"]},
+    {"id":"car_battery","label":"Batterie de voiture","icon":"🔋","weight":5.0,"category":"electricite","rarity":"rare","desc":"Permet de réapprovisionner une radio portable en énergie.","sources":["auto"]},
+    {"id":"solar_charger","label":"Chargeur solaire portable","icon":"🌞","weight":0.6,"category":"electricite","rarity":"rare","desc":"Recharge une batterie rechargeable une fois par jour, en journée.","sources":["electronics","outdoors"]},
+    {"id":"sleeping_bag","label":"Sac de couchage","icon":"🛏️","weight":1.4,"category":"equipements","rarity":"peu commun","desc":"Permet de récupérer un peu d’endurance pendant une expédition.","sources":["outdoors","general"]},
+    {"id":"hiking_boots","label":"Chaussures de randonnée","icon":"🥾","weight":1.5,"category":"equipements","rarity":"peu commun","desc":"Équipement activable : réduit légèrement le coût des fouilles.","sources":["outdoors","general"]},
+    {"id":"safety_gloves","label":"Gants de protection","icon":"🧤","weight":0.25,"category":"equipements","rarity":"commun","desc":"Équipement activable : réduit légèrement le risque pendant les fouilles.","sources":["hardware","outdoors"]},
+    {"id":"side_pouch","label":"Sacoche supplémentaire","icon":"🎒","weight":0.65,"category":"equipements","rarity":"rare","desc":"Équipement activable : capacité du sac +5 kg.","sources":["outdoors","general"]},
+    {"id":"empty_bottle","label":"Bouteille vide","icon":"🍾","weight":0.15,"category":"equipements","rarity":"commun","desc":"Leurre sonore virtuel à courte portée pour éloigner des infectés.","sources":["food","general"]},
+    {"id":"alarm_clock","label":"Réveil mécanique","icon":"⏰","weight":0.45,"category":"equipements","rarity":"peu commun","desc":"Leurre sonore virtuel plus puissant, temporaire.","sources":["general","electronics"]},
+    {"id":"flare","label":"Fusée de détresse","icon":"🚨","weight":0.3,"category":"equipements","rarity":"rare","desc":"Illumine une zone de nuit, mais attire les zombies proches.","sources":["outdoors","auto","general"]},
+  ];
+  const CATEGORY_LABELS={nourriture:'🥫 Nourriture & eau',soins:'🩹 Soins',materiaux:'🪵 Matériaux',outils:'🔧 Outils',electricite:'🔋 Électricité',equipements:'🎒 Survie'};
+  const RARITY_LABELS={commun:'Commun','peu commun':'Peu commun',rare:'Rare',legendaire:'Légendaire'};
+  const SOURCE_LABELS={food:'Alimentation',general:'Commerces variés',outdoors:'Équipement de plein air',medical:'Pharmacies et soins',hardware:'Bricolage et quincaillerie',nature:'Parcs et nature',auto:'Garages et stations',electronics:'Électronique'};
+  for(const item of EXTRA_ITEM_LIST)ITEMS[item.id]=item;
+  // Un ingrédient supplémentaire propre au système de purification.
+  ITEMS.dirty_water={label:'Eau trouble',icon:'🫗',weight:.6,category:'nourriture',rarity:'commun',desc:'Trouvée parfois dans la nature. À purifier avec une pastille avant de boire.',sources:['nature']};
+  // Métadonnées des anciens objets pour les filtres et les fiches d’objets.
+  const LEGACY_CATEGORIES={water:'nourriture',food:'nourriture',bandage:'soins',medkit:'soins',wood:'materiaux',metal:'materiaux',cloth:'materiaux',parts:'materiaux',ammo:'equipements',fuel:'electricite',flashlight:'equipements',rifle_stock:'materiaux',rifle_trigger:'materiaux',rifle_barrel:'materiaux',bolts:'equipements'};
+  for(const [id,item] of Object.entries(ITEMS)){
+    item.category??=LEGACY_CATEGORIES[id]||'materiaux';
+    item.rarity??=['rifle_stock','rifle_trigger','rifle_barrel'].includes(id)?'rare':'commun';
+    item.desc??='Ressource de survie et de fabrication utilisée dans DEAD EARTH.';
+    item.sources??=['general'];
+  }
+  const DURABLE_TOOLS=new Set(['hammer','screwdriver','multi_pliers','crowbar','shovel','handsaw','multitool','binoculars','portable_radio']);
+  const DISMANTLE_LOOT={portable_radio:{parts:2,electrical_cable:1,screws:2},alarm_clock:{parts:1,screws:2},solar_charger:{parts:2,electrical_cable:2},rechargeable_battery:{parts:1,metal:1},car_battery:{metal:2,parts:2}};
   const GEAR_CRAFTS = [
     {id:'reinforced',name:'Sac renforcé',icon:'▣',desc:'Capacité du sac : 40 kg (au lieu de 30 kg).',cost:{cloth:4,wood:2,parts:1}},
     {id:'padded',name:'Gilet rembourré',icon:'⛨',desc:'Réduit de 25 % les dégâts infligés par les zombies.',cost:{cloth:5,metal:2,parts:1}}
@@ -938,7 +1037,10 @@ const DEAD_EARTH_ICONS = Object.freeze({
     {id:'bandage',name:'Bandage',cost:{cloth:2},gain:{bandage:1},desc:'Soigne 30 points de vie.'},
     {id:'medkit',name:'Trousse de secours',cost:{cloth:3,bandage:2,parts:1},gain:{medkit:1},desc:'Soigne 70 points de vie.'},
     {id:'ammo',name:'Munitions de fortune',cost:{metal:2,parts:1},gain:{ammo:4},requiresWorkshop:true,desc:'Munitions virtuelles pour les armes à feu.'},
-    {id:'bolts',name:'Carreaux (arbalète)',cost:{wood:1,metal:1},gain:{bolts:5},requiresWorkshop:true,desc:'Projectiles virtuels de l’arbalète.'}
+    {id:'bolts',name:'Carreaux (arbalète)',cost:{wood:1,metal:1},gain:{bolts:5},requiresWorkshop:true,desc:'Projectiles virtuels de l’arbalète.'},
+    {id:'field_bandage',name:'Bandage de terrain',cost:{sterile_compress:1,cloth:1},gain:{bandage:1},desc:'Assemble des soins trouvés en fouille.'},
+    {id:'cordage',name:'Cordage de fortune',cost:{cloth:3},gain:{rope:1},desc:'Transforme le tissu en corde virtuelle.'},
+    {id:'electrical_parts',name:'Pièces recyclées',cost:{screws:2,electrical_cable:1,fuse:1},gain:{parts:2},requiresWorkshop:true,desc:'Recyclage à l’atelier alimenté.'}
   ];
   // Progression indépendante des objets construits : une amélioration = un niveau supplémentaire.
   const BASE_TIERS = [
@@ -1048,7 +1150,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     storageInventory:{},radioOps:{day:'',entries:[]},radioEvent:{day:'',resolved:false},workbenchLevel:0,productionDays:{collector:'',garden:''},generatorDay:'',generatorState:{running:false,fuel:0,condition:100,updatedAt:Date.now()},electricSwitches:{...ELECTRIC_DEFAULTS},
     weapons:Object.fromEntries(BASE_WEAPONS.map(w=>[w.id,{owned:!!w.basic,durability:w.basic?100:0,level:w.basic?1:0}])),equippedWeapon:'knife',
     craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},flashlightOn:false,
-    inventory:{water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0,flashlight:0},
+    inventoryGear:{},itemCondition:{},biscuitsPortions:3,canteenCharges:0,gardenSeedBonus:0,energyCrashQueue:[],portableBattery:0,rechargeableCharge:0,portableRadioDay:'',solarChargeDay:'',solarInstalled:false,collectorCover:false,greenhouse:false,lightingOptimized:false,distraction:null,flareEffect:null,infection:0,painReliefUntil:0,
+    inventory:{...Object.fromEntries(Object.keys(ITEMS).map(id=>[id,0])),water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0,flashlight:0},
     claimed:[],cooldowns:{},logs:[{time:Date.now(),message:'Transmission reçue. Bienvenue dans DEAD EARTH.'}]});
   function load(){
     try {
@@ -1115,6 +1218,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     } catch {return fresh();}
   }
   let game=load();
+  game.inventoryGear={...game.inventoryGear};
+  game.itemCondition={...game.itemCondition};
+  game.energyCrashQueue=Array.isArray(game.energyCrashQueue)?game.energyCrashQueue.filter(Number.isFinite):[];
+  game.canteenCharges=Math.max(0,Math.min(2,Number(game.canteenCharges)||0));
+  game.biscuitsPortions=Math.max(1,Math.min(3,Number(game.biscuitsPortions)||3));
   game.micEnabled=false; // Chaque session demande un geste explicite avant toute capture audio.
   game.micSensitivity=clamp(Number(game.micSensitivity)||5,1,10);
   // Conserver le logement déjà posé dans une ancienne sauvegarde, mais remplacer la campagne à quotas.
@@ -1126,7 +1234,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       game.territory={id:'local-'+Math.round(home[0]*10000)+'-'+Math.round(home[1]*10000),name:previous?.name||'Mon village',kind:previous?.kind||'village',center:[...home],radius,spatialCampaign:true};
     }
   }else game.territory=null;
-  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),weaponCatalog:BASE_WEAPONS.map(w=>({id:w.id,family:w.family,type:w.type,workbench:w.workbench,bonus:weaponBonus(w),damage:weaponDamageRange(w),wear:w.wear})),buildingRequirements:Object.fromEntries(BASE_BUILDINGS.map(b=>[b.id,b.minLevel])),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,flashlightOn:flashlightActive(),flashlightCount:quantity('flashlight'),electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
+  window.DEAD_EARTH_SNAPSHOT=()=>({hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing,baseLevel:game.baseLevel,maxFort:BASE_TIERS[game.baseLevel-1].max,fort:game.fort,buildings:{...game.buildings},buildingLevels:{...game.buildingLevels},storageInventory:{...game.storageInventory},storageCapacity:buildingLevel('storage')*50,radioOps:JSON.parse(JSON.stringify(game.radioOps)),weapons:JSON.parse(JSON.stringify(game.weapons)),weaponCatalog:BASE_WEAPONS.map(w=>({id:w.id,family:w.family,type:w.type,workbench:w.workbench,bonus:weaponBonus(w),damage:weaponDamageRange(w),wear:w.wear})),buildingRequirements:Object.fromEntries(BASE_BUILDINGS.map(b=>[b.id,b.minLevel])),catalogueExtra:EXTRA_ITEM_LIST.length,inventoryCatalogSize:Object.keys(ITEMS).length,inventoryRarities:Object.fromEntries(Object.entries(ITEMS).map(([id,item])=>[id,item.rarity])),equippedWeapon:game.equippedWeapon,productionDays:{...game.productionDays},powered:powered(),generatorFuel:game.generatorState.fuel,generatorRunning:game.generatorState.running,generatorCapacity:GENERATOR_TANK_CAPACITY,generatorCondition:game.generatorState.condition,flashlightOn:flashlightActive(),flashlightCount:quantity('flashlight'),electricDemand:electricLoad(),electricCapacity:electricCapacity(),electricStatus:Object.fromEntries(ELECTRIC_CONSUMERS.map(c=>[c.id,isConsumerPowered(c.id)])),night:!realRestCycle().isDay});
   let center=game.safeZone?[...game.safeZone.center]:[...DEFAULT_CENTER];
   let pois=[];
   let map=null,gpsWatch=null,combat=null,sound=false,currentTab='map',toastTimer=null;
@@ -1475,8 +1583,18 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(document.visibilityState!=='visible'||!detectionReady()||combat){renderDetectionUI();return;}
     const hearing=zombieHearingRadius(),playerLat=game.lat,playerLon=game.lon;
     const nearby=zombiesNear(playerLat,playerLon,Math.max(hearing+65,155));
+    const decoy=game.distraction?.until>now?game.distraction:null;
+    if(decoy){
+      for(const z of zombiesNear(decoy.lat,decoy.lon,decoy.radius)){
+        chaseZombieToward(z,decoy.lat,decoy.lon,now);
+        z.lastKnownLat=decoy.lat;z.lastKnownLon=decoy.lon;
+        z.alertedUntil=now+3500;
+        z.decoyUntil=decoy.until;
+      }
+    }
     for(const z of nearby){
       const distance=distanceM(playerLat,playerLon,z.lat,z.lon);
+      if(z.decoyUntil>now)continue;
       if(distance<=hearing){
         z.lastKnownLat=playerLat;z.lastKnownLon=playerLon;z.alertedUntil=now+DETECTION_CHASE_MEMORY_MS;
       }
@@ -1816,15 +1934,15 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function commit(msg){if(msg)log(msg);save();renderAll();if(msg)toast(msg);if(msg)window.dispatchEvent(new CustomEvent('de:message',{detail:{message:msg}}));}
   function toast(msg){const node=$('toast');node.textContent=msg;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),3900);}
   function xpGain(n){game.xp+=n;while(game.xp>=game.level*100){game.xp-=game.level*100;game.level++;game.hp=clamp(game.hp+10);log(`Niveau ${game.level} atteint ! +10 santé.`);}}
-  function inventoryWeight(){return Object.entries(game.inventory).reduce((total,[id,qty])=>total+(ITEMS[id]?.weight||0)*qty,0)}
-  function bagCapacity(){return game.loadout?.bag==='reinforced'&&game.craftedGear?.reinforced?40:30}
+  function inventoryWeight(){return Object.entries(game.inventory).reduce((total,[id,qty])=>total+(ITEMS[id]?.weight||0)*qty,0)+(quantity('empty_canteen')>0?(game.canteenCharges||0)*.5:0)}
+  function bagCapacity(){return (game.loadout?.bag==='reinforced'&&game.craftedGear?.reinforced?40:30)+(game.inventoryGear?.side_pouch&&quantity('side_pouch')?5:0)}
   const quantity = id => Math.max(0,Number(game.inventory[id])||0);
   function canPay(cost){return Object.entries(cost).every(([key,val])=>quantity(key)>=val)}
   function pay(cost){if(!canPay(cost))return false;Object.entries(cost).forEach(([key,val])=>game.inventory[key]-=val);return true}
   function buildingLevel(id){return game.buildings[id]?clamp(Number(game.buildingLevels[id])||1,1,MAX_BUILDING_LEVEL):0}
   function storageQuantity(id){return Math.max(0,Math.floor(Number(game.storageInventory?.[id])||0))}
   function storageCapacity(){return buildingLevel('storage')*50}
-  function storageWeight(){return Object.entries(game.storageInventory||{}).reduce((sum,[id,n])=>sum+(ITEMS[id]?.weight||0)*n,0)}
+  function storageWeight(){return Object.entries(game.storageInventory||{}).reduce((sum,[id,n])=>sum+(ITEMS[id]?.weight||0)*n,0)+(quantity('empty_canteen')===0&&storageQuantity('empty_canteen')>0?(game.canteenCharges||0)*.5:0)}
   function canPayBase(cost){return Object.entries(cost).every(([id,n])=>quantity(id)+storageQuantity(id)>=n)}
   function payBase(cost){
     if(!canPayBase(cost))return false;
@@ -1869,6 +1987,20 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const factor=next-1;
     const scale={};
     for(const [id,amount] of Object.entries(b.cost))scale[id]=Math.max(1,Math.ceil(amount*(.55+.38*factor)));
+    // Matériaux rares nécessaires à partir des améliorations de niveau 3.
+    // Les bâtiments déjà acquis dans une ancienne partie sont conservés.
+    if(next>=3){
+      const extra={collector:{tarp:1},garden:{seeds:1},generator:{electrical_cable:1,fuse:1},
+        workbench:{screws:2,metal_pipe:1},infirmary:{sterile_compress:2},
+        watchtower:{wire_mesh:1,rope:1},storage:{planks:2,nails:3},radio:{electrical_cable:1,screws:2}}[b.id];
+      if(extra)for(const [id,n] of Object.entries(extra))scale[id]=(scale[id]||0)+n*(next>=5?2:1);
+    }
+    if(next>=4){
+      if(b.id==='garden')scale.window_glass=1;
+      if(b.id==='storage')scale.sheet_metal=1;
+      if(b.id==='collector')scale.metal_pipe=1;
+      if(b.id==='generator')scale.light_bulb=1;
+    }
     return scale;
   }
   function buildingEffect(id,level){
@@ -2245,12 +2377,26 @@ const DEAD_EARTH_ICONS = Object.freeze({
     closeModal();window.dispatchEvent(new CustomEvent('de:action',{detail:{type:'idle'}}));
     // On prélève les ressources uniquement après la fin de la fouille et on revérifie la distance.
     const finalCheck=actionGPS(10,p.lat,p.lon,'Fouille');if(!finalCheck.ok){renderAll();return toast('Fouille annulée : '+finalCheck.msg);}
-    game.energy=clamp(game.energy-m.energy);game.water=clamp(game.water-2);game.food=clamp(game.food-2);
+    const bootBonus=game.inventoryGear?.hiking_boots&&quantity('hiking_boots')?3:0;
+    game.energy=clamp(game.energy-Math.max(3,m.energy-bootBonus));game.water=clamp(game.water-2);game.food=clamp(game.food-2);
     const soundLevel=mic.hasMic?mic.level:0;
     game.lastMicLevel=mic.hasMic?soundLevel:null;
-    game.noise=clamp(game.noise+m.noise+Math.round(soundLevel*.45));game.threat=clamp(game.threat+Math.round((m.noise+soundLevel*.55)*.25));
+    game.noise=clamp(game.noise+m.noise+(durableToolReady('crowbar')?4:0)+Math.round(soundLevel*.45));game.threat=clamp(game.threat+Math.round((m.noise+soundLevel*.55)*.25));
     game.totalSearches++;game.cooldowns[p.id]=Date.now()+90000;
-    const amount=1+m.bonus+random(0,2),loot={};for(let i=0;i<amount;i++){let id=pick(p.loot);loot[id]=(loot[id]||0)+1;}
+    const toolLoot=durableToolReady('crowbar')?1:0;
+    const natureLoot=durableToolReady('shovel')&&getPoiSources(p).includes('nature')?1:0;
+    const amount=1+m.bonus+random(0,2)+toolLoot+natureLoot,loot={};
+    for(let i=0;i<amount;i++){let id=pick(p.loot);loot[id]=(loot[id]||0)+1;}
+    if(toolLoot)wearTool('crowbar',2);
+    if(natureLoot)wearTool('shovel',2);
+    // Ressources des lieux réels uniquement : les 50 objets utilisent les catégories du POI OpenStreetMap.
+    const sources=getPoiSources(p);
+    for(let i=0;i<2;i++){
+      if(Math.random()>(i===0?.73:.27))continue;
+      const extra=randomExtraLoot(sources);
+      if(extra)loot[extra]=(loot[extra]||0)+1;
+    }
+    if(sources.includes('nature')&&Math.random()<.22)loot.dirty_water=(loot.dirty_water||0)+1;
     // Lampe facilement trouvable dans les vrais lieux accessibles à moins de 10 m au GPS.
     // Une fois acquise, les doublons restent rares pour ne pas saturer le sac.
     if(quantity('flashlight')+storageQuantity('flashlight')===0 && Math.random()<.55){loot.flashlight=1;}
@@ -2264,7 +2410,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       loot[fragment]=(loot[fragment]||0)+1;
     }
     const found=takeLoot(loot);xpGain(12+(p.danger>>3));
-    const risk=clamp(8+p.danger*.45+m.risk+game.noise*.16+soundLevel*.40,0,92);
+    const risk=clamp(8+p.danger*.45+m.risk+game.noise*.16+soundLevel*.40-(game.inventoryGear?.safety_gloves&&quantity('safety_gloves')?5:0)-(game.inventoryGear?.filter_mask&&quantity('filter_mask')?3:0),0,92);
     log(`Fouille ${m.name.toLowerCase()} · ${p.name} : ${found.length?found.join(', '):'sac plein'}${mic.hasMic?` · bruit ${soundLevel}/100`:''}.`);
     if(Math.random()*100<risk){
       const nearby=zombiesNear(game.lat,game.lon,ZOMBIE_COMBAT_RANGE_M).find(z=>actionGPS(ZOMBIE_COMBAT_RANGE_M,z.lat,z.lon,'Combat').ok);
@@ -2350,7 +2496,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
     combat.round++;
     const raw=random(...z.damage);let hit=combat.guard?Math.ceil(raw*.25):raw;combat.guard=false;
     if(game.loadout.armor==='padded'&&game.craftedGear.padded)hit=Math.max(1,Math.ceil(hit*.75));
+    if(game.painReliefUntil>Date.now())hit=Math.max(1,Math.ceil(hit*.85));
     game.hp=clamp(game.hp-hit);note+=` ${z.name} t’inflige ${hit} dégâts.`;
+    if(hit>=10&&Math.random()<.11){game.infection=clamp((game.infection||0)+10);note+=' ⚠ Infection +10 : utilise un soin adapté.';}
     if(game.hp<=0){
       combat=null;engagedZombieId=null;game.hp=55;game.energy=40;game.water=clamp(game.water-12);game.food=clamp(game.food-10);
       const loss=Math.min(quantity('food'),1);game.inventory.food-=loss;
@@ -2474,7 +2622,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     renderEquipment();
     const nameInput=$('survivorNameInput');
     if(document.activeElement!==nameInput&&nameInput.value!==game.survivorName)nameInput.value=game.survivorName||'';
-    const rows=[['Niveau',game.level],['Expérience',`${game.xp} / ${game.level*100}`],['Satiété',`${game.food}%`],['Hydratation',`${game.water}%`],['Fatigue',`${clamp(100-game.energy)}%`],['Zombies éliminés',game.kills],['Fouilles terminées',game.totalSearches],['Mode',game.mode==='gps'?'GPS · hybride':'Démo · hybride']];
+    const rows=[['Niveau',game.level],['Expérience',`${game.xp} / ${game.level*100}`],['Satiété',`${game.food}%`],['Hydratation',`${game.water}%`],['Fatigue',`${clamp(100-game.energy)}%`],['Infection',`${clamp(game.infection||0)}%`],['Zombies éliminés',game.kills],['Fouilles terminées',game.totalSearches],['Mode',game.mode==='gps'?'GPS · hybride':'Démo · hybride']];
     $('survivorStats').innerHTML=rows.map(([name,value])=>`<div class="info-line"><span>${name}</span><strong>${safe(value)}</strong></div>`).join('');
     $('stealthValue').textContent=`${100-game.noise}%`;
     $('stealthBar').style.width=`${100-game.noise}%`;
@@ -2506,7 +2654,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(!hasBuilding('generator'))return 0;
     return ELECTRIC_CONSUMERS.reduce((sum,c)=>sum+(game.electricSwitches?.[c.id]&&c.requirements()?c.draw:0),0);
   }
-  function fuelRate(){return GENERATOR_FUEL_UNITS_PER_HOUR+0.12*electricLoad()}
+  function fuelRate(){return Math.max(.2,GENERATOR_FUEL_UNITS_PER_HOUR+0.12*electricLoad()-(game.solarInstalled&&realRestCycle().isDay?.2:0)-(game.lightingOptimized&&game.electricSwitches?.lighting?.08:0))}
   // Mise à jour par temps réellement écoulé. Toujours appeler avant de changer les interrupteurs.
   // La consommation d'énergie et l'usure s'arrêtent au moment précis de la panne sèche/casse.
   function advanceGenerator(now=Date.now()){
@@ -2575,7 +2723,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function flashlightActive(){return game.loadout.flashlight==='torch' && quantity('flashlight')>0 && game.flashlightOn===true;}
   window.DEAD_EARTH_NIGHT_VIEW=()=>({night:!realRestCycle().isDay,
     player:game.mode==='gps'&&Number.isFinite(game.lat)&&Number.isFinite(game.lon)?[game.lat,game.lon]:[...center],
-    flashlight:flashlightActive(),light:isConsumerPowered('lighting')&&Boolean(game.safeZone?.center),home:game.safeZone?.center||null});
+    flashlight:flashlightActive(),light:isConsumerPowered('lighting')&&Boolean(game.safeZone?.center),home:game.safeZone?.center||null,flare:game.flareEffect?.until>Date.now()?[game.flareEffect.lat,game.flareEffect.lon]:null});
   function hasBuilding(id){return Boolean(game.buildings[id])}
   function buildStructure(id){
     if(!game.safeZone)return toast('Installe d’abord ton refuge avant les constructions.');
@@ -2619,9 +2767,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function collectProduction(id){
     if(!['collector','garden'].includes(id)||!hasBuilding(id))return;
     if(game.productionDays[id]===localDay())return toast('Récolte déjà récupérée aujourd’hui.');
-    const gain=id==='collector'?{water:2*buildingLevel('collector')}:{food:buildingLevel('garden')};
+    const gain=id==='collector'?{water:2*buildingLevel('collector')+(game.collectorCover?1:0)}:{food:buildingLevel('garden')+(game.greenhouse?1:0)+2*(Number(game.gardenSeedBonus)||0)};
     if(!creditBaseReward(gain))return toast('Pas assez de place dans le sac ou la réserve.');
-    game.productionDays[id]=localDay();xpGain(7);
+    game.productionDays[id]=localDay();if(id==='garden')game.gardenSeedBonus=0;xpGain(7);
     commit(`Production quotidienne : ${Object.entries(gain).map(([k,n])=>n+' '+ITEMS[k].label).join(', ')}.`);
   }
   function setGeneratorRunning(running){
@@ -2907,8 +3055,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
 
     const collectorReady=hasBuilding('collector')&&game.productionDays.collector!==localDay(),gardenReady=hasBuilding('garden')&&game.productionDays.garden!==localDay();
     $('baseProduction').innerHTML=`
-      <div class="base-production-row"><div class="base-production-head"><b>◉ RÉCUPÉRATEUR D’EAU</b><span>${hasBuilding('collector')?'+'+(2*buildingLevel('collector'))+' / jour':'NON CONSTRUIT'}</span></div><p>${collectorReady?(2*buildingLevel('collector'))+' eaux disponibles pour ton sac.':hasBuilding('collector')?'Récolte du jour déjà récupérée.':'Construis le récupérateur pour obtenir de l’eau.'}</p><button class="pixel-button" data-produce="collector" ${!collectorReady?'disabled':''}>${collectorReady?'RÉCUPÉRER '+(2*buildingLevel('collector'))+' EAUX':'INDISPONIBLE'}</button></div>
-      <div class="base-production-row"><div class="base-production-head"><b>♣ POTAGER</b><span>${hasBuilding('garden')?'+'+buildingLevel('garden')+' / jour':'NON CONSTRUIT'}</span></div><p>${gardenReady?buildingLevel('garden')+' ration(s) disponibles.':hasBuilding('garden')?'Récolte du jour déjà récupérée.':'Construis le potager dès le niveau 1.'}</p><button class="pixel-button" data-produce="garden" ${!gardenReady?'disabled':''}>${gardenReady?'RÉCUPÉRER '+buildingLevel('garden')+' RATION(S)':'INDISPONIBLE'}</button></div>
+      <div class="base-production-row"><div class="base-production-head"><b>◉ RÉCUPÉRATEUR D’EAU</b><span>${hasBuilding('collector')?'+'+(2*buildingLevel('collector')+(game.collectorCover?1:0))+' / jour':'NON CONSTRUIT'}</span></div><p>${collectorReady?(2*buildingLevel('collector')+(game.collectorCover?1:0))+' eaux disponibles pour ton sac.':hasBuilding('collector')?'Récolte du jour déjà récupérée.':'Construis le récupérateur pour obtenir de l’eau.'}</p><button class="pixel-button" data-produce="collector" ${!collectorReady?'disabled':''}>${collectorReady?'RÉCUPÉRER '+(2*buildingLevel('collector')+(game.collectorCover?1:0))+' EAUX':'INDISPONIBLE'}</button></div>
+      <div class="base-production-row"><div class="base-production-head"><b>♣ POTAGER</b><span>${hasBuilding('garden')?'+'+(buildingLevel('garden')+(game.greenhouse?1:0)+2*(Number(game.gardenSeedBonus)||0))+' / jour':'NON CONSTRUIT'}</span></div><p>${gardenReady?(buildingLevel('garden')+(game.greenhouse?1:0)+2*(Number(game.gardenSeedBonus)||0))+' ration(s) disponibles.':hasBuilding('garden')?'Récolte du jour déjà récupérée.':'Construis le potager dès le niveau 1.'}</p><button class="pixel-button" data-produce="garden" ${!gardenReady?'disabled':''}>${gardenReady?'RÉCUPÉRER '+(buildingLevel('garden')+(game.greenhouse?1:0)+2*(Number(game.gardenSeedBonus)||0))+' RATION(S)':'INDISPONIBLE'}</button></div>
       <div class="base-production-row generator-box" id="generatorPanel"><div class="base-production-head"><b>⚡ GÉNÉRATEUR</b><span id="generatorPowerStatus">${powered()?'● EN MARCHE':'○ ÉTEINT'}</span></div>
         <div class="generator-meter-head"><b id="generatorFuelLabel">⛽ ${game.generatorState.fuel.toFixed(2)} / ${GENERATOR_TANK_CAPACITY} unités</b><span id="generatorFuelPercent">${Math.round(game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100)} %</span></div>
         <div class="generator-meter" role="progressbar" aria-label="Essence du générateur" aria-valuemin="0" aria-valuemax="${GENERATOR_TANK_CAPACITY}" aria-valuenow="${game.generatorState.fuel.toFixed(2)}" id="generatorFuelMeter"><i id="generatorFuelFill" style="width:${game.generatorState.fuel/GENERATOR_TANK_CAPACITY*100}%"></i></div>
@@ -2991,10 +3139,260 @@ const DEAD_EARTH_ICONS = Object.freeze({
     commit(`Horde de ${horde} infectés : barricades -${damage}, ${success?'refuge défendu !':'défenses détruites !'}`);
     modal({tag:'RAPPORT DE DÉFENSE',title:success?'REFUGE DÉFENDU':'BARRICADES ROMPUES',text:`${horde} infectés ont attaqué ton refuge virtuel. Résistance restante : ${game.fort}/${maxFort()}${isConsumerPowered('defense')?' · défenses électriques actives':''}. Test lancé uniquement sur demande.`,actions:[{name:'CONTINUER',fn:closeModal}]});
   }
+  // ——— V3.0 : catalogue, fouilles, objets actifs, rangement et démontage ———
+  let bagCatalogue=false,bagCategory='all',bagRarity='all',bagQuery='';
+  const normalizeSearch=str=>String(str||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const itemCondition=id=>clamp(Number(game.itemCondition?.[id]??100),0,100);
+  const durableToolReady=id=>quantity(id)>0&&itemCondition(id)>0;
+  function wearTool(id,n=3){if(durableToolReady(id))game.itemCondition[id]=clamp(itemCondition(id)-n);}
+  function getPoiSources(p){
+    const name=normalizeSearch(p?.type||'')+' '+normalizeSearch(p?.name||'');
+    const tags=[];
+    if(/boulanger|supermarche|epicer|cafe|restaurant|boucher|primeur|alimentation|hotel|auberge|commerce/.test(name)||p?.loot?.includes('food'))tags.push('food');
+    if(/commerce general|magasin general|brocante|papeterie|librairie|centre communautaire|grand magasin|mairie|ecole|hotel/.test(name))tags.push('general');
+    if(/pharmacie|soins|parapharmacie|hopital|clinique|cabinet medical|docteur/.test(name)||p?.loot?.includes('medkit'))tags.push('medical');
+    if(/bricol|quincaill|garage|atelier|outillage|repar|entrepot/.test(name))tags.push('hardware');
+    if(/station|carburant|automobile|garage|mecanique|velo/.test(name)||p?.loot?.includes('fuel'))tags.push('auto');
+    if(/electron|telephone|mobile|electri|techno/.test(name)||p?.loot?.includes('parts'))tags.push('electronics');
+    if(/parc|jardin|foret|bois|nature|fleuriste/.test(name)||p?.type==='Nature')tags.push('nature');
+    if(/outdoor|randonn|camping|sport|plein air|vetement|chaussur/.test(name))tags.push('outdoors');
+    if(!tags.length)tags.push('general');
+    return [...new Set(tags)];
+  }
+  function randomExtraLoot(tags){
+    const eligible=EXTRA_ITEM_LIST.filter(item=>item.sources.some(tag=>tags.includes(tag)));
+    if(!eligible.length)return null;
+    // La catégorie du lieu réellement référencé est prioritaire (pharmacie = soins,
+    // bricolage = outils/matériaux, station-service = mécanique, etc.).
+    const specificTags=tags.filter(t=>t!=='general');
+    const specialty=eligible.filter(item=>item.sources.some(t=>specificTags.includes(t)));
+    const pool=specialty.length && Math.random()<.82 ? specialty : eligible;
+    const rarityWeight={commun:12,'peu commun':5,rare:1.25,legendaire:.14};
+    const total=pool.reduce((n,item)=>n+rarityWeight[item.rarity],0);
+    let roll=Math.random()*total;
+    for(const item of pool){roll-=rarityWeight[item.rarity];if(roll<=0)return item.id;}
+    return pool[pool.length-1].id;
+  }
+  function advanceSurvivalEffects(){
+    const due=Array.isArray(game.energyCrashQueue)?game.energyCrashQueue:[];
+    const now=Date.now();const count=due.filter(t=>t<=now).length;
+    if(count){game.energy=clamp(game.energy-15*count);game.energyCrashQueue=due.filter(t=>t>now);log('Contrecoup des boissons énergisantes : fatigue accrue.');save();}
+    if(game.distraction?.until<=now)game.distraction=null;
+    if(game.flareEffect?.until<=now)game.flareEffect=null;
+  }
+  function playerOnField(){return game.mode==='gps'&&Number.isFinite(game.lat)&&Number.isFinite(game.lon)}
+  function activateDistraction(id,radius,duration){
+    if(!playerOnField())return toast('Active le GPS pour une diversion virtuelle.');
+    if(isProtected(game.lat,game.lon))return toast('Évite les leurres dans une zone SAFE.');
+    const lat=game.lat+.00023,lon=game.lon+.00019;
+    if(isProtected(lat,lon))return toast('Impossible de poser le leurre dans une zone SAFE.');
+    game.inventory[id]--;
+    game.distraction={lat,lon,until:Date.now()+duration,radius};
+    game.noise=clamp(game.noise+5);
+    commit(`${ITEMS[id].label} : diversion virtuelle active pendant ${Math.round(duration/1000)} s.`);
+  }
+  function baseMaterialAction(id){
+    if(!game.safeZone||!actionGPS(35,...game.safeZone.center,'Construction').ok)return toast('Il faut être à moins de 35 m du refuge avec GPS actif.');
+    let cost,kind,boost=0;
+    if(id==='planks'){cost={planks:1,nails:2};boost=12;kind='Barricade de bois';}
+    else if(id==='wire_mesh'){cost={wire_mesh:1,metal_pipe:1,rope:1};boost=20;kind='Clôture métallique';}
+    else if(id==='sheet_metal'){cost={sheet_metal:1,screws:2};boost=25;kind='Protection de tôle';}
+    else if(id==='tarp'){
+      if(!buildingLevel('collector'))return toast('Construis un récupérateur d’eau.');
+      if(game.collectorCover)return toast('Bâche déjà installée sur le récupérateur.');
+      cost={tarp:1,rope:1};kind='Bâche du récupérateur';
+    }else if(id==='window_glass'){
+      if(!buildingLevel('garden'))return toast('Construis un potager au refuge.');
+      if(game.greenhouse)return toast('Petite serre déjà installée.');
+      cost={window_glass:1,planks:2,nails:2};kind='Petite serre';
+    }else if(id==='light_bulb'){
+      if(!buildingLevel('generator'))return toast('Construis un générateur pour utiliser l’éclairage.');
+      if(game.lightingOptimized)return toast('Éclairage du refuge déjà optimisé.');
+      cost={light_bulb:1,electrical_cable:1,fuse:1};kind='Éclairage optimisé';
+    }else return toast('Cet objet sert de matériau à d’autres systèmes de survie.');
+    if(boost&&game.fort>=maxFort())return toast('La résistance du refuge est déjà maximale.');
+    if(!canPayBase(cost))return toast('Matériaux manquants : '+Object.entries(cost).map(([k,n])=>`${n} ${ITEMS[k].label}`).join(', '));
+    payBase(cost);
+    if(boost)game.fort=clamp(game.fort+boost,0,maxFort());
+    if(id==='tarp')game.collectorCover=true;
+    if(id==='window_glass')game.greenhouse=true;
+    if(id==='light_bulb')game.lightingOptimized=true;
+    xpGain(12);commit(`${kind} construite : ${boost?`+${boost} résistance.`:'installation améliorée.'}`);
+  }
+  function itemAction(id){
+    if(quantity(id)<1||!ITEMS[id])return toast('Cet objet n’est pas dans ton sac.');
+    const use=(msg)=>{game.inventory[id]--;xpGain(2);commit(msg)};
+    const refill=(prop,n)=>{game[prop]=clamp(game[prop]+n);};
+    const toggle=(prop)=>{game.inventoryGear[prop]=!game.inventoryGear[prop];commit(`${ITEMS[id].label} ${game.inventoryGear[prop]?'équipé(e)':'retiré(e)'}.`)};
+    switch(id){
+      case 'cereal_bar':if(game.food>=100)return toast('Tu n’as pas faim.');refill('food',15);use('Barre de céréales consommée : +15 satiété.');break;
+      case 'biscuits':{
+        refill('food',8);game.biscuitsPortions=(game.biscuitsPortions||3)-1;
+        if(game.biscuitsPortions<=0){game.inventory.biscuits--;game.biscuitsPortions=3;}
+        commit('Biscuits : +8 satiété · '+game.biscuitsPortions+' portion(s) dans le paquet courant.');break;
+      }
+      case 'canned_soup':refill('food',25);refill('water',8);use('Soupe consommée : +25 satiété, +8 hydratation.');break;
+      case 'soda':refill('water',12);refill('energy',8);use('Soda consommé : +12 hydratation, +8 endurance.');break;
+      case 'energy_drink':refill('energy',35);game.energyCrashQueue.push(Date.now()+20*60*1000);use('Boisson énergisante : +35 endurance ; contrecoup dans 20 minutes.');break;
+      case 'empty_canteen':
+        if(game.canteenCharges>=2)return toast('Gourde déjà pleine (2/2).');
+        if(quantity('water')<1)return toast('Il faut une eau potable dans le sac.');
+        game.inventory.water--;game.canteenCharges++;commit('Gourde remplie : '+game.canteenCharges+'/2 charge(s).');break;
+      case 'purification_tablets':
+        if(quantity('dirty_water')<1)return toast('Trouve d’abord de l’eau trouble dans la nature.');
+        if(inventoryWeight()-ITEMS.dirty_water.weight-ITEMS.purification_tablets.weight+ITEMS.water.weight>bagCapacity())return toast('Sac trop plein.');
+        game.inventory.purification_tablets--;game.inventory.dirty_water--;game.inventory.water++;commit('Eau trouble purifiée : +1 eau potable.');break;
+      case 'seeds':
+        if(!buildingLevel('garden'))return toast('Construis le potager au refuge.');
+        if(!game.safeZone||!actionGPS(35,...game.safeZone.center,'Semis').ok)return toast('Approche ton refuge à moins de 35 m pour semer.');
+        game.inventory.seeds--;game.gardenSeedBonus=(Number(game.gardenSeedBonus)||0)+1;
+        commit('Graines semées : +2 rations à la prochaine récolte du potager.');break;
+      case 'sterile_compress':if(game.hp>=100)return toast('Santé au maximum.');refill('hp',10);use('Compresses : +10 PV.');break;
+      case 'antiseptic':game.infection=clamp(game.infection-20);use('Désinfectant appliqué : infection réduite.');break;
+      case 'medical_alcohol':game.infection=clamp(game.infection-30);use('Alcool médical utilisé pour désinfecter.');break;
+      case 'painkillers':game.painReliefUntil=Date.now()+8*60*1000;use('Antidouleurs : 15 % de dégâts en moins pendant 8 min.');break;
+      case 'antibiotics':game.infection=clamp(game.infection-60);use('Antibiotiques utilisés : infection réduite.');break;
+      case 'splint':game.energy=clamp(game.energy+12);use('Attelle appliquée : +12 endurance.');break;
+      case 'filter_mask':case 'hiking_boots':case 'safety_gloves':case 'side_pouch':toggle(id);break;
+      case 'suture_kit':
+        if(!isConsumerPowered('infirmary'))return toast('Infirmerie niveau 2+ alimentée nécessaire.');
+        if(!game.safeZone||!actionGPS(35,...game.safeZone.center,'Soins').ok)return toast('Rejoins ton refuge pour les soins avancés.');
+        if(game.hp>=100)return toast('Ta santé est déjà au maximum.');
+        refill('hp',55);use('Kit de suture : +55 PV à l’infirmerie.');break;
+      case 'handsaw':
+        if(!durableToolReady(id))return toast('Scie cassée : répare-la à l’atelier.');
+        if(quantity('wood')<1)return toast('Il faut 1 bois à transformer.');
+        if(inventoryWeight()-ITEMS.wood.weight+2*ITEMS.planks.weight>bagCapacity())return toast('Sac trop plein.');
+        game.inventory.wood--;game.inventory.planks+=2;wearTool(id,5);commit('Scie à main : 1 bois transformé en 2 planches.');break;
+      case 'hammer':
+        if(!durableToolReady(id))return toast('Marteau cassé.');
+        if(!game.safeZone||!actionGPS(35,...game.safeZone.center,'Réparation').ok)return toast('Approche ton refuge à moins de 35 m.');
+        if(quantity('planks')<1||quantity('nails')<2)return toast('Nécessite 1 planche et 2 clous.');
+        if(game.fort>=maxFort())return toast('Barricades déjà au maximum.');
+        game.inventory.planks--;game.inventory.nails-=2;game.fort=clamp(game.fort+14,0,maxFort());wearTool(id,6);
+        commit('Barricades réparées : +14 résistance.');break;
+      case 'binoculars':{
+        if(!durableToolReady(id))return toast('Jumelles endommagées.');
+        if(!playerOnField())return toast('Active ton GPS pour observer les environs.');
+        const nearby=zombiesNear(game.lat,game.lon,450);
+        wearTool(id,1);commit('Observation : '+nearby.length+' zombies repérés dans un rayon de 450 m.');break;
+      }
+      case 'lighter':{
+        if(!playerOnField())return toast('Active ton GPS pour un repos de terrain.');
+        if(quantity('wood')<1)return toast('Il faut une unité de bois pour le feu fictif.');
+        if(zombiesNear(game.lat,game.lon,35).length)return toast('Trop de zombies autour pour se reposer.');
+        if(Date.now()-(game.campfireAt||0)<2*3600000)return toast('Tu as déjà utilisé un feu de camp récemment.');
+        game.inventory.wood--;game.campfireAt=Date.now();refill('energy',16);game.noise=clamp(game.noise+7);commit('Feu de camp virtuel : +16 endurance, bruit +7.');break;
+      }
+      case 'sleeping_bag':
+        if(!playerOnField())return toast('Active le GPS pour te reposer dehors.');
+        if(zombiesNear(game.lat,game.lon,40).length)return toast('Zone trop dangereuse pour dormir.');
+        refill('energy',15);game.threat=clamp(game.threat+5);commit('Repos léger sur le terrain : +15 endurance · menace +5.');break;
+      case 'empty_bottle':activateDistraction(id,70,30000);break;
+      case 'alarm_clock':activateDistraction(id,125,60000);break;
+      case 'flare':{
+        if(!playerOnField())return toast('Active le GPS pour utiliser une fusée virtuelle.');
+        game.inventory.flare--;game.flareEffect={lat:game.lat,lon:game.lon,until:Date.now()+120000};
+        game.distraction={lat:game.lat+.00021,lon:game.lon+.00015,until:Date.now()+120000,radius:170};
+        game.noise=clamp(game.noise+20);commit('Fusée virtuelle : éclairage pendant 2 min et attraction des infectés.');break;
+      }
+      case 'batteries':
+        if(quantity('portable_radio')<1)return toast('Trouve une radio portable pour utiliser les piles.');
+        if(game.portableBattery>=100)return toast('Radio déjà à pleine charge.');
+        game.inventory.batteries--;game.portableBattery=clamp(game.portableBattery+50);commit('Piles installées dans la radio : +50 % d’énergie.');break;
+      case 'rechargeable_battery':
+        if(game.rechargeableCharge<20)return toast('Recharge cette batterie avec le chargeur solaire.');
+        if(quantity('portable_radio')<1)return toast('Pas de radio portable dans le sac.');
+        game.rechargeableCharge=clamp(game.rechargeableCharge-20);game.portableBattery=clamp(game.portableBattery+50);
+        commit('Batterie rechargeable : énergie transférée à la radio.');break;
+      case 'solar_charger':
+        if(quantity('rechargeable_battery')<1)return toast('Il faut une batterie rechargeable.');
+        if(!realRestCycle().isDay)return toast('Charge solaire disponible pendant la journée.');
+        if(game.solarChargeDay===localDay())return toast('Recharge solaire déjà effectuée aujourd’hui.');
+        game.solarChargeDay=localDay();game.rechargeableCharge=100;commit('Batterie rechargeable remise à 100 % par le soleil.');break;
+      case 'car_battery':
+        if(quantity('portable_radio')<1)return toast('Garde cette batterie pour une future installation ou trouve une radio portable.');
+        game.inventory.car_battery--;game.portableBattery=100;
+        game.inventory.parts+=2;commit('Batterie auto virtuelle convertie en énergie radio et 2 pièces.');break;
+      case 'portable_radio':{
+        if(!durableToolReady(id))return toast('Radio endommagée : atelier nécessaire.');
+        if(game.portableBattery<20)return toast('Radio déchargée : utilise des piles ou une batterie.');
+        if(game.portableRadioDay===localDay())return toast('Transmission du jour déjà captée.');
+        game.portableBattery-=20;game.portableRadioDay=localDay();wearTool(id,1);
+        const nearby=playerOnField()?zombiesNear(game.lat,game.lon,300).length:0;
+        xpGain(5);commit(`Radio portable : signal capté (+5 XP), ${nearby} signature(s) à moins de 300 m du GPS.`);break;
+      }
+      case 'solar_panel':
+        if(game.solarInstalled)return toast('Panneau déjà installé au refuge.');
+        if(!game.safeZone||!actionGPS(35,...game.safeZone.center,'Installation').ok)return toast('Approche le refuge à moins de 35 m.');
+        if(!buildingLevel('generator'))return toast('Le réseau électrique nécessite un générateur construit.');
+        game.inventory.solar_panel--;game.solarInstalled=true;
+        commit('Panneau solaire installé : consommation du générateur −0,2 essence/h de jour.');break;
+      case 'planks':case 'wire_mesh':case 'sheet_metal':case 'tarp':case 'window_glass':case 'light_bulb':baseMaterialAction(id);break;
+      case 'flashlight':
+        game.loadout.flashlight='torch';game.flashlightOn=true;commit('Lampe torche équipée et allumée.');break;
+      case 'water':refill('water',30);use('Eau potable : +30 hydratation.');break;
+      case 'food':refill('food',30);use('Conserve : +30 satiété.');break;
+      case 'bandage':refill('hp',30);use('Bandage : +30 PV.');break;
+      case 'medkit':refill('hp',70);use('Trousse de secours : +70 PV.');break;
+      default:return toast('Cet objet sert aux constructions, recettes ou réparations. Ouvre sa fiche pour voir son rôle.');
+    }
+  }
+  function canDismantle(id){return Boolean(DISMANTLE_LOOT[id]&&(durableToolReady('screwdriver')||durableToolReady('multi_pliers')||durableToolReady('multitool')));}
+  function dismantleItem(id){
+    const reward=DISMANTLE_LOOT[id];if(!reward||quantity(id)<1)return;
+    if(!canDismantle(id))return toast('Démontage : tournevis, pince ou multitool en état requis.');
+    const outputMass=Object.entries(reward).reduce((a,[key,n])=>a+ITEMS[key].weight*n,0);
+    if(inventoryWeight()-ITEMS[id].weight+outputMass>bagCapacity()+.0001)return toast('Sac trop chargé pour les composants récupérés.');
+    game.inventory[id]--;
+    for(const [key,n] of Object.entries(reward))game.inventory[key]=(game.inventory[key]||0)+n;
+    const tool=['multi_pliers','screwdriver','multitool'].find(durableToolReady);wearTool(tool,5);
+    commit(`${ITEMS[id].label} démonté : `+Object.entries(reward).map(([key,n])=>`${n} ${ITEMS[key].label}`).join(', ')+'.');
+  }
+  function repairTool(id){
+    if(!DURABLE_TOOLS.has(id)||quantity(id)<1)return;
+    if(!isConsumerPowered('workbench'))return toast('L’atelier alimenté est nécessaire pour réparer.');
+    if(itemCondition(id)>=100)return toast('Cet objet est déjà en bon état.');
+    const cost={parts:1,metal:1};if(!canPayBase(cost))return toast('Réparation : 1 pièce et 1 ferraille nécessaires.');
+    payBase(cost);game.itemCondition[id]=100;commit(`${ITEMS[id].label} réparé à 100 %.`);
+  }
+  function getItemActionLabel(id){
+    const labels={planks:'Réparer les barricades',wire_mesh:'Poser une clôture',sheet_metal:'Renforcer le refuge',tarp:'Couvrir le récupérateur',window_glass:'Fabriquer une petite serre',light_bulb:'Améliorer l’éclairage',cereal_bar:'Manger',biscuits:'Manger 1 portion',canned_soup:'Manger',soda:'Boire',energy_drink:'Boire',empty_canteen:'Remplir la gourde',purification_tablets:'Purifier une eau',seeds:'Semer au potager',sterile_compress:'Soigner',antiseptic:'Désinfecter',medical_alcohol:'Désinfecter',painkillers:'Prendre',antibiotics:'Soigner l’infection',splint:'Poser une attelle',filter_mask:'Équiper / retirer',suture_kit:'Soins avancés',handsaw:'Scier 1 bois',hammer:'Réparer les barricades',binoculars:'Observer à 450 m',lighter:'Feu de camp virtuel',sleeping_bag:'Repos de terrain',empty_bottle:'Créer une diversion',alarm_clock:'Poser un leurre',flare:'Allumer une fusée virtuelle',batteries:'Alimenter la radio',rechargeable_battery:'Alimenter la radio',solar_charger:'Recharger au soleil',car_battery:'Alimenter la radio',portable_radio:'Écouter le signal',solar_panel:'Installer au refuge',hiking_boots:'Équiper / retirer',safety_gloves:'Équiper / retirer',side_pouch:'Équiper / retirer',water:'Boire',food:'Manger',bandage:'Soigner',medkit:'Soigner',flashlight:'Équiper + allumer'};
+    return labels[id]||null;
+  }
+  function showItemDetail(id){
+    const item=ITEMS[id];if(!item)return;
+    const owned=quantity(id),stored=storageQuantity(id),action=getItemActionLabel(id);
+    const sourceList=item.sources.map(s=>SOURCE_LABELS[s]||s).join(' · ');
+    const equipped=Boolean(game.inventoryGear?.[id]);
+    const extra=id==='biscuits'&&owned?`Portions restantes du paquet : ${game.biscuitsPortions||3}/3`:id==='empty_canteen'?`Contenu : ${game.canteenCharges||0}/2 charges`:id==='portable_radio'?`Énergie : ${game.portableBattery||0}%`:id==='rechargeable_battery'?`Charge : ${game.rechargeableCharge||0}%`:id==='seeds'?`Plantations en attente : ${game.gardenSeedBonus||0}`:id==='solar_panel'&&game.solarInstalled?'Panneau déjà installé au refuge':equipped?'Équipé':null;
+    const content=`<div class="bag-detail"><div><strong>${item.icon||'📦'} ${safe(item.label)}</strong><br><span class="bag-meta">${safe(CATEGORY_LABELS[item.category])} · ${safe(RARITY_LABELS[item.rarity])} · ${item.weight} kg</span></div><div>${safe(item.desc)}</div><div><strong>Découverte :</strong> ${safe(sourceList)}</div><div><strong>Sac :</strong> ${owned} · <strong>Réserve :</strong> ${stored}</div>${DURABLE_TOOLS.has(id)?`<div>État de l’outil : <strong>${itemCondition(id)}/100 ${itemCondition(id)===0?'— CASSÉ':''}</strong></div>`:''}${extra?`<div class="bag-bonus">${safe(extra)}</div>`:''}${DISMANTLE_LOOT[id]?`<div><strong>Démontage :</strong> ${safe(Object.entries(DISMANTLE_LOOT[id]).map(([k,n])=>`${n} ${ITEMS[k].label}`).join(', '))}</div>`:''}</div>`;
+    modal({tag:'🎒 FICHE D’OBJET',title:`${item.icon||'📦'} ${item.label}`,text:owned?'Objet présent dans ton sac.':'Catalogue : objet encore à trouver.',content,actions:[
+      ...(owned&&action?[{name:action.toUpperCase(),fn:()=>{closeModal();itemAction(id)}}]:[]),
+      ...(owned&&id==='empty_canteen'&&game.canteenCharges>0?[{name:'BOIRE LA GOURDE',fn:()=>{closeModal();game.canteenCharges--;game.water=clamp(game.water+22);commit('Eau de la gourde : +22 hydratation.')}}]:[]),
+      ...(owned&&DISMANTLE_LOOT[id]?[{name:'DÉMONTER',fn:()=>{closeModal();dismantleItem(id)}}]:[]),
+      ...(owned&&DURABLE_TOOLS.has(id)&&itemCondition(id)<100?[{name:'RÉPARER À L’ATELIER',fn:()=>{closeModal();repairTool(id)}}]:[]),
+      ...(owned&&buildingLevel('storage')?[{name:'DÉPOSER EN RÉSERVE',fn:()=>{closeModal();transferStorage(id,'deposit')}}]:[]),
+      {name:'FERMER',fn:closeModal,alt:true}
+    ]});
+  }
+
   function renderInventory(){
     $('capacityText').textContent=`${inventoryWeight().toFixed(1)} / ${bagCapacity()} KG`;
     $('capacityBar').style.width=`${Math.min(100,inventoryWeight()/bagCapacity()*100)}%`;
-    $('inventoryGrid').innerHTML=Object.entries(ITEMS).map(([id,item])=>`<div class="item-card ${quantity(id)===0?'empty':''}"><div class="item-symbol"><span class="item-emoji" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span></div><b>${safe(item.label)}</b><small>× ${quantity(id)} · ${item.weight} kg/u.</small></div>`).join('');
+    const allItems=Object.entries(ITEMS).filter(([id,item])=>(bagCatalogue||quantity(id)>0)&&
+      (bagCategory==='all'||item.category===bagCategory)&&
+      (bagRarity==='all'||item.rarity===bagRarity)&&
+      (!bagQuery||normalizeSearch(item.label+' '+item.desc).includes(normalizeSearch(bagQuery))))
+      .sort(([idA,a],[idB,b])=>{
+        if(!bagCatalogue&&quantity(idA)!==quantity(idB))return quantity(idB)-quantity(idA);
+        return a.label.localeCompare(b.label,'fr');
+      });
+    $('bagCount').textContent=allItems.length+' type(s) '+(bagCatalogue?'au catalogue':'dans le sac')+' · '+EXTRA_ITEM_LIST.length+' nouveaux objets à découvrir';
+    $('bagOwned').classList.toggle('selected',!bagCatalogue);$('bagCatalogue').classList.toggle('selected',bagCatalogue);
+    $('inventoryGrid').innerHTML=allItems.length?allItems.map(([id,item])=>`<button type="button" class="item-card ${quantity(id)===0?'empty':''} rarity-${item.rarity==='peu commun'?'uncommon':item.rarity}" data-item-id="${safe(id)}" aria-label="Afficher ${safe(item.label)}">
+      <div class="item-symbol"><span class="item-emoji" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span></div><b>${safe(item.label)}</b><span class="bag-rarity">${safe(RARITY_LABELS[item.rarity])}</span><small>× ${quantity(id)} · ${item.weight} kg</small>${game.inventoryGear?.[id]?'<span class="bag-equipped" aria-label="Équipé">✓</span>':''}</button>`).join(''):'<div class="bag-empty">Aucun objet dans ce filtre. Regarde le catalogue ou change de catégorie.</div>';
+    $('inventoryGrid').querySelectorAll('[data-item-id]').forEach(el=>el.addEventListener('click',()=>showItemDetail(el.dataset.itemId)));
     $('craftList').innerHTML=RECIPES.map(r=>`<div class="upgrade-card"><div><strong>${safe(r.name)}</strong><p>${safe(r.desc)}</p><p>${safe(costText(r.cost))}</p></div><button class="btn outlined" data-craft="${r.id}" ${(!r.requiresWorkshop||isConsumerPowered('workbench'))&&canPay(r.cost)&&inventoryWeight()-Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)+Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)<=bagCapacity()?'':'disabled'}>FABRIQUER</button></div>`).join('');
     $('craftList').insertAdjacentHTML('beforeend',`<div class="pixel-heading gear-craft-card">◈ ÉQUIPEMENT À PORTER</div>`+GEAR_CRAFTS.map(g=>`<div class="upgrade-card gear-craft-card"><div><strong>${g.icon} ${safe(g.name)}</strong><p>${safe(g.desc)}</p><p class="gear-craft-cost">${safe(costText(g.cost))}</p></div><button type="button" class="pixel-button" data-craft-gear="${g.id}" ${game.craftedGear[g.id]||!canPay(g.cost)?'disabled':''}>${game.craftedGear[g.id]?'DÉJÀ FABRIQUÉ':'FABRIQUER'}</button></div>`).join(''));
     $('craftList').querySelectorAll('[data-craft-gear]').forEach(el=>el.addEventListener('click',()=>craftEquipment(el.dataset.craftGear)));
@@ -3020,7 +3418,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }));
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
-  function renderAll(){advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
+  function renderAll(){advanceSurvivalEffects();advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
   function switchTab(tab){window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
@@ -3132,6 +3530,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('detectionToggle').addEventListener('click',toggleDetectionMic);
     $('flashlightToggle').addEventListener('click',toggleFlashlight);
     $('micSensitivity').addEventListener('input',event=>setDetectionSensitivity(event.target.value));
+    $('bagOwned').addEventListener('click',()=>{bagCatalogue=false;renderInventory()});
+    $('bagCatalogue').addEventListener('click',()=>{bagCatalogue=true;renderInventory()});
+    $('bagCategory').addEventListener('change',ev=>{bagCategory=ev.target.value;renderInventory()});
+    $('bagRarity').addEventListener('change',ev=>{bagRarity=ev.target.value;renderInventory()});
+    $('bagSearch').addEventListener('input',ev=>{bagQuery=ev.target.value.trim();renderInventory()});
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));
     $('healBtn').addEventListener('click',()=>useItem('bandage','hp',30,'Bandage utilisé. +30 santé.'));
