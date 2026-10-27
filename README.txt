@@ -1,11 +1,19 @@
-DEAD EARTH V1.7 — RETOUCHES PAGE PERSO
+DEAD EARTH V3.2 — Correctif fonds GitHub
 
-• Crayon à droite du nom du survivant : ouvrir l'édition.
-• Entrer un nom de 2 à 20 caractères, puis ✓ pour enregistrer ou ✕ pour annuler.
-• Ancien cadre de changement de nom retiré.
-• Bouton d'activation du micro retiré de la page Perso.
-• Micro et sensibilité toujours dans Carte > Options.
-• Aucun changement volontaire de sauvegarde, carte, combats, base, sac ou quêtes.
+À remplacer dans le dépôt : index.html uniquement.
+Les quatre images restent dans le dossier « image jeux » déjà présent sur GitHub.
 
-Installation : remplacer uniquement index.html dans le dépôt GitHub à sa racine.
-Ce fichier est autonome. Ne pas importer les scripts des tests.
+Noms utilisés :
+- image jeux/Fond carte.PNG
+- image jeux/Fond base .jpg
+- image jeux/Fond sac .PNG
+- image jeux/Fond quêtes .jpg (accent combinant)
+
+Améliorations :
+- Arrière-plans fixes sur Base / Sac / Quêtes pendant le défilement
+- Opacité des panneaux ajustée pour voir les images sans perdre le texte
+- Suppression de l'image superposée en double au-dessus de la carte GPS
+- Pas de modification des règles du jeu et sauvegardes
+
+Les fonds ne seront visibles sur GitHub Pages que si les images sont déjà présentes aux chemins ci-dessus.
+Si l'ancienne version persiste, ouvrir https://hugotronel-boop.github.io/dead-earth/?v=32 et recharger.
