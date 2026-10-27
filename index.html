@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.2 Fonds corrigés</title>
+  <title>DEAD EARTH — V3.3 Téléphone et lampe</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -491,35 +491,91 @@
   #gameViewport::before { transition: none; }
 }
 </style>
+<style id="dead-earth-v33-phone-torch">
+/* V3.3 — Graphismes externes. La carte GPS, les sauvegardes, les fouilles et le moteur restent inchangés. */
+.de-phone-topbar{
+  --phone-width:100%;
+  flex:0 0 auto !important;
+  height:auto !important;
+  padding:0 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+  z-index:40;
+  overflow:visible;
+}
+.de-phone-shell{width:100%;aspect-ratio:1325 / 564;position:relative;isolation:isolate;overflow:visible}
+.de-phone-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;image-rendering:pixelated;pointer-events:none;user-select:none;z-index:0}
+/* Original touch panels of the user's rugged survival phone. */
+.de-phone-controls{position:absolute;z-index:5;left:16.3%;top:16%;width:13.7%;height:69%;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.de-phone-village,.de-phone-options{width:100%;height:43.5%;position:relative;pointer-events:auto}
+#phoneVillageSlot #territoryCampaign{position:relative!important;inset:auto!important;width:100%!important;max-height:none!important;height:100%;min-height:0;overflow:visible!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;z-index:60}
+#phoneVillageSlot .village-toggle{width:100%;height:100%;min-height:0!important;display:flex;align-items:center;justify-content:center;padding:2px 0!important;border:0!important;border-radius:0;background:transparent!important;font:700 clamp(5px,1.55vw,8px)/1.35 'Courier New',monospace!important;color:#172018;text-shadow:0 1px #d8d49b;text-align:center;letter-spacing:-.1px;word-break:normal}
+#phoneVillageSlot .village-title{font-size:inherit!important;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;flex:1;min-width:0}
+#phoneVillageSlot .village-arrow{display:none}
+#phoneVillageSlot .village-panel{position:absolute;z-index:95;top:calc(100% + 18vw);left:-5px;width:min(300px,87vw);max-height:min(65dvh,450px);overflow-y:auto!important;background:#1d2b30f7;border:3px solid #819185;box-shadow:0 5px 15px #080c0ddd;padding:10px}
+#phoneVillageSlot .village-panel[hidden]{display:none!important}
+.de-phone-option-button{appearance:none;border:0;box-shadow:none;outline:0;width:100%;height:100%;background:transparent;color:#1a251a;font:700 clamp(6px,1.8vw,9px)/1.3 'Courier New',monospace;white-space:nowrap;letter-spacing:-.3px;text-shadow:0 1px #d8d49b;display:grid;place-items:center;position:relative;padding:0;cursor:pointer;transform:none!important}
+.de-phone-option-button span{display:none}
+.de-phone-option-button[aria-expanded="true"]{color:#473520;filter:brightness(1.12)}
+#phoneVillageSlot .village-toggle:focus-visible,.de-phone-option-button:focus-visible{outline:2px solid #ffe1a1;outline-offset:2px}
+/* Four live stats, laid out on the original LCD, no fake numbers baked into the asset. */
+.de-phone-screen{position:absolute;z-index:2;left:34.2%;top:17.5%;width:39.2%;height:65%;display:flex;flex-direction:column;gap:2px;color:#d1dbbd;pointer-events:none}
+.de-phone-status{height:16%;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:2px;font:clamp(6px,1.45vw,8px)/1 'Courier New',monospace;letter-spacing:.2px;text-shadow:0 0 4px #b7d4b255}
+.de-phone-status #soundToggle{pointer-events:auto;border:0;box-shadow:none;background:transparent;padding:0 2px;color:#cce8ab;font:700 11px monospace;min-height:18px;cursor:pointer}
+.de-phone-screen .stats-strip{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(4,minmax(0,1fr));width:100%;height:82%;min-height:0;gap:3px;padding:0}
+.de-phone-screen .stat{background:none!important;box-shadow:none!important;border:0!important;display:grid!important;grid-template-columns:35% minmax(0,1fr) 15%;grid-template-rows:1fr;align-items:center;gap:3px;min-width:0;min-height:0;height:auto!important;padding:0!important}
+.de-phone-screen .stat-title{display:contents!important}
+.de-phone-screen .stat-title span{grid-column:1;grid-row:1;white-space:nowrap;color:#bdd6b2;font:700 clamp(6px,1.4vw,8px)/1 monospace;letter-spacing:-.25px;text-shadow:0 0 2px #a1d7b244}
+.de-phone-screen .stat-title strong{grid-column:3;grid-row:1;font:700 clamp(6px,1.45vw,9px)/1 monospace!important;color:#d4e7c3!important;text-align:right;white-space:nowrap}
+.de-phone-screen .pixel-track{grid-column:2;grid-row:1;width:100%;height:clamp(5px,1.9vw,9px);margin:0;box-shadow:none;border:1px solid #7c9375!important;background:#14251a!important}
+.de-phone-screen .pixel-track i{height:100%;transition:width .25s steps(10,end)}
+/* Options dropdown remains attached to map; the trigger is physically on the phone. */
+.de-phone-topbar .map-top{position:absolute!important;top:calc(100% + 2px)!important;left:auto!important;right:8px!important;z-index:120!important;width:auto;pointer-events:none}
+.de-phone-topbar .map-top .map-utilities{pointer-events:auto}
+.de-phone-topbar #mapTools{width:auto;max-width:min(260px,86vw)}
+.de-phone-topbar #mapToolsPanel{margin:0;max-height:min(71dvh,560px);overflow:auto;width:min(248px,84vw);padding:10px}
+.de-phone-topbar .de-option-refuge{background:#475640;border-color:#c3ac78 #18251d #18251d #c3ac78;color:#ffe1a3}
+/* The physical pixel-art flashlight is the visible bottom-left action button. */
+#page-map .de-flashlight-dock{position:absolute!important;z-index:28!important;left:6px!important;right:auto!important;bottom:6px!important;width:clamp(76px,25vw,112px);height:clamp(170px,51vw,229px);display:block!important;pointer-events:auto;background:transparent!important;padding:0!important;box-shadow:none!important;transform:none}
+#page-map .de-torch-image{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;user-select:none;display:block;filter:drop-shadow(2px 5px 3px #0009)}
+#page-map #openLoot.de-torch-button{position:absolute;inset:0;width:100%;height:100%;border:0!important;background:transparent!important;box-shadow:none!important;outline:0;color:#ffe29a!important;text-shadow:2px 2px 2px #120d08,0 0 6px #0b0c0a;font:700 clamp(10px,2.8vw,14px) 'Courier New',monospace;letter-spacing:.5px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;transform:none!important;opacity:1}
+#page-map #openLoot.de-torch-button span{display:block;transform:rotate(-90deg) translate(-6px,0);white-space:nowrap;margin-top:38%;background:transparent;pointer-events:none}
+#page-map #openLoot.de-torch-button:focus-visible{outline:2px dashed #e9bf76!important;outline-offset:2px;border-radius:8px}
+#page-map .de-flashlight-dock .remote-chip{display:none!important}
+/* Existing refuge drawer remains functional; the dock action is now under Options. */
+@media(max-height:700px){#page-map .de-flashlight-dock{bottom:2px!important;height:clamp(132px,35vh,200px)}#phoneVillageSlot .village-panel{max-height:57dvh}}
+@media(max-width:355px){.de-phone-controls{left:16.4%;width:14%}.de-phone-screen{left:34%;width:40%}.de-phone-screen .stat{gap:1px}.de-phone-screen .stat-title span{font-size:6px}}
+</style>
 </head>
 <body>
 <div id="app">
-  <header class="topbar" aria-label="État du survivant">
-    <div class="top-line">
-      <div class="brand"><span class="brand-icon">☣</span><span>DEAD EARTH</span><small>V3.2 · FONDS</small></div>
-      <div class="top-actions"><span class="day-pill">JOUR <b id="day">01</b></span><button id="soundToggle" class="tiny-button" aria-label="Activer le son">♪</button></div>
-    </div>
-    <div class="stats-strip">
-      <div class="stat"><div class="stat-title"><span>♥ SANTÉ</span><strong id="hudHp">100</strong></div><div class="pixel-track"><i id="hpBar" class="red"></i></div></div>
-      <div class="stat"><div class="stat-title"><span>ϟ ENDURANCE</span><strong id="hudEnergy">100</strong></div><div class="pixel-track"><i id="energyBar" class="gold"></i></div></div>
-      <div class="stat"><div class="stat-title"><span>◉ EAU</span><strong id="hudWater">86</strong></div><div class="pixel-track"><i id="waterBar" class="blue"></i></div></div>
-      <div class="stat"><div class="stat-title"><span>★ NIVEAU</span><strong id="hudLevel">01</strong></div><div class="pixel-track"><i id="xpBar" class="green"></i></div></div>
-    </div>
-  </header>
-
-  <main class="viewport" id="gameViewport" data-art-page="map">
-    <section id="page-map" class="page active" aria-label="Carte de jeu">
-      <div class="map-wrap">
-        <div id="map" aria-label="Carte GPS interactive de l'environnement post-apocalyptique"></div>
-        <div id="mapFallback" class="map-fallback" hidden>Carte schématique active — chargement du terrain réel en arrière-plan</div>
-        <div class="map-art-filter" aria-hidden="true"></div>
-        <div class="map-vignette" aria-hidden="true"></div>
+  <header class="topbar de-phone-topbar" aria-label="Téléphone de survie : village, options et statistiques">
+    <div class="de-phone-shell">
+      <img class="de-phone-art" src="./image%20jeux/telephone-hud.png" alt="" aria-hidden="true">
+      <div class="de-phone-controls">
+        <div class="de-phone-village" id="phoneVillageSlot">
+          <div id="territoryCampaign" class="territory-campaign" aria-live="polite"></div>
+        </div>
+        <div class="de-phone-options">
+          <button id="mapMenuToggle" class="de-phone-option-button" type="button" aria-label="Ouvrir les options de la carte" aria-controls="mapToolsPanel" aria-expanded="false">OPTIONS<span id="mapMenuChevron" aria-hidden="true">▾</span></button>
+        </div>
       </div>
-
-      <div class="map-top" aria-label="Commandes de navigation">
+      <div class="de-phone-screen" aria-label="État du survivant">
+        <div class="de-phone-status"><span>◉ SIGNAL</span><span>JOUR <b id="day">01</b></span><button id="soundToggle" type="button" aria-label="Activer le son">♪</button></div>
+        <div class="stats-strip">
+          <div class="stat"><div class="stat-title"><span>♥ SANTÉ</span><strong id="hudHp">100</strong></div><div class="pixel-track"><i id="hpBar" class="red"></i></div></div>
+          <div class="stat"><div class="stat-title"><span>ϟ ENERGIE</span><strong id="hudEnergy">100</strong></div><div class="pixel-track"><i id="energyBar" class="gold"></i></div></div>
+          <div class="stat"><div class="stat-title"><span>◉ SOIF</span><strong id="hudWater">86</strong></div><div class="pixel-track"><i id="waterBar" class="blue"></i></div></div>
+          <div class="stat"><div class="stat-title"><span>★ LVL</span><strong id="hudLevel">01</strong></div><div class="pixel-track"><i id="xpBar" class="green"></i></div></div>
+        </div>
+      </div>
+    </div>
+          <div class="map-top" aria-label="Commandes de navigation">
         <div class="map-utilities" id="mapTools">
-          <button id="mapMenuToggle" class="pixel-button utility map-menu-toggle" type="button" aria-controls="mapToolsPanel" aria-expanded="false">⚙ OPTIONS <span id="mapMenuChevron">▾</span></button>
+          
           <div class="map-tools-panel pixel-frame" id="mapToolsPanel" hidden>
+            <button id="openRefuge" class="pixel-button utility de-option-refuge" type="button">⌂ GÉRER LE REFUGE</button>
             <button id="gpsMode" class="pixel-button utility" type="button">◎ GPS</button>
             
             <button id="recenter" class="pixel-button utility" type="button">⌖ CENTRER</button>
@@ -541,6 +597,17 @@
           </div>
         </div>
       </div>
+  </header>
+
+  <main class="viewport" id="gameViewport" data-art-page="map">
+    <section id="page-map" class="page active" aria-label="Carte de jeu">
+      <div class="map-wrap">
+        <div id="map" aria-label="Carte GPS interactive de l'environnement post-apocalyptique"></div>
+        <div id="mapFallback" class="map-fallback" hidden>Carte schématique active — chargement du terrain réel en arrière-plan</div>
+        <div class="map-art-filter" aria-hidden="true"></div>
+        <div class="map-vignette" aria-hidden="true"></div>
+      </div>
+
       <div id="detectionHud" class="detection-hud pixel-frame" role="status" aria-live="off">
         <strong id="detectionHudTitle">◉ MODE PASSIF</strong>
         <span id="detectionHudInfo">Active le GPS pour être détecté</span>
@@ -548,11 +615,11 @@
         <small id="detectionAlert">Aucun zombie en chasse</small>
       </div>
       <div class="sr-only" aria-hidden="true"><span id="sidebarThreat"></span><div id="sidebarThreatBar"></div><span id="sidebarThreatText"></span><span id="mapCoords"></span><span id="poiCounter"></span><span id="poiCount"></span></div>
-      <div id="territoryCampaign" class="territory-campaign pixel-frame" aria-live="polite"></div>
-      <div class="action-dock">
-        <div class="remote-chip">⌕ <span id="remoteCount">2 / 2 FOUILLES</span></div>
-        <button id="openLoot" class="pixel-button main-action">▣ FOUILLER <small>POINTS DE RAVITAILLEMENT</small></button>
-        <button id="openRefuge" class="pixel-button refuge-action">⌂<small>REFUGE</small></button>
+      
+      <div class="action-dock de-flashlight-dock" aria-label="Fouilles GPS">
+        <img class="de-torch-image" src="./image%20jeux/lampe-fouille.png" alt="" aria-hidden="true">
+        <div class="remote-chip sr-only"><span id="remoteCount">FOUILLES GPS ≤10 M</span></div>
+        <button id="openLoot" class="de-torch-button" type="button" aria-label="Fouiller les lieux proches (à moins de 10 mètres)"><span>FOUILLER</span></button>
       </div>
       <div class="drawing-controls pixel-frame" id="drawingControls" hidden>
         <span id="placementHint">⌂ TOUCHE LA CARTE POUR POSER LE CARRÉ (20 × 20 M)</span>
@@ -1954,7 +2021,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     card.classList.toggle('is-open',villagePanelOpen);
     card.innerHTML=`<button type="button" id="villageToggle" class="village-toggle" aria-controls="villagePanel" aria-expanded="${villagePanelOpen}"><span class="village-title">${stage==='safe'?'★':stage==='place'?'⌂':'☣'} ${safe(name)}</span><span class="village-arrow">${villagePanelOpen?'▲':'▼'}</span></button>${panel}`;
     $('villageToggle')?.addEventListener('click',()=>{villagePanelOpen=!villagePanelOpen;renderTerritory()});
-    $('territoryAction')?.addEventListener('click',()=>stage==='place'?startDrawing():startProtectionPlacement());
+    $('territoryAction')?.addEventListener('click',()=>{if(currentTab!=='map')switchTab('map');stage==='place'?startDrawing():startProtectionPlacement()});
     $('zoneConfirm')?.addEventListener('click',deployProtection);
     $('zoneCancel')?.addEventListener('click',cancelProtection);
     card.querySelectorAll('[data-zone]').forEach(el=>el.addEventListener('click',()=>showProtection(el.dataset.zone)));
@@ -3710,7 +3777,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeDrawer();closeTools()}});
     $('editSafeZone').addEventListener('click',closeDrawer);
     $('mapMenuToggle').addEventListener('click',toggleTools);
-    document.addEventListener('pointerdown',ev=>{if(!$('mapTools').contains(ev.target))closeTools()});
+    document.addEventListener('pointerdown',ev=>{if(!$('mapTools').contains(ev.target)&&!$('mapMenuToggle').contains(ev.target))closeTools()});
     for(const id of ['gpsMode','recenter','zoomIn','zoomOut'])$(id)?.addEventListener('click',closeTools);
     $('zoomIn').addEventListener('click',()=>{let m=window.DEAD_EARTH_MAP;if(m){m.zoom=Math.min(18,m.zoom+.7);m.queueDraw()}});
     $('zoomOut').addEventListener('click',()=>{let m=window.DEAD_EARTH_MAP;if(m){m.zoom=Math.max(13.5,m.zoom-.7);m.queueDraw()}});
