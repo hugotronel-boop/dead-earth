@@ -963,6 +963,104 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 }
 </style>
 
+
+<!-- DEAD EARTH / CORRECTION LISIBILITÉ DU PANNEAU REFUGE -->
+<style id="de-refuge-legibilite-v2">
+/* Cadre en bois conservé. Un cartouche sombre isole le texte des nervures. */
+#homeVillageAnchor .village-panel .de-village-wood-scroll {
+  background: linear-gradient(150deg, rgba(26,20,16,.88), rgba(35,26,20,.91)) !important;
+  border: 2px solid rgba(238,191,120,.88) !important;
+  border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px rgba(22,12,7,.75), 0 1px 10px rgba(17,9,5,.40) !important;
+  padding: 10px 9px 15px !important;
+  margin: 0 !important;
+  scrollbar-color: #e6b77c #281a13 !important;
+  -webkit-overflow-scrolling: touch;
+}
+/* Typo claire, grasse et réellement lisible sur Safari iPhone. */
+#homeVillageAnchor .village-panel .de-village-wood-scroll *:not(button):not(i) {
+  color: #fff6e6 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px #090604, 1px 0 2px #090604 !important;
+  -webkit-text-stroke: .12px #100b08;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll p,
+#homeVillageAnchor .village-panel .de-village-wood-scroll small,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-help,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-hint,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zombie-sector-info,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-safe-line {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .campaign-head b {
+  font: 900 13px/1.35 -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  letter-spacing: .3px;
+  color: #fff3c9 !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .campaign-head span {
+  font: 900 10px/1.2 -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  background: #744128 !important;
+  color: white !important;
+  border-radius: 3px;
+  padding: 4px !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-section-label {
+  font: 900 11.5px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  letter-spacing: .25px;
+  color: #ffe2a5 !important;
+  margin: 12px 0 6px !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-resource,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-safe-line,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zombie-sector-info {
+  background: rgba(255,255,255,.075) !important;
+  border: 1px solid rgba(230,186,127,.46) !important;
+  border-radius: 4px !important;
+  padding: 7px !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-resource {
+  gap: 5px !important;
+  min-height: 31px !important;
+  font-size: 11.5px !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-resource span {
+  flex-shrink: 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-resource.enough span {
+  color: #abffbd !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-resource.missing span,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-hint.missing,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-blocked {
+  color: #ffbbab !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .campaign-track {
+  border-color: #d5a76d !important;
+  height: 11px !important;
+}
+#homeVillageAnchor .village-panel .de-village-wood-scroll .campaign-go,
+#homeVillageAnchor .village-panel .de-village-wood-scroll .zone-safe-btn,
+#homeVillageAnchor .village-panel .de-village-wood-scroll #zoneConfirm,
+#homeVillageAnchor .village-panel .de-village-wood-scroll #zoneCancel {
+  font: 900 11px/1.25 -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  background: #563321 !important;
+  color: #fff8e8 !important;
+  border-color: #e7b477 !important;
+  padding: 8px 6px !important;
+}
+/* La croix reste toujours visible, au-dessus du fond illustré. */
+#homeVillageAnchor .de-village-wood-close {
+  color: #2b150c !important;
+  background: #f0bd84 !important;
+  border-color: #69391f !important;
+  font-weight: 900 !important;
+}
+</style>
+
 </head>
 <body>
 <div id="app">
