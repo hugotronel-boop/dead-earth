@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V4.0 Sac visuel</title>
+  <title>DEAD EARTH — V4.1 Sac visuel</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -730,6 +730,33 @@ body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
 @media (max-width:355px){#page-inventory .de-bag-hotspot{font-size:8px}#page-inventory .de-bag-craft{font-size:7px}#page-inventory .de-bag-capacity{width:43%}#page-inventory .de-bag-loot-icon{font-size:27px}}
 @media (max-height:650px){#page-inventory .de-bag-capacity{padding:4px 6px}#page-inventory .de-bag-capacity-track{display:none}#page-inventory .de-bag-back{min-height:34px;padding:5px 8px}#page-inventory .de-bag-pagination{bottom:max(4px,env(safe-area-inset-bottom))}}
 @media (prefers-reduced-motion:reduce){#page-inventory .de-bag-loot{transition:none!important}}
+</style>
+
+<style id="dead-earth-v41-bag-invisible-controls">
+/* Les quatre boutons du sac restent actifs mais sans aucun habillage visible.
+   Leurs zones de toucher sont fixées aux objets de l'illustration. */
+#page-inventory .de-bag-hotspot,
+#page-inventory .de-bag-hotspot.selected,
+#page-inventory .de-bag-hotspot:active,
+#page-inventory .de-bag-hotspot:hover {
+  background:transparent !important;
+  background-image:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+  color:transparent !important;
+  text-shadow:none !important;
+  font-size:0 !important;
+  letter-spacing:0 !important;
+  padding:0 !important;
+  filter:none !important;
+  opacity:1 !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+#page-inventory .de-bag-hotspot span {
+  visibility:hidden !important;
+}
+/* La bordure de focus n'apparaît qu'au clavier (accessibilité). */
+#page-inventory .de-bag-hotspot:focus:not(:focus-visible){outline:none !important}
 </style>
 </head>
 <body>
