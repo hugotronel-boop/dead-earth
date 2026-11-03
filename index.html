@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="theme-color" content="#151b20">
   <meta name="description" content="DEAD EARTH : un jeu mobile de survie zombie en pixel art sur une carte GPS du monde réel.">
   
@@ -812,6 +812,22 @@ body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
   #page-inventory .de-bag-pagination{bottom:calc(4px + env(safe-area-inset-bottom,0px));}
 }
 </style>
+<style id="dead-earth-v43-fixed-viewport">
+/* Echelle fixe du jeu, pas de recadrage tactile. */
+html,body,#app{overscroll-behavior:none;touch-action:pan-x pan-y}
+#gameViewport{overscroll-behavior:none}
+.de-home-hub-art,.de-bag-backdrop{-webkit-user-drag:none;user-select:none}
+</style>
+<script id="dead-earth-v43-stop-page-zoom">
+/* Safari iOS peut encore accepter le pincement malgre la balise viewport. */
+(function(){
+  const stopZoom=event=>{if(event.cancelable)event.preventDefault()};
+  document.addEventListener('gesturestart',stopZoom,{passive:false});
+  document.addEventListener('gesturechange',stopZoom,{passive:false});
+  document.addEventListener('touchmove',event=>{if(event.touches.length>1)stopZoom(event)},{passive:false});
+  document.addEventListener('wheel',event=>{if(event.ctrlKey)stopZoom(event)},{passive:false});
+})();
+</script>
 </head>
 <body>
 <div id="app">
@@ -1169,20 +1185,20 @@ const DEAD_EARTH_ICONS = Object.freeze({
       this.ctx=this.canvas.getContext('2d',{alpha:false});this.center=xy(config.center?.[0]??48.8566,config.center?.[1]??2.3522);this.zoom=14;
       this.markers=[];this.zombieCells=[];this.onTilePOI=config.onTilePOI||null;this.safeZone=null;this.protectedZones=[];this.draftCircle=null;this.drawing=[];this.isDrawing=false;this.onTap=config.onTap||null;this.onMarker=config.onMarker||null;
       this.tiles=new Map();this.pending=[];this.active=0;this.maxLoads=3;this.tileTemplate=null;this.templatePending=false;
-      this.ready=true;this.pointer=new Map();this.lastDistance=null;this.dragging=false;this.dirty=false;this.destroyed=false;
+      this.ready=true;this.pointer=new Map();this.dragging=false;this.dirty=false;this.destroyed=false;
       this.resize=()=>{if(this.destroyed)return;const rect=this.node.getBoundingClientRect();this.w=Math.max(220,rect.width);this.h=Math.max(260,rect.height);const dpr=Math.min(window.devicePixelRatio||1,1.5);this.canvas.width=Math.round(this.w*dpr);this.canvas.height=Math.round(this.h*dpr);this.ctx.setTransform(dpr,0,0,dpr,0,0);this.queueDraw()};
       if('ResizeObserver' in window){this.ro=new ResizeObserver(this.resize);this.ro.observe(this.node)}else window.addEventListener('resize',this.resize);
-      this.canvas.addEventListener('pointerdown',e=>{this.pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});try{this.canvas.setPointerCapture(e.pointerId)}catch{};this.dragging=false});
+      this.canvas.addEventListener('pointerdown',e=>{this.pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});try{this.canvas.setPointerCapture(e.pointerId)}catch{};this.dragging=this.pointer.size>1});
       this.canvas.addEventListener('pointermove',e=>{
         const p=this.pointer.get(e.pointerId);if(!p)return;
-        if(this.pointer.size===2){this.pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});const ps=[...this.pointer.values()];const d=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);if(this.lastDistance&&Math.abs(d-this.lastDistance)>3){this.zoom=clamp(this.zoom+Math.log2(d/this.lastDistance),13.5,18);this.queueDraw();this.onExplore?.()}this.lastDistance=d;this.dragging=true;return;}
+        if(this.pointer.size!==1){this.pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});this.dragging=true;return;}
         const dx=e.clientX-p.x,dy=e.clientY-p.y;if(Math.abs(dx)+Math.abs(dy)>2){this.dragging=true;this.center.x-=dx/2**(this.zoom-BASE);this.center.y-=dy/2**(this.zoom-BASE);this.queueDraw();this.onExplore?.()}
         this.pointer.set(e.pointerId,{x:e.clientX,y:e.clientY});
       });
-      const up=e=>{const p=this.pointer.get(e.pointerId);this.pointer.delete(e.pointerId);this.lastDistance=null;if(!p)return; if(!this.dragging){const rect=this.canvas.getBoundingClientRect();this.handleTap(e.clientX-rect.left,e.clientY-rect.top)}if(!this.pointer.size)this.dragging=false};
-      this.canvas.addEventListener('pointerup',up);this.canvas.addEventListener('pointercancel',e=>{this.pointer.delete(e.pointerId);this.lastDistance=null});
-      this.canvas.addEventListener('wheel',e=>{e.preventDefault();this.zoom=clamp(this.zoom+(e.deltaY<0?.5:-.5),13.5,18);this.queueDraw()},{passive:false});
-      this.canvas.addEventListener('dblclick',e=>{e.preventDefault();this.zoom=clamp(this.zoom+1,13.5,18);this.queueDraw()});
+      const up=e=>{const p=this.pointer.get(e.pointerId);this.pointer.delete(e.pointerId);if(!p)return; if(!this.dragging){const rect=this.canvas.getBoundingClientRect();this.handleTap(e.clientX-rect.left,e.clientY-rect.top)}if(!this.pointer.size)this.dragging=false};
+      this.canvas.addEventListener('pointerup',up);this.canvas.addEventListener('pointercancel',e=>{this.pointer.delete(e.pointerId);if(!this.pointer.size)this.dragging=false});
+      this.canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
+      this.canvas.addEventListener('dblclick',e=>e.preventDefault());
       this.resize();this.animation=setInterval(()=>{if(document.visibilityState==='visible'&&this.node.getClientRects().length)this.queueDraw()},750);
     }
     position(lat,lon){const p=xy(lat,lon),s=2**(this.zoom-BASE);return{x:this.w/2+(p.x-this.center.x)*s,y:this.h/2+(p.y-this.center.y)*s}}
@@ -3612,7 +3628,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const page=$('page-inventory'),scene=$('bagScene');
     if(!page||!scene||!page.clientWidth||!page.clientHeight)return;
     const ratio=864/1536;
-    const imageHeight=Math.max(page.clientHeight,page.clientWidth/ratio);
+    const imageHeight=Math.min(page.clientHeight,page.clientWidth/ratio);
     scene.style.width=`${imageHeight*ratio}px`;
     scene.style.height=`${imageHeight}px`;
   }
@@ -4201,7 +4217,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     btn.addEventListener('click',()=>{
       document.querySelector(`.nav-item[data-tab="${btn.dataset.hubTab}"]`)?.click();
       syncHomeState();
-      if(btn.dataset.hubTab==='inventory')requestAnimationFrame(()=>{const scene=$('bagScene'),page=$('page-inventory');if(scene&&page&&page.clientHeight){const h=Math.max(page.clientHeight,page.clientWidth/(864/1536));scene.style.width=(h*(864/1536))+'px';scene.style.height=h+'px';}});
+      /* Taille du sac geree par fitBagScene et l'evenement de:tab. */
     });
   });
   $('homeLootTrigger')?.addEventListener('click',()=>$('openLoot')?.click());
