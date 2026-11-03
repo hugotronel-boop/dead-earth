@@ -812,6 +812,39 @@ body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
   #page-inventory .de-bag-pagination{bottom:calc(4px + env(safe-area-inset-bottom,0px));}
 }
 </style>
+
+<!-- DEAD EARTH V4.2 : repérage visuel des 8 zones tactiles de l'accueil.
+     Pas de modification des zones ou de leur logique de navigation. -->
+<style id="dead-earth-home-red-dots">
+  /* 6 boutons transparents disposés sur les objets de l'illustration,
+     + bouton dynamique du village + bouton dynamique des options. */
+  #page-map .de-home-hit::after,
+  #homeVillageAnchor #villageToggle::after,
+  #homeOptionsBtn::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: #ff1717;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px #780000, 0 0 12px 3px rgba(255, 30, 30, 0.6);
+    pointer-events: none !important;
+    z-index: 9999;
+  }
+
+  /* Les 6 zones .de-home-hit sont déjà en position:absolute.
+     Ces deux boutons sont produits par JavaScript, d'où leur règle dédiée. */
+  #homeVillageAnchor #villageToggle,
+  #homeOptionsBtn {
+    position: relative !important;
+  }
+</style>
+
 </head>
 <body>
 <div id="app">
