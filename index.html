@@ -4352,14 +4352,14 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
 
   // Livre : 4 tickets sur chaque page, 8 par double-page, 3 doubles-pages.
-  // Noms de fichiers EXACTS (sensibles à la casse sur GitHub Pages) : Tr1.PNG...Tr18.PNG et Tv1.PNG...Tv18.PNG.
+  // Noms de fichiers EXACTS (sensibles à la casse sur GitHub Pages) : Tr1.png...Tr18.png et Tv1.PNG...Tv18.PNG.
   let ticketBookSpread=0,bookTicketViewerId=null,bookTicketViewerFace='front';
   const BOOK_TICKETS_PER_SPREAD=8;
   const BOOK_TICKET_Y=[19.8,35.9,52,68.1];
   const BOOK_TOTAL_SPREADS=Math.ceil(CRAFT_TICKETS.length/BOOK_TICKETS_PER_SPREAD);
   function ticketImageUrl(id,face='front'){
     const index=CRAFT_TICKETS.findIndex(ticket=>ticket.id===id);
-    return index<0?'':`./image%20jeux/${face==='back'?'Tv':'Tr'}${index+1}.PNG`;
+    return index<0?'':`./image%20jeux/${face==='back'?'Tv':'Tr'}${index+1}.${face==='back'?'PNG':'png'}`;
   }
   function bookTicketCard(ticket,indexWithinSpread){
     if(!ticket)return '';
@@ -4409,7 +4409,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const ingredients=owned&&bookTicketViewerFace==='back'&&def?.cost?`<div class="de-book-viewer-cost">⚒ MATÉRIAUX : ${safe(costText(def.cost))}</div>`:'';
     const fallback=bookTicketViewerFace==='back'
       ?`Verso pas encore ajouté (Tv${CRAFT_TICKETS.indexOf(ticket)+1}.PNG). ${owned?'Recette débloquée.':''}`
-      :`Ticket recto n°${CRAFT_TICKETS.indexOf(ticket)+1} à ajouter (Tr${CRAFT_TICKETS.indexOf(ticket)+1}.PNG)`;
+      :`Ticket recto n°${CRAFT_TICKETS.indexOf(ticket)+1} à ajouter (Tr${CRAFT_TICKETS.indexOf(ticket)+1}.png)`;
     return `<div id="deBookViewer" class="de-book-viewer" role="dialog" aria-modal="true" aria-label="Ticket : ${safe(ticketName(ticket))}">
       <div class="de-book-viewer-panel">
         <div class="de-book-viewer-top"><strong class="de-book-viewer-title">🎟 ${safe(ticketName(ticket))}</strong>
