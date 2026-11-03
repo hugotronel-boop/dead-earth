@@ -667,7 +667,7 @@
 .de-home-option-anchor #mapToolsPanel{margin-top:0!important;width:min(252px,84vw);max-height:min(70dvh,560px)}
 .de-home-option-anchor .map-utilities{display:flex!important;flex-direction:column;align-items:flex-end;gap:7px}
 body.de-home-map .topbar{display:none!important}
-body.de-home-map .mobile-nav{display:none!important}
+/* Navigation toujours visible, y compris sur l accueil. */
 body.de-home-map #page-map .de-flashlight-dock,body.de-home-map #page-map .action-dock,body.de-home-map #page-map .survivor-figure{display:none!important}
 body.de-home-map #page-map .map-vignette{background:radial-gradient(ellipse at 50% 44%,transparent 30%,rgba(18,20,22,.16) 100%),linear-gradient(180deg,rgba(18,21,24,.08),transparent 20%,transparent 82%,rgba(14,17,20,.24))}
 body.de-home-map #page-map #nightClock{left:auto;right:8px;bottom:8px;z-index:12}
@@ -685,7 +685,7 @@ body.de-home-map #page-map .drawing-controls{z-index:35}
 
 <style id="dead-earth-v40-sac-visuel">
 /* Inventaire visuel : le vrai fond existant et toutes les fonctions du jeu sont conservés. */
-body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
+body.de-bag-view .topbar{display:none!important}
 #page-inventory.de-bag-active{padding:0!important;overflow:hidden!important;touch-action:pan-y;background:#292c27!important}
 #gameViewport[data-art-page="inventory"]::before{background-image:none!important;background-color:#272c24!important}
 #page-inventory .de-bag-scene{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);overflow:visible;pointer-events:none;user-select:none;isolation:isolate}
