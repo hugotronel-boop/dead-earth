@@ -828,6 +828,15 @@ body.de-map-explore.de-home-map #page-map .survivor-figure{display:none!importan
 body.de-map-explore #deReturnHome{display:block}
 </style>
 
+<!-- DEAD EARTH : masquage du téléphone hors de la Carte -->
+<style id="dead-earth-hide-phone-outside-map">
+/* Sur les menus Perso, Base, Sac et Quêtes, on masque tout le téléphone,
+   y compris ses boutons, et le contenu récupère automatiquement sa hauteur.
+   La page Carte conserve son comportement existant. */
+body:not(.de-home-map) #app > header.de-phone-topbar {
+  display: none !important;
+}
+</style>
 </head>
 <body>
 <div id="app">
