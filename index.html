@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.7 Nouveau téléphone</title>
+  <title>DEAD EARTH — V3.8 Accueil illustré</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -639,6 +639,48 @@
 /* V3.7: le nouveau boîtier a des touches et un écran légèrement décalés ;
    leurs positions sont ajustées ci-dessus et restent interactives. */
 </style>
+
+<style id="dead-earth-v38-home-hub">
+/* V3.8 — page d'accueil illustrée : la carte GPS reste le fond,
+   et les zones cliquables sont intégrées dans l'illustration du survivant. */
+.de-home-hub{position:absolute;z-index:26;left:50%;top:50%;bottom:auto;width:min(100vw,470px);aspect-ratio:1086 / 810;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
+.de-home-hub-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
+.de-home-hit{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;margin:0;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.de-home-hit:focus-visible{outline:2px dashed #f2cb8a;outline-offset:2px;background:rgba(255,227,163,.08)}
+.de-home-hit-base{left:3.5%;top:3.5%;width:25%;height:26%}
+.de-home-hit-map{left:1%;top:25%;width:24%;height:18%}
+.de-home-hit-fouille{left:31%;top:7%;width:16%;height:16%}
+.de-home-hit-quests{left:38%;top:18%;width:13%;height:15%}
+.de-home-hit-perso{left:45%;top:1%;width:19%;height:24%}
+.de-home-hit-bag{left:42%;top:28%;width:25%;height:45%}
+.de-home-village-anchor{position:absolute;z-index:27;left:79.2%;top:5.8%;width:18.5%;height:15.5%;pointer-events:auto}
+.de-home-village-anchor #territoryCampaign{position:relative!important;inset:auto!important;width:100%!important;height:100%!important;max-height:none!important;overflow:visible!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important}
+.de-home-village-anchor .village-toggle{width:100%;height:100%;min-height:0!important;display:flex;align-items:center;justify-content:center;gap:0;padding:3px 8px 2px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5d3a1d;text-shadow:0 1px rgba(255,247,214,.85);font:700 clamp(7px,1.9vw,10px)/1.15 'Courier New',monospace!important;letter-spacing:0;text-transform:uppercase;text-align:center}
+.de-home-village-anchor .village-title{display:block;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.05;max-width:100%}
+.de-home-village-anchor .village-arrow{display:none!important}
+.de-home-village-anchor .village-panel{position:absolute;top:calc(100% + 10px);right:-2px;width:min(316px,90vw);max-height:min(56dvh,420px);overflow-y:auto!important;background:#1d2b30f5;border:3px solid #819185;box-shadow:0 10px 22px rgba(0,0,0,.32);padding:10px;border-radius:6px;z-index:120}
+.de-home-option-anchor{position:absolute;z-index:32;top:max(8px,env(safe-area-inset-top));right:8px;pointer-events:auto}
+.de-home-option-anchor #mapTools{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.de-home-options-trigger{appearance:none;min-width:42px;height:42px;padding:0 12px;border:3px solid;border-color:#9aa7a4 #121b1f #121b1f #9aa7a4;background:#314148;color:#f3dfaf;box-shadow:inset 0 0 0 2px #455962,0 3px 0 #10171a;border-radius:4px;font:700 26px/1 'Courier New',monospace;text-shadow:1px 1px #111820;display:grid;place-items:center}
+.de-home-options-trigger:focus-visible{outline:2px dashed #f2cc8e;outline-offset:2px}
+.de-home-option-anchor #mapToolsPanel{margin-top:0!important;width:min(252px,84vw);max-height:min(70dvh,560px)}
+.de-home-option-anchor .map-utilities{display:flex!important;flex-direction:column;align-items:flex-end;gap:7px}
+body.de-home-map .topbar{display:none!important}
+body.de-home-map .mobile-nav{display:none!important}
+body.de-home-map #page-map .de-flashlight-dock,body.de-home-map #page-map .action-dock,body.de-home-map #page-map .survivor-figure{display:none!important}
+body.de-home-map #page-map .map-vignette{background:radial-gradient(ellipse at 50% 44%,transparent 30%,rgba(18,20,22,.16) 100%),linear-gradient(180deg,rgba(18,21,24,.08),transparent 20%,transparent 82%,rgba(14,17,20,.24))}
+body.de-home-map #page-map #nightClock{left:auto;right:8px;bottom:8px;z-index:12}
+body.de-home-map #page-map .map-attribution{left:8px;right:auto;bottom:8px;z-index:12;background:rgba(16,20,23,.46);padding:4px 6px;border-radius:4px}
+body.de-home-map #page-map .drawing-controls{z-index:35}
+@media (max-width:390px){
+  .de-home-hub{width:min(100vw,470px)}
+  .de-home-option-anchor{right:6px}
+  .de-home-options-trigger{min-width:39px;height:39px;font-size:24px}
+}
+@media (max-height:760px){
+  .de-home-hub{width:min(100vw,435px)}
+}
+</style>
 </head>
 <body>
 <div id="app">
@@ -725,6 +767,17 @@
       </div>
       <div class="status-toast" id="heroAction" aria-hidden="true"></div>
 
+      <div class="de-home-option-anchor" id="homeOptionsAnchor"></div>
+      <div class="de-home-hub" id="homeHub" aria-label="Accueil illustré de Dead Earth">
+        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village">
+        <button class="de-home-hit de-home-hit-base" type="button" data-hub-tab="base" aria-label="Ouvrir la base"></button>
+        <button class="de-home-hit de-home-hit-map" type="button" data-hub-tab="map" aria-label="Ouvrir la carte GPS"></button>
+        <button class="de-home-hit de-home-hit-perso" type="button" data-hub-tab="survivor" aria-label="Ouvrir la fiche du personnage"></button>
+        <button class="de-home-hit de-home-hit-bag" type="button" data-hub-tab="inventory" aria-label="Ouvrir le sac"></button>
+        <button class="de-home-hit de-home-hit-quests" type="button" data-hub-tab="missions" aria-label="Ouvrir les quêtes"></button>
+        <button class="de-home-hit de-home-hit-fouille" type="button" id="homeLootTrigger" aria-label="Fouiller avec la lampe torche"></button>
+        <div class="de-home-village-anchor" id="homeVillageAnchor" aria-label="Accès au village"></div>
+      </div>
 
     </section>
 
@@ -3888,6 +3941,69 @@ const DEAD_EARTH_ICONS = Object.freeze({
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 
+</script>
+
+<script id="dead-earth-v38-home-hub-script">
+(function(){
+  const $=id=>document.getElementById(id);
+  const homeOptionsBtn=document.createElement('button');
+  homeOptionsBtn.type='button';
+  homeOptionsBtn.id='homeOptionsBtn';
+  homeOptionsBtn.className='de-home-options-trigger';
+  homeOptionsBtn.setAttribute('aria-label','Ouvrir les options');
+  homeOptionsBtn.setAttribute('aria-controls','mapToolsPanel');
+  homeOptionsBtn.setAttribute('aria-expanded','false');
+  homeOptionsBtn.textContent='=';
+
+  function moveHomeControls(){
+    const mapTools=$('mapTools');
+    const optionAnchor=$('homeOptionsAnchor');
+    if(mapTools && optionAnchor && mapTools.parentElement!==optionAnchor){
+      optionAnchor.appendChild(mapTools);
+    }
+    if(mapTools && homeOptionsBtn.parentElement!==mapTools){
+      mapTools.prepend(homeOptionsBtn);
+    }
+    const territory=$('territoryCampaign');
+    const villageAnchor=$('homeVillageAnchor');
+    if(territory && villageAnchor && territory.parentElement!==villageAnchor){
+      villageAnchor.appendChild(territory);
+      if(typeof renderTerritory==='function') renderTerritory();
+    }
+  }
+
+  function syncHomeState(){
+    const current=document.querySelector('.nav-item.active')?.dataset.tab || 'map';
+    document.body.classList.toggle('de-home-map', current==='map');
+    const panel=$('mapToolsPanel');
+    if(panel) homeOptionsBtn.setAttribute('aria-expanded', String(!panel.hidden));
+  }
+
+  moveHomeControls();
+  syncHomeState();
+
+  document.querySelectorAll('[data-hub-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelector(`.nav-item[data-tab="${btn.dataset.hubTab}"]`)?.click();
+      syncHomeState();
+    });
+  });
+  $('homeLootTrigger')?.addEventListener('click',()=>$('openLoot')?.click());
+  homeOptionsBtn.addEventListener('click',ev=>{
+    ev.preventDefault();
+    ev.stopPropagation();
+    $('mapMenuToggle')?.click();
+    syncHomeState();
+  });
+
+  document.addEventListener('click',ev=>{
+    if(ev.target.closest('[data-tab]')){
+      setTimeout(()=>{moveHomeControls();syncHomeState();},0);
+    }
+  });
+  document.addEventListener('pointerup',()=>setTimeout(syncHomeState,0));
+  window.addEventListener('de:tab',()=>setTimeout(()=>{moveHomeControls();syncHomeState();},0));
+})();
 </script>
 </body>
 </html>
