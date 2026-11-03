@@ -643,7 +643,7 @@
 <style id="dead-earth-v38-home-hub">
 /* V3.8 — page d'accueil illustrée : la carte GPS reste le fond,
    et les zones cliquables sont intégrées dans l'illustration du survivant. */
-.de-home-hub{position:absolute;z-index:26;left:50%;top:50%;bottom:auto;width:min(100vw,470px);aspect-ratio:1086 / 810;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
+.de-home-hub{position:absolute;z-index:26;left:50%;top:auto;bottom:max(0px,env(safe-area-inset-bottom));width:min(100vw,470px);aspect-ratio:1086 / 810;transform:translateX(-50%);pointer-events:none;user-select:none}
 .de-home-hub-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
 .de-home-hit{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;margin:0;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .de-home-hit:focus-visible{outline:2px dashed #f2cb8a;outline-offset:2px;background:rgba(255,227,163,.08)}
