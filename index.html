@@ -1139,6 +1139,66 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 }
 </style>
 
+
+<!-- DEAD EARTH V4.5 : placement des trois zones selon la capture annotée.
+     CSS seulement : le glisser-déposer, les objets et les sauvegardes restent inchangés. -->
+<style id="dead-earth-v45-sac-placements">
+/* Cadre et dépôt des ingrédients à l'intérieur du plan bleu sur l'image.
+   Coordonnées calées sur la scène illustrée, pas sur le viewport. */
+#page-inventory .de-bag-blueprint {
+  left: 10.5% !important;
+  top: 63.8% !important;
+  width: 32.5% !important;
+  height: 20.9% !important;
+  box-sizing: border-box !important;
+}
+/* Les commandes de craft restent à l'intérieur du plan et ne débordent
+   plus sous les touches de navigation. */
+#page-inventory .de-blueprint-placed {
+  top: 24px;
+  bottom: 48px;
+}
+/* Pagination déportée à droite sur le morceau de bâche marqué en rouge. */
+#page-inventory .de-bag-pagination {
+  top: 71.8% !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: 4.3% !important;
+  transform: none !important;
+  z-index: 20 !important;
+  width: auto !important;
+  gap: 3px !important;
+  padding: 3px 4px !important;
+  min-height: 36px !important;
+  font: 800 10px/1 'Courier New',monospace !important;
+}
+#page-inventory .de-bag-pagination button {
+  width: 26px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  font-size: 18px !important;
+}
+#page-inventory #bagPageText { white-space: nowrap; }
+/* Les trois commandes descendent à la place de l'ancienne pagination. */
+#page-inventory .de-bag-bottom-buttons {
+  bottom: calc(10px + env(safe-area-inset-bottom,0px)) !important;
+  z-index: 24 !important;
+  grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+}
+@media (max-width: 355px) {
+  #page-inventory .de-bag-pagination {
+    right: 2.5% !important;
+  }
+  #page-inventory .de-bag-bottom-buttons {
+    bottom: calc(6px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  #page-inventory .de-bag-bottom-buttons .de-bag-hotspot {
+    height: 49px !important;
+    min-height: 49px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="app">
