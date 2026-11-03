@@ -837,6 +837,132 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
   display: none !important;
 }
 </style>
+
+<!-- DEAD EARTH — Panneau "Mon Refuge" sur planche en bois, ouverture vers le haut -->
+<style id="de-village-refuge-bois">
+#homeVillageAnchor .village-panel {
+  position: absolute !important;
+  top: auto !important;
+  bottom: calc(100% + 10px) !important;
+  right: -3px !important;
+  left: auto !important;
+  width: min(94vw, 410px) !important;
+  height: min(94vw, 410px, 70dvh) !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: clamp(44px, 11.8vw, 58px) clamp(39px, 10.7vw, 55px) clamp(43px, 11vw, 54px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-image: url("./image%20jeux/panneau-refuge.png") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 13px 12px rgba(0, 0, 0, .56));
+  color: #29170e !important;
+  text-shadow: none !important;
+  z-index: 125 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+#homeVillageAnchor .village-panel[hidden] { display: none !important; }
+#homeVillageAnchor .de-village-wood-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #825134 transparent;
+  padding: 6px 4px 9px 2px;
+  touch-action: pan-y;
+}
+#homeVillageAnchor .de-village-wood-scroll::-webkit-scrollbar { width: 4px; }
+#homeVillageAnchor .de-village-wood-scroll::-webkit-scrollbar-thumb {
+  background: rgba(91, 47, 25, .75); border-radius: 4px;
+}
+#homeVillageAnchor .village-panel .campaign-head { align-items: start; }
+#homeVillageAnchor .village-panel .campaign-head b {
+  color: #28140b !important;
+  font: 900 12px/1.4 'Courier New', monospace !important;
+}
+#homeVillageAnchor .village-panel .campaign-head span {
+  background: #592b18 !important;
+  color: #fff0c6 !important;
+  padding: 3px 4px !important;
+  font: 700 8px/1.3 monospace !important;
+}
+#homeVillageAnchor .village-panel p,
+#homeVillageAnchor .village-panel small,
+#homeVillageAnchor .village-panel .zone-help,
+#homeVillageAnchor .village-panel .zone-hint,
+#homeVillageAnchor .village-panel .zone-section-label,
+#homeVillageAnchor .village-panel .zone-safe-line,
+#homeVillageAnchor .village-panel .zombie-sector-info,
+#homeVillageAnchor .village-panel .zone-resource {
+  color: #301a0f !important;
+  font: 700 10px/1.4 'Courier New', monospace !important;
+  text-shadow: 0 1px 0 rgba(243, 194, 126, .35) !important;
+}
+#homeVillageAnchor .village-panel .zone-section-label {
+  font-size: 11px !important;
+  margin: 10px 0 5px !important;
+}
+#homeVillageAnchor .village-panel .zone-safe-line,
+#homeVillageAnchor .village-panel .zone-resource,
+#homeVillageAnchor .village-panel .zombie-sector-info {
+  border: 1px solid #71452a !important;
+  background: rgba(247, 200, 131, .32) !important;
+  padding: 5px !important;
+}
+#homeVillageAnchor .village-panel .zone-resource.enough span { color: #21592d !important; }
+#homeVillageAnchor .village-panel .zone-resource.missing span,
+#homeVillageAnchor .village-panel .zone-hint.missing,
+#homeVillageAnchor .village-panel .zone-blocked { color: #8a1e17 !important; }
+#homeVillageAnchor .village-panel .campaign-track { border-color: #542b18; background: #3a2015; }
+#homeVillageAnchor .village-panel .campaign-go,
+#homeVillageAnchor .village-panel .zone-safe-btn,
+#homeVillageAnchor .village-panel #zoneConfirm,
+#homeVillageAnchor .village-panel #zoneCancel {
+  background: #4b291c !important;
+  border: 2px solid #c99561 !important;
+  color: #ffe9be !important;
+  min-height: 34px !important;
+  border-radius: 2px;
+  font: 800 10px/1.25 'Courier New', monospace !important;
+  text-shadow: none !important;
+  overflow-wrap: anywhere;
+}
+#homeVillageAnchor .village-panel button:disabled { opacity: .45; }
+#homeVillageAnchor .de-village-wood-close {
+  position: absolute;
+  top: 11%;
+  right: 13%;
+  z-index: 6;
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  border: 2px solid #6a3923;
+  border-radius: 4px;
+  background: #e0ab74;
+  color: #432112;
+  font: bold 20px/1 'Courier New', monospace;
+  display: grid;
+  place-items: center;
+}
+@media (max-width: 365px) {
+  #homeVillageAnchor .village-panel {
+    padding: 40px 35px 40px !important;
+  }
+  #homeVillageAnchor .village-panel .campaign-head b { font-size: 11px !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -2346,17 +2472,23 @@ const DEAD_EARTH_ICONS = Object.freeze({
       gridStatus=`<div class="zombie-sector-info"><b>☣ CASE DE 20 KM²</b><span>${present} infecté(s) · ${waiting} en attente${waitLabel}</span><small>Errance libre dans toute la case · positions conservées · retour 20 h après élimination · zones SAFE interdites.</small></div>`;
     }
     const panel=`<div class="village-panel" id="villagePanel" ${villagePanelOpen?'':'hidden'}>
+      <button type="button" id="villageWoodClose" class="de-village-wood-close" aria-label="Fermer Mon Refuge">×</button>
+      <div class="de-village-wood-scroll">
       <div class="campaign-head"><b>${safe(title)}</b><span>${stage==='place'?'DÉPART':stage==='safe'?'PROTÉGÉ':'RECONQUÊTE'}</span></div>
       <p>${safe(desc)}</p>${gridStatus}<div class="campaign-track"><i style="width:${progress}%"></i></div>
       ${buildResources}
       ${!zoneDraftMode?`<button class="campaign-go" id="territoryAction" ${activeAction?'disabled':''}>${safe(action)}</button>`:''}${form}
       <small>${safe(info)}</small>
       ${count?`<div class="zone-section-label">MES ZONES SÉCURISÉES</div><div class="zone-list">${list}</div>`:''}
-    </div>`;
+      </div>\n    </div>`;
     const name=stage==='place'?'MON REFUGE':stage==='identify'?'MON VILLAGE':t?.name||'MON VILLAGE';
+    const woodScrollBefore=card.querySelector('.de-village-wood-scroll')?.scrollTop||0;
     card.classList.toggle('is-open',villagePanelOpen);
     card.innerHTML=`<button type="button" id="villageToggle" class="village-toggle" aria-controls="villagePanel" aria-expanded="${villagePanelOpen}"><span class="village-title">${stage==='safe'?'★':stage==='place'?'⌂':'☣'} ${safe(name)}</span><span class="village-arrow">${villagePanelOpen?'▲':'▼'}</span></button>${panel}`;
     $('villageToggle')?.addEventListener('click',()=>{villagePanelOpen=!villagePanelOpen;renderTerritory()});
+    const woodScrollAfter=card.querySelector('.de-village-wood-scroll');
+    if(woodScrollAfter)woodScrollAfter.scrollTop=woodScrollBefore;
+    $('villageWoodClose')?.addEventListener('click',()=>{villagePanelOpen=false;renderTerritory()});
     $('territoryAction')?.addEventListener('click',()=>{if(currentTab!=='map')switchTab('map');stage==='place'?startDrawing():startProtectionPlacement()});
     $('zoneConfirm')?.addEventListener('click',deployProtection);
     $('zoneCancel')?.addEventListener('click',cancelProtection);
