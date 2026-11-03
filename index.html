@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.8 Accueil illustré</title>
+  <title>DEAD EARTH — V3.9 Accueil corrigé</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -643,8 +643,9 @@
 <style id="dead-earth-v38-home-hub">
 /* V3.8 — page d'accueil illustrée : la carte GPS reste le fond,
    et les zones cliquables sont intégrées dans l'illustration du survivant. */
-.de-home-hub{position:absolute;z-index:26;left:50%;top:auto;bottom:max(0px,env(safe-area-inset-bottom));width:min(calc(100vw - 8px),470px);max-width:calc(100vw - 8px);max-height:calc(100% - 8px);aspect-ratio:1086 / 810;transform:translateX(-50%);pointer-events:none;user-select:none;overflow:visible}
-.de-home-hub-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
+/* L'image fait elle-même la hauteur du conteneur : fiable sur Safari iPhone. */
+.de-home-hub{position:absolute;z-index:26;left:50%;bottom:0;top:auto;width:min(100%,470px);max-width:100%;height:auto;transform:translateX(-50%);pointer-events:none;user-select:none;overflow:visible}
+.de-home-hub-art{position:relative;display:block;width:100%;max-width:100%;height:auto;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
 .de-home-hit{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;margin:0;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .de-home-hit:focus-visible{outline:2px dashed #f2cb8a;outline-offset:2px;background:rgba(255,227,163,.08)}
 .de-home-hit-base{left:4%;top:4.4%;width:22.5%;height:23.2%}
@@ -673,12 +674,12 @@ body.de-home-map #page-map #nightClock{left:auto;right:8px;bottom:8px;z-index:12
 body.de-home-map #page-map .map-attribution{left:8px;right:auto;bottom:8px;z-index:12;background:rgba(16,20,23,.46);padding:4px 6px;border-radius:4px}
 body.de-home-map #page-map .drawing-controls{z-index:35}
 @media (max-width:390px){
-  .de-home-hub{width:min(100vw,470px)}
+  .de-home-hub{width:min(100%,470px)}
   .de-home-option-anchor{right:6px}
   .de-home-options-trigger{min-width:39px;height:39px;font-size:24px}
 }
 @media (max-height:760px){
-  .de-home-hub{width:min(100vw,435px)}
+  .de-home-hub{width:min(100%,435px)}
 }
 </style>
 </head>
@@ -769,7 +770,7 @@ body.de-home-map #page-map .drawing-controls{z-index:35}
 
       <div class="de-home-option-anchor" id="homeOptionsAnchor"></div>
       <div class="de-home-hub" id="homeHub" aria-label="Accueil illustré de Dead Earth">
-        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village">
+        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png?v=39" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village" decoding="async">
         <button class="de-home-hit de-home-hit-base" type="button" data-hub-tab="base" aria-label="Ouvrir la base"></button>
         <button class="de-home-hit de-home-hit-map" type="button" data-hub-tab="map" aria-label="Ouvrir la carte GPS"></button>
         <button class="de-home-hit de-home-hit-perso" type="button" data-hub-tab="survivor" aria-label="Ouvrir la fiche du personnage"></button>
@@ -3979,22 +3980,9 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(panel) homeOptionsBtn.setAttribute('aria-expanded', String(!panel.hidden));
   }
 
-  function fitHomeHub(){
-    const page=$('page-map');
-    const hub=$('homeHub');
-    if(!page || !hub) return;
-    const vw=page.clientWidth || window.innerWidth;
-    const vh=page.clientHeight || window.innerHeight;
-    const aspect=1086/810;
-    const maxWidth=Math.min(470, Math.max(280, vw-8));
-    const widthFromHeight=Math.max(280, (vh-8)*aspect);
-    const finalWidth=Math.min(maxWidth, widthFromHeight);
-    hub.style.width=`${finalWidth}px`;
-  }
 
   moveHomeControls();
   syncHomeState();
-  fitHomeHub();
 
   document.querySelectorAll('[data-hub-tab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -4016,10 +4004,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     }
   });
   document.addEventListener('pointerup',()=>setTimeout(syncHomeState,0));
-  window.addEventListener('de:tab',()=>setTimeout(()=>{moveHomeControls();syncHomeState();fitHomeHub();},0));
-  window.addEventListener('resize',fitHomeHub);
-  window.addEventListener('orientationchange',()=>setTimeout(fitHomeHub,120));
-  window.addEventListener('load',fitHomeHub);
+  window.addEventListener('de:tab',()=>setTimeout(()=>{moveHomeControls();syncHomeState();},0));
 })();
 </script>
 </body>
