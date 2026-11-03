@@ -1062,41 +1062,66 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 </style>
 
 
-<!-- DEAD EARTH V4.3 : artisanat tactile sur la bâche, manuel informatif -->
-<style id="dead-earth-v43-assembly">
-#page-inventory .de-bag-bottom-buttons #bagAssembleTrigger { font-size:clamp(7px,2.05vw,10px)!important; }
-#page-inventory.de-assembling #inventoryGrid,
-#page-inventory.de-assembling .de-bag-pagination {display:none!important}
-#page-inventory .de-bag-assembly {
- position:absolute;z-index:13;pointer-events:auto;
- left:24%;right:3%;top:26%;bottom:calc(138px + env(safe-area-inset-bottom, 0px));width:auto;height:auto;
- display:flex;flex-direction:column;gap:6px;
- padding:10px 9px 9px;border:3px dashed #ddbc82;border-radius:9px;
- background:linear-gradient(145deg,rgba(27,38,31,.94),rgba(31,37,30,.96));
- box-shadow:0 7px 0 #131713aa,inset 0 0 0 1px #68806d;
- color:#ffebbd;touch-action:pan-y;
+<!-- DEAD EARTH V4.4 : glisser-déposer tactile sur le plan bleu -->
+<style id="dead-earth-v44-drag-craft">
+/* Le plan bleu est intégré à l'image, pas de fenêtre opaque par-dessus la bâche. */
+#page-inventory .de-bag-blueprint {
+ position:absolute;z-index:8;left:12%;top:63.8%;width:34%;height:17.7%;
+ background:rgba(19,70,103,.05); border:2px dashed rgba(152,220,238,.8);
+ border-radius:3px;box-shadow:inset 0 0 15px rgba(40,131,181,.18);
+ pointer-events:none; color:#f2edda; overflow:visible;
 }
-#page-inventory .de-bag-assembly[hidden]{display:none!important}
-#page-inventory .de-assembly-heading{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #86957b;padding-bottom:5px}
-#page-inventory .de-assembly-heading strong{font:900 clamp(11px,3.1vw,14px)/1.2 'Courier New',monospace;color:#ffe4a5}
-#page-inventory .de-assembly-heading small{font:700 9px/1.2 monospace;color:#c6d1ba}
-#page-inventory .de-assembly-picked{min-height:48px;max-height:86px;display:flex;align-content:flex-start;gap:5px;flex-wrap:wrap;overflow-y:auto;overscroll-behavior:contain;padding:3px 2px;border:1px dashed #9fa181;background:#151e19b3;border-radius:5px}
-#page-inventory .de-assembly-picked .de-assembly-placeholder{font:700 10px/1.4 monospace;color:#d1c4a7;padding:7px 4px}
-#page-inventory .de-assembly-picked button{border:1px solid #bcb68b;background:#3c4f41;color:#fff0cf;border-radius:4px;padding:4px;min-height:29px;font:700 10px/1.25 monospace;white-space:normal}
-#page-inventory .de-assembly-picked button span{color:#ffbaa4}
-#page-inventory .de-assembly-result{font:700 10px/1.3 'Courier New',monospace;color:#d0ccb7;min-height:25px;display:flex;align-items:center;gap:3px}
-#page-inventory .de-assembly-result.is-ready{color:#b5e9a7}
-#page-inventory .de-assembly-result.is-locked{color:#ffca8e}
-#page-inventory .de-assembly-stock{flex:1;min-height:50px;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:4px;padding:4px;border:1px solid #687e70;border-radius:4px;background:rgba(7,14,12,.38)}
-#page-inventory .de-assembly-stock button{min-width:0;display:flex;align-items:center;gap:3px;min-height:32px;padding:3px;border:1px solid #88947f;border-radius:3px;background:#3b5044;color:#fff2c9;font:700 9px/1.2 monospace;text-align:left}
-#page-inventory .de-assembly-stock button b{font:17px/1 system-ui}
-#page-inventory .de-assembly-stock button span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#page-inventory .de-assembly-stock button:disabled{opacity:.38}
-#page-inventory .de-assembly-stock .de-assembly-no-stock{grid-column:1/-1;color:#dfd4bc;font:10px/1.35 monospace;padding:5px}
-#page-inventory .de-assembly-actions{display:grid;grid-template-columns:.8fr 1.6fr;gap:5px}
-#page-inventory .de-assembly-actions button{min-width:0;min-height:37px;padding:5px 2px;border:2px solid #bda878;border-radius:4px;background:#493e32;color:#ffefc6;font:900 10px/1.15 monospace}
-#page-inventory .de-assembly-actions #bagAssemblyValidate:not(:disabled){background:#54734a;border-color:#c3dda3;color:#f4ffcd}
-#page-inventory .de-assembly-actions button:disabled{opacity:.4}
+#page-inventory .de-bag-blueprint.is-over {
+ background:rgba(75,177,208,.28); border-color:#f9e7a7;
+ box-shadow:inset 0 0 22px #55dbf16a,0 0 12px #80f0f099;
+}
+#page-inventory .de-blueprint-title {
+ position:absolute;top:-24px;left:3px;right:3px;text-align:center;
+ color:#fff5c8;text-shadow:1px 1px 2px #001020, -1px -1px 1px #001020;
+ font:900 clamp(8px,2.1vw,11px)/1.15 'Courier New',monospace;
+ pointer-events:none;z-index:2;
+}
+#page-inventory .de-blueprint-title small {display:block;font:700 clamp(7px,1.7vw,9px)/1.2 monospace;}
+#page-inventory .de-blueprint-placed {position:absolute;inset:25px 5px 49px;pointer-events:none;}
+#page-inventory .de-placed-ingredient {
+ position:absolute;width:37px;height:42px;transform:translate(-50%,-50%);
+ background:rgba(16,37,43,.74);border:1px solid #d0c29c;border-radius:5px;
+ padding:1px;display:grid;place-items:center;box-shadow:0 2px 5px #0008;
+ color:#fff4d3;pointer-events:auto;touch-action:none;user-select:none;
+ -webkit-user-select:none;cursor:grab;
+}
+#page-inventory .de-placed-ingredient .de-placed-icon {font:26px/1 system-ui;pointer-events:none;}
+#page-inventory .de-placed-ingredient .de-placed-minus {position:absolute;right:-5px;top:-6px;
+ width:14px;height:14px;border-radius:50%;background:#84382a;color:white;
+ font:900 12px/14px monospace;text-align:center;pointer-events:none;}
+#page-inventory .de-blueprint-result {
+ position:absolute;left:2px;right:2px;bottom:28px;text-align:center;
+ padding:2px 1px;min-height:16px;background:rgba(8,24,35,.83);
+ border-radius:3px;font:800 9px/1.2 monospace;color:#ffe1b6;
+ pointer-events:none;z-index:3;
+}
+#page-inventory .de-blueprint-result.is-ready {color:#d8ffbe;}
+#page-inventory .de-blueprint-result.is-locked {color:#ffd1a0;}
+#page-inventory .de-blueprint-actions {position:absolute;left:2px;right:2px;bottom:2px;
+ display:grid;grid-template-columns:1fr 1.5fr;gap:3px;z-index:5;pointer-events:auto;}
+#page-inventory .de-blueprint-actions button {
+ font:800 clamp(7px,1.9vw,10px)/1.1 'Courier New',monospace;
+ padding:2px;min-height:22px;background:#273b3c;color:#fff0c6;
+ border:1px solid #d1bf92;border-radius:3px;
+}
+#page-inventory .de-blueprint-actions #bagAssemblyValidate:not(:disabled) {background:#476444;color:#f2ffcc;border-color:#c4ec94;}
+#page-inventory .de-blueprint-actions button:disabled {opacity:.5;}
+#page-inventory .de-bag-loot {touch-action:none!important;-webkit-user-select:none!important;user-select:none!important;}
+#page-inventory .de-bag-loot.is-held {opacity:.48;}
+#page-inventory .de-bag-loot.staged-out {opacity:.3;filter:grayscale(.8);}
+#page-inventory .de-drag-ghost {position:fixed;z-index:1000;pointer-events:none;
+ width:65px;min-height:55px;transform:translate(-50%,-50%);
+ display:grid;place-items:center;padding:3px;text-align:center;
+ background:rgba(21,38,35,.78);border:2px solid #f4d697;border-radius:9px;
+ box-shadow:0 6px 16px rgba(0,0,0,.5);color:#fff4cd;}
+#page-inventory .de-drag-ghost .de-drag-symbol{font:31px/1 system-ui;}
+#page-inventory .de-drag-ghost .de-drag-name{font:700 9px/1.2 monospace;}
+#page-inventory .de-bag-bottom-buttons {grid-template-columns:repeat(3,minmax(0,1fr));}
 #page-inventory #bagActionPanel{background:linear-gradient(160deg,#313b2ff6,#171e1af9);}
 #page-inventory #bagActionPanel .de-manual-group{font:900 14px/1.4 monospace;color:#ffdda0;border-bottom:2px solid #99876b;padding:8px 0 5px;margin:16px 0 10px}
 #page-inventory #bagActionPanel .de-manual-recipe{padding:12px;border:2px solid #94876e;border-radius:5px;background:#374339f2;color:#fff0d1;display:grid;gap:6px}
@@ -1105,15 +1130,12 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 #page-inventory #bagActionPanel .de-manual-recipe small{font:10px/1.4 monospace;color:#f4ce9f}
 #page-inventory #bagActionPanel .de-manual-recipe em{font:900 10px/1.5 monospace;color:#a8daaa;font-style:normal}
 #page-inventory #bagActionPanel #bagManualGoAssemble{position:sticky;bottom:0;z-index:4;width:100%;min-height:48px;margin-top:14px;background:#476a4c;border:2px solid #cfdb9d;color:#fff9d4;font:900 13px monospace;border-radius:5px}
-@media(max-width:370px){
- #page-inventory .de-bag-assembly{left:20%;right:3%;top:23%;bottom:calc(128px + env(safe-area-inset-bottom, 0px));width:auto;height:auto;padding:7px;gap:4px}
- #page-inventory .de-assembly-picked{min-height:40px}
- #page-inventory .de-assembly-actions button{min-height:32px;font-size:9px}
-}
-@media(max-height:700px){
- #page-inventory .de-bag-assembly{top:18%;bottom:calc(112px + env(safe-area-inset-bottom, 0px));height:auto;gap:4px}
- #page-inventory .de-assembly-heading small{display:none}
- #page-inventory .de-assembly-picked{min-height:35px;max-height:65px}
+@media(max-width:360px){
+ #page-inventory .de-placed-ingredient {width:31px;height:36px;}
+ #page-inventory .de-placed-ingredient .de-placed-icon {font-size:21px;}
+ #page-inventory .de-blueprint-placed{inset:23px 3px 44px;}
+ #page-inventory .de-blueprint-result {font-size:8px;bottom:26px;}
+ #page-inventory .de-blueprint-actions button {font-size:8px;}
 }
 </style>
 
@@ -1325,25 +1347,23 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
       <div class="de-bag-scene" id="bagScene" aria-label="Tapis de survie et objets en possession">
         <img class="de-bag-backdrop" src="./image%20jeux/Fond%20sac%20.PNG" alt="Sac de survie posé sur une bâche dans la forêt" draggable="false">
         <div id="inventoryGrid" class="de-bag-scattered-items" aria-label="Objets disposés sur la bâche"></div>
-
-      </div>
-        <section id="bagAssemblySurface" class="de-bag-assembly" aria-label="Zone d'assemblage sur la bâche" hidden>
-          <div class="de-assembly-heading"><strong>⚒ ASSEMBLAGE</strong><small>TOUCHE LES MATÉRIAUX</small></div>
-          <div id="bagAssemblyPicked" class="de-assembly-picked" aria-label="Matériaux déposés"></div>
-          <div id="bagAssemblyResult" class="de-assembly-result" role="status" aria-live="polite"></div>
-          <div id="bagAssemblyStock" class="de-assembly-stock" aria-label="Matériaux disponibles à déposer"></div>
-          <div class="de-assembly-actions">
-            <button id="bagAssemblyClear" type="button">VIDER</button>
-            <button id="bagAssemblyValidate" type="button" disabled>✓ ASSEMBLER</button>
+        <!-- La zone du plan bleu fait partie de la scène et reste active en permanence. -->
+        <section id="bagAssemblySurface" class="de-bag-blueprint" aria-label="Dépose ici les objets en les faisant glisser">
+          <div class="de-blueprint-title">⚒ ASSEMBLAGE <small>GLISSE LES OBJETS ICI</small></div>
+          <div id="bagAssemblyPicked" class="de-blueprint-placed" aria-label="Objets posés sur le plan bleu"></div>
+          <div id="bagAssemblyResult" class="de-blueprint-result" role="status" aria-live="polite"></div>
+          <div class="de-blueprint-actions">
+            <button id="bagAssemblyClear" type="button" disabled>↺ VIDER</button>
+            <button id="bagAssemblyValidate" type="button" disabled>✓ FABRIQUER</button>
           </div>
         </section>
+      </div>
       <button id="bagReturn" class="de-bag-back" type="button" aria-label="Retourner à la carte d'accueil">← CARTE</button>
       <div class="de-bag-capacity" aria-label="Poids de l'inventaire">
         <div><span>🎒 SAC</span><strong id="capacityText">0/30 KG</strong></div>
         <div class="de-bag-capacity-track"><i id="capacityBar" class="gold"></i></div>
       </div>
       <div class="de-bag-bottom-buttons" role="group" aria-label="Actions du sac">
-        <button type="button" class="de-bag-hotspot de-bag-equipment" id="bagAssembleTrigger" aria-label="Ouvrir la zone d'assemblage" aria-pressed="false"><span>⚒ ZONE<br>D'ASSEMBLAGE</span></button>
         <button id="bagOwned" class="de-bag-hotspot de-bag-owned selected" type="button" aria-pressed="true">POSSÉDÉS</button>
         <button id="bagCatalogue" class="de-bag-hotspot de-bag-catalogue" type="button" aria-pressed="false">CATALOGUE</button>
         <button id="bagCraftTrigger" class="de-bag-hotspot de-bag-craft" type="button" aria-label="Ouvrir le manuel des recettes"><span>📖 MANUEL<br>DE SURVIE</span></button>
@@ -1356,7 +1376,7 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
       <p id="bagCount" class="de-bag-count sr-only" aria-live="polite"></p>
       <div class="de-bag-panel" id="bagActionPanel" hidden role="dialog" aria-modal="false" aria-labelledby="bagPanelTitle">
         <div class="de-bag-panel-header"><h2 id="bagPanelTitle">📖 MANUEL DE SURVIE</h2><button type="button" id="bagPanelClose" aria-label="Fermer le manuel">✕</button></div>
-        <div id="bagCraftContent"><p class="de-bag-panel-intro">Consulte les recettes ici, puis dépose les vrais ingrédients sur la bâche pour les assembler. Le manuel ne fabrique aucun objet à ta place.</p><div id="craftList" class="item-list"></div></div>
+        <div id="bagCraftContent"><p class="de-bag-panel-intro">Glisse les objets de ton sac sur le plan bleu, en bas à gauche de la bâche. Une recette exacte débloque la fabrication, après confirmation.</p><div id="craftList" class="item-list"></div></div>
       </div>
     </section>
 
@@ -3918,82 +3938,136 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   // ——— V3.0 : catalogue, fouilles, objets actifs, rangement et démontage ———
   let bagCatalogue=false,bagCategory='all',bagRarity='all',bagQuery='',bagPage=0;
-  let bagAssemblyMode=false;
+  // Chaque pièce réellement déposée conserve sa position sur le plan (en %).
+  // La partie n'est débitée qu'après la confirmation finale.
   let bagAssemblyItems=Object.create(null);
+  let bagAssemblyPlacements=[];
+  let bagDragging=null;
   const BAG_ASSEMBLY_RECIPES=[
     ...RECIPES.map(r=>({...r,kind:'item'})),
     ...GEAR_CRAFTS.map(r=>({...r,kind:'gear'}))
   ];
-  const BAG_ASSEMBLY_INGREDIENT_IDS=[...new Set(BAG_ASSEMBLY_RECIPES.flatMap(r=>Object.keys(r.cost)))];
   function findBagAssemblyRecipe(){
     const used=Object.entries(bagAssemblyItems).filter(([,n])=>n>0);
     if(!used.length)return null;
     return BAG_ASSEMBLY_RECIPES.find(r=>
-      Object.keys(r.cost).length===used.length &&
+      Object.keys(r.cost).length===used.length&&
       used.every(([id,n])=>r.cost[id]===n)
     )||null;
   }
-  function setBagAssemblyMode(active){
-    bagAssemblyMode=!!active;
-    if(bagAssemblyMode){bagCatalogue=false;bagPage=0;closeBagPanel();}
-    $('page-inventory').classList.toggle('de-assembling',bagAssemblyMode);
-    $('bagAssemblySurface').hidden=!bagAssemblyMode;
-    $('bagAssembleTrigger').classList.toggle('selected',bagAssemblyMode);
-    $('bagAssembleTrigger').setAttribute('aria-pressed',String(bagAssemblyMode));
-    renderInventory();
+  function rebuildBagAssemblyCounts(){
+    bagAssemblyItems=Object.create(null);
+    for(const p of bagAssemblyPlacements)bagAssemblyItems[p.id]=(bagAssemblyItems[p.id]||0)+1;
   }
-  function stageBagIngredient(id){
-    if(!BAG_ASSEMBLY_INGREDIENT_IDS.includes(id))return;
-    const placed=bagAssemblyItems[id]||0;
-    if(placed>=quantity(id))return toast('Tu ne possèdes pas davantage de '+ITEMS[id].label+'.');
-    if(Object.values(bagAssemblyItems).reduce((a,b)=>a+b,0)>=16)return toast('Zone pleine : retire un ingrédient.');
-    bagAssemblyItems[id]=placed+1;
-    renderBagAssembly();
+  function blueprintContains(clientX,clientY){
+    const b=$('bagAssemblySurface').getBoundingClientRect();
+    return clientX>=b.left&&clientX<=b.right&&clientY>=b.top&&clientY<=b.bottom;
   }
-  function removeBagIngredient(id){
-    if(!bagAssemblyItems[id])return;
-    bagAssemblyItems[id]--;
-    if(!bagAssemblyItems[id])delete bagAssemblyItems[id];
-    renderBagAssembly();
+  function blueprintPosition(clientX,clientY){
+    const rect=$('bagAssemblyPicked').getBoundingClientRect();
+    return {x:clamp((clientX-rect.left)/Math.max(1,rect.width)*100,12,88),
+            y:clamp((clientY-rect.top)/Math.max(1,rect.height)*100,14,86)};
+  }
+  function stageBagIngredient(id,clientX,clientY){
+    if((bagAssemblyItems[id]||0)>=quantity(id))return toast('Tous les '+ITEMS[id].label+' sont déjà déposés.');
+    if(bagAssemblyPlacements.length>=12)return toast('Plan bleu plein : retire un objet avant de continuer.');
+    bagAssemblyPlacements.push({id,...blueprintPosition(clientX,clientY)});
+    rebuildBagAssemblyCounts();renderInventory();
+  }
+  function removeBagIngredient(index){
+    if(index<0||index>=bagAssemblyPlacements.length)return;
+    bagAssemblyPlacements.splice(index,1);rebuildBagAssemblyCounts();renderInventory();
   }
   function renderBagAssembly(){
     const surface=$('bagAssemblySurface');if(!surface)return;
-    surface.hidden=!bagAssemblyMode;
-    $('page-inventory').classList.toggle('de-assembling',bagAssemblyMode);
-    $('bagAssembleTrigger').classList.toggle('selected',bagAssemblyMode);
-    if(!bagAssemblyMode)return;
     const recipe=findBagAssemblyRecipe();
-    const placed=Object.entries(bagAssemblyItems).filter(([,n])=>n>0);
     const picked=$('bagAssemblyPicked');
-    picked.innerHTML=placed.length?placed.map(([id,n])=>`<button type="button" data-remove-ingredient="${safe(id)}" aria-label="Retirer 1 ${safe(ITEMS[id].label)}">${ITEMS[id].icon||'📦'} ${safe(ITEMS[id].label)} ×${n} <span>−</span></button>`).join(''):
-      '<span class="de-assembly-placeholder">Aucun ingrédient posé. Choisis des matériaux ci-dessous.</span>';
-    picked.querySelectorAll('[data-remove-ingredient]').forEach(el=>el.addEventListener('click',()=>removeBagIngredient(el.dataset.removeIngredient)));
-    const stock=BAG_ASSEMBLY_INGREDIENT_IDS.filter(id=>quantity(id)>0).sort((a,b)=>ITEMS[a].label.localeCompare(ITEMS[b].label,'fr'));
-    $('bagAssemblyStock').innerHTML=stock.length?stock.map(id=>{
-      const free=quantity(id)-(bagAssemblyItems[id]||0);
-      return `<button type="button" data-stage-ingredient="${safe(id)}" ${free<=0?'disabled':''} aria-label="Déposer ${safe(ITEMS[id].label)} (${free} disponible${free>1?'s':''})"><b>${ITEMS[id].icon||'📦'}</b><span>${safe(ITEMS[id].label)} ×${free}</span></button>`;
-    }).join(''):'<div class="de-assembly-no-stock">Aucun matériau à assembler. Fouille des lieux pour en récupérer.</div>';
-    $('bagAssemblyStock').querySelectorAll('[data-stage-ingredient]').forEach(el=>el.addEventListener('click',()=>stageBagIngredient(el.dataset.stageIngredient)));
+    picked.innerHTML=bagAssemblyPlacements.map((p,i)=>
+      `<button type="button" class="de-placed-ingredient" data-placed-index="${i}" style="left:${p.x}%;top:${p.y}%" aria-label="${safe(ITEMS[p.id].label)} déposé : déplacer ou toucher pour retirer">
+        <span class="de-placed-icon">${DEAD_EARTH_ICONS[p.id]||ITEMS[p.id].icon||'📦'}</span><span class="de-placed-minus">−</span>
+      </button>`).join('');
+    picked.querySelectorAll('[data-placed-index]').forEach(el=>{
+      el.addEventListener('pointerdown',ev=>startBagPointerDrag(ev,el,'placed',bagAssemblyPlacements[Number(el.dataset.placedIndex)]?.id,Number(el.dataset.placedIndex)));
+      el.addEventListener('click',ev=>{if(el.dataset.justDragged==='1'){ev.preventDefault();return;}removeBagIngredient(Number(el.dataset.placedIndex));});
+    });
     const alreadyMade=recipe?.kind==='gear'&&game.craftedGear[recipe.id];
     const workshopMissing=recipe?.requiresWorkshop&&!isConsumerPowered('workbench');
     const enough=recipe&&canPay(recipe.cost);
-    const mass=recipe?.kind==='item'?Object.entries(recipe.gain).reduce((w,[id,n])=>w+ITEMS[id].weight*n,0):0;
-    const consumed=recipe?Object.entries(recipe.cost).reduce((w,[id,n])=>w+ITEMS[id].weight*n,0):0;
-    const overweight=recipe?.kind==='item'&&inventoryWeight()-consumed+mass>bagCapacity();
+    const gainedMass=recipe?.kind==='item'?Object.entries(recipe.gain).reduce((w,[id,n])=>w+ITEMS[id].weight*n,0):0;
+    const consumedMass=recipe?Object.entries(recipe.cost).reduce((w,[id,n])=>w+ITEMS[id].weight*n,0):0;
+    const overweight=recipe?.kind==='item'&&inventoryWeight()-consumedMass+gainedMass>bagCapacity();
     const valid=!!recipe&&!alreadyMade&&!workshopMissing&&enough&&!overweight;
-    const line=!placed.length?'Dépose les ingrédients. Consulte le MANUEL pour les recettes.':
-      !recipe?'❔ Combinaison inconnue : essaie une recette du manuel.':
-      alreadyMade?'✓ Cet équipement est déjà fabriqué.':
-      workshopMissing?'⚡ Assemblage reconnu : atelier électrique nécessaire.':
-      !enough?'Matériaux insuffisants dans le sac.':
-      overweight?'Sac trop lourd pour recevoir le résultat.':
-      `✓ RECETTE TROUVÉE : ${recipe.name}${recipe.kind==='item'?' · '+Object.entries(recipe.gain).map(([id,n])=>'×'+n+' '+ITEMS[id].label).join(', '):''}`;
-    const result=$('bagAssemblyResult');
-    result.textContent=line;
-    result.classList.toggle('is-ready',!!valid);
-    result.classList.toggle('is-locked',!!recipe&&!valid);
+    const status=!bagAssemblyPlacements.length?'Glisse ici tes objets':
+      !recipe?'Combinaison inconnue':
+      alreadyMade?'Déjà fabriqué':workshopMissing?'⚡ Atelier requis':
+      !enough?'Stock insuffisant':overweight?'Sac trop lourd':`✓ ${recipe.name}`;
+    const result=$('bagAssemblyResult');result.textContent=status;
+    result.classList.toggle('is-ready',!!valid);result.classList.toggle('is-locked',!!recipe&&!valid);
     $('bagAssemblyValidate').disabled=!valid;
-    $('bagAssemblyClear').disabled=!placed.length;
+    $('bagAssemblyClear').disabled=!bagAssemblyPlacements.length;
+  }
+  function startBagPointerDrag(ev,source,kind,id,index){
+    if(ev.button!==0||!id||bagDragging)return;
+    if(kind==='inventory'&&(quantity(id)-(bagAssemblyItems[id]||0))<=0)return;
+    const rect=source.getBoundingClientRect();
+    const obj={pointerId:ev.pointerId,source,kind,id,index,originX:rect.left+rect.width/2,originY:rect.top+rect.height/2,
+      x0:ev.clientX,y0:ev.clientY,ghost:null,moved:false};
+    bagDragging=obj;
+    try{source.setPointerCapture(ev.pointerId)}catch{}
+    const pointerMove=e=>{
+      if(!bagDragging||e.pointerId!==obj.pointerId)return;
+      if(!obj.moved&&Math.hypot(e.clientX-obj.x0,e.clientY-obj.y0)<8)return;
+      if(!obj.moved){
+        obj.moved=true;obj.source.classList.add('is-held');
+        const ghost=document.createElement('div');ghost.className='de-drag-ghost';
+        ghost.innerHTML=`<span class="de-drag-symbol">${DEAD_EARTH_ICONS[id]||ITEMS[id].icon||'📦'}</span><span class="de-drag-name">${safe(ITEMS[id].label)}</span>`;
+        document.body.appendChild(ghost);obj.ghost=ghost;
+      }
+      obj.ghost.style.left=e.clientX+'px';obj.ghost.style.top=e.clientY+'px';
+      $('bagAssemblySurface').classList.toggle('is-over',blueprintContains(e.clientX,e.clientY));
+      e.preventDefault();
+    };
+    const finish=e=>{
+      if(!bagDragging||e.pointerId!==obj.pointerId)return;
+      bagDragging=null;
+      source.removeEventListener('pointermove',pointerMove);
+      source.removeEventListener('pointerup',finish);
+      source.removeEventListener('pointercancel',cancel);
+      try{source.releasePointerCapture(e.pointerId)}catch{}
+      source.classList.remove('is-held');
+      $('bagAssemblySurface').classList.remove('is-over');
+      if(!obj.moved)return;
+      source.dataset.justDragged='1';
+      const inside=blueprintContains(e.clientX,e.clientY);
+      if(kind==='inventory'&&inside){
+        obj.ghost?.remove();stageBagIngredient(id,e.clientX,e.clientY);return;
+      }
+      if(kind==='placed'){
+        obj.ghost?.remove();
+        if(inside){
+          const p=bagAssemblyPlacements[index];if(p){Object.assign(p,blueprintPosition(e.clientX,e.clientY));renderBagAssembly();}
+        }else removeBagIngredient(index);
+        return;
+      }
+      // Hors du plan : l'objet revient visuellement à sa position d'origine.
+      if(obj.ghost){
+        obj.ghost.style.transition='left .17s ease-out,top .17s ease-out,opacity .17s ease-out';
+        obj.ghost.style.left=obj.originX+'px';obj.ghost.style.top=obj.originY+'px';obj.ghost.style.opacity='0';
+        setTimeout(()=>obj.ghost?.remove(),190);
+      }
+    };
+    const cancel=e=>{
+      if(!bagDragging||e.pointerId!==obj.pointerId)return;
+      bagDragging=null;
+      source.removeEventListener('pointermove',pointerMove);
+      source.removeEventListener('pointerup',finish);
+      source.removeEventListener('pointercancel',cancel);
+      source.classList.remove('is-held');
+      obj.ghost?.remove();$('bagAssemblySurface').classList.remove('is-over');
+    };
+    source.addEventListener('pointermove',pointerMove);
+    source.addEventListener('pointerup',finish);
+    source.addEventListener('pointercancel',cancel);
   }
   function confirmBagAssembly(){
     const recipe=findBagAssemblyRecipe();
@@ -4013,13 +4087,13 @@ const DEAD_EARTH_ICONS = Object.freeze({
         if(recipe.requiresWorkshop&&!isConsumerPowered('workbench'))return toast('Atelier électrique requis.');
         if(recipe.kind==='gear'){
           if(game.craftedGear[recipe.id])return toast('Équipement déjà fabriqué.');
-          bagAssemblyItems=Object.create(null);
+          bagAssemblyPlacements=[];rebuildBagAssemblyCounts();
           craftEquipment(recipe.id);
         } else {
           if(inventoryWeight()-consumed+gained>bagCapacity())return toast('Sac trop lourd.');
           pay(recipe.cost);
           for(const [id,n] of Object.entries(recipe.gain))game.inventory[id]=(game.inventory[id]||0)+n;
-          bagAssemblyItems=Object.create(null);
+          bagAssemblyPlacements=[];rebuildBagAssemblyCounts();
           xpGain(10);
           commit(`⚒ Assemblage réussi : ${recipe.name} !`);
         }
@@ -4028,7 +4102,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     });
   }
 
-  const BAG_PAGE_SIZE=15;
+  // 9 objets maximum par page pour laisser toujours le plan bleu dégagé.
+  const BAG_PAGE_SIZE=9;
   const BAG_SCATTER_POINTS=[
     [47,35,-9],[66,36,10],[79,40,-7],[32,45,14],[54,46,-12],
     [77,50,8],[43,55,-5],[64,58,13],[80,62,-15],[34,66,5],
@@ -4310,12 +4385,18 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('bagCatalogue').setAttribute('aria-pressed',String(bagCatalogue));
     $('inventoryGrid').innerHTML=visible.length?visible.map(([id,item],i)=>{
       const [x,y,angle]=BAG_SCATTER_POINTS[i];
-      const owned=quantity(id);
-      return `<button type="button" class="de-bag-loot ${owned===0?'unowned':''}" data-item-id="${safe(id)}" style="left:${x}%;top:${y}%;--scatter-angle:${angle}deg" aria-label="${safe(item.label)} : ${owned} dans le sac. Voir la fiche.">
-        <span class="de-bag-loot-icon" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span><span class="de-bag-loot-qty">×${owned}</span>
+      const owned=quantity(id),free=Math.max(0,owned-(bagAssemblyItems[id]||0));
+      return `<button type="button" class="de-bag-loot ${owned===0?'unowned':free===0?'staged-out':''}" data-item-id="${safe(id)}" style="left:${x}%;top:${y}%;--scatter-angle:${angle}deg" aria-label="${safe(item.label)} : ${free} à déposer. Glisser sur le plan bleu pour fabriquer.">
+        <span class="de-bag-loot-icon" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span><span class="de-bag-loot-qty">×${free}</span>
         <span class="de-bag-loot-label">${safe(item.label)}</span></button>`;
     }).join(''):'<div class="de-bag-empty">Ton sac est vide. Explore la carte pour récupérer des ressources !</div>';
-    $('inventoryGrid').querySelectorAll('[data-item-id]').forEach(el=>el.addEventListener('click',()=>showItemDetail(el.dataset.itemId)));
+    $('inventoryGrid').querySelectorAll('[data-item-id]').forEach(el=>{
+      el.addEventListener('pointerdown',ev=>startBagPointerDrag(ev,el,'inventory',el.dataset.itemId,-1));
+      el.addEventListener('click',ev=>{
+        if(el.dataset.justDragged==='1'){ev.preventDefault();return;}
+        showItemDetail(el.dataset.itemId);
+      });
+    });
 
     // Le manuel explique les recettes sans fabriquer directement les objets.
     const manualCard=(r,kind)=>{
@@ -4328,8 +4409,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('craftList').innerHTML=`<div class="de-manual-group">🩹 RECETTES D'ASSEMBLAGE</div>${RECIPES.map(r=>manualCard(r,'item')).join('')}
       <div class="de-manual-group">🎒 ÉQUIPEMENTS À FABRIQUER</div>${GEAR_CRAFTS.map(r=>manualCard(r,'gear')).join('')}
       <div class="de-manual-group">⚔ ARMES : ATELIER DE LA BASE</div>${weaponGuide}
-      <button id="bagManualGoAssemble" type="button">⚒ RETOUR À LA BÂCHE POUR ASSEMBLER</button>`;
-    $('bagManualGoAssemble')?.addEventListener('click',()=>{closeBagPanel();setBagAssemblyMode(true)});
+      <button id="bagManualGoAssemble" type="button">↩ REVENIR À LA BÂCHE</button>`;
+    $('bagManualGoAssemble')?.addEventListener('click',closeBagPanel);
     renderBagAssembly();
     if(currentTab==='inventory')requestAnimationFrame(fitBagScene);
   }
@@ -4456,13 +4537,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('detectionToggle').addEventListener('click',toggleDetectionMic);
     $('flashlightToggle').addEventListener('click',toggleFlashlight);
     $('micSensitivity').addEventListener('input',event=>setDetectionSensitivity(event.target.value));
-    $('bagOwned').addEventListener('click',()=>{if(bagAssemblyMode)setBagAssemblyMode(false);bagCatalogue=false;bagPage=0;renderInventory()});
-    $('bagCatalogue').addEventListener('click',()=>{if(bagAssemblyMode)setBagAssemblyMode(false);bagCatalogue=true;bagPage=0;renderInventory()});
+    $('bagOwned').addEventListener('click',()=>{bagCatalogue=false;bagPage=0;renderInventory()});
+    $('bagCatalogue').addEventListener('click',()=>{bagCatalogue=true;bagPage=0;renderInventory()});
     $('bagPrev').addEventListener('click',()=>{bagPage=Math.max(0,bagPage-1);renderInventory()});
     $('bagNext').addEventListener('click',()=>{bagPage++;renderInventory()});
     $('bagCraftTrigger').addEventListener('click',()=>openBagPanel('manual'));
-    $('bagAssembleTrigger').addEventListener('click',()=>setBagAssemblyMode(!bagAssemblyMode));
-    $('bagAssemblyClear').addEventListener('click',()=>{bagAssemblyItems=Object.create(null);renderBagAssembly();});
+    $('bagAssemblyClear').addEventListener('click',()=>{bagAssemblyPlacements=[];rebuildBagAssemblyCounts();renderInventory();});
     $('bagAssemblyValidate').addEventListener('click',confirmBagAssembly);
     $('bagPanelClose').addEventListener('click',closeBagPanel);
     $('bagReturn').addEventListener('click',()=>{closeBagPanel();switchTab('map')});
