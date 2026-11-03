@@ -1200,83 +1200,123 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 </style>
 
 
-<!-- DEAD EARTH V4.6 : collection de tickets de craft trouvés pendant les fouilles -->
-<style id="de-ticket-collection-v46">
-/* Album pleine page, visuels recto/verso livrés dans image jeux/ */
+<!-- DEAD EARTH V4.7 : livre de collection de tickets, 4 par page papier -->
+<style id="de-craft-book-v47">
 #page-inventory #bagActionPanel.de-ticket-collection-mode {
-  background: radial-gradient(ellipse at 40% -20%,#4e4f3c 0%,#26352d 46%,#131e1b 100%) !important;
-  box-shadow: inset 0 0 0 4px #7b876a;
-  padding: 11px 12px max(23px,env(safe-area-inset-bottom)) !important;
+  padding: max(8px,env(safe-area-inset-top)) 6px max(18px,env(safe-area-inset-bottom)) !important;
+  overflow-y: auto !important;
+  background: radial-gradient(circle at 50% 8%, #51412d, #251e18 52%, #151512) !important;
+  box-shadow: inset 0 0 0 2px #5f543a;
 }
 #page-inventory .de-ticket-collection-mode .de-bag-panel-header {
-  background:#26332df4 !important; border-bottom:2px solid #b69a70;
+  display:flex; gap:8px; align-items:center; padding:7px 6px 9px;
+  border:0; background:transparent !important; position:relative;
+  color:#f8dfaa; z-index:3;
 }
-#page-inventory .de-ticket-album {padding:2px 1px 20px;color:#f5ead2;}
-#page-inventory .de-ticket-overview {
-  border:1px solid #81927f;background:#1a2925bd;border-radius:7px;
-  margin:12px 0;padding:12px 11px;box-shadow:0 3px 0 #111b18;
+#page-inventory .de-ticket-collection-mode .de-bag-panel-header h2 {
+  font:900 clamp(12px,3.5vw,17px)/1.3 'Courier New',monospace;
+  text-shadow:2px 2px #19130e; letter-spacing:.3px;
 }
-#page-inventory .de-ticket-count {display:flex;align-items:center;justify-content:space-between;gap:8px;font:800 12px/1.4 'Courier New',monospace;color:#fae5b8;}
-#page-inventory .de-ticket-count b {font:900 16px/1.2 monospace;color:#c6f0bb;}
-#page-inventory .de-ticket-meter {height:8px;border:1px solid #9aa78c;margin:10px 0;background:#0a1515;}
-#page-inventory .de-ticket-meter i {display:block;height:100%;background:repeating-linear-gradient(90deg,#78a875 0 11px,#b8dca1 11px 15px);}
-#page-inventory .de-ticket-overview p {font:12px/1.55 'Courier New',monospace;color:#e5d9bf;margin:0;}
-#page-inventory .de-ticket-focus {
-  border:2px solid #bbad8a;background:linear-gradient(160deg,#26302c,#181f1d);
-  border-radius:9px;padding:10px 9px;margin:13px 0 17px;
-  box-shadow:0 5px 0 #101713,0 7px 14px #0006;
+#page-inventory .de-ticket-collection-mode .de-bag-panel-header button {
+  width:39px;min-width:39px;height:39px;min-height:39px;
+  color:#ffecbd; background:#493327; border:2px solid #af8664;
 }
-#page-inventory .de-ticket-focus-title {
-  display:flex;justify-content:space-between;gap:8px;align-items:center;
-  font:900 11px/1.4 'Courier New',monospace;color:#ffe1a6;margin:1px 2px 10px;
+#page-inventory .de-ticket-album {padding:0 !important;}
+#page-inventory .de-book-status {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;margin:1px 9px 6px;
+  font:900 10px/1.4 'Courier New',monospace;
+  color:#f2ddb0;
 }
-#page-inventory .de-ticket-focus-title small {font-size:9px;white-space:nowrap;color:#afcbb2;}
-#page-inventory .de-ticket-art {
-  display:block;width:100%;aspect-ratio:561 / 156;
-  background-repeat:no-repeat;
-  background-color:#1f1f21;
-  background-size:200% 900%;
-  image-rendering:auto;
+#page-inventory .de-book-status strong {color:#bbefb7;font-size:12px;white-space:nowrap;}
+#page-inventory .de-book-meter {height:5px;margin:0 9px 8px;background:#1b170f;border:1px solid #987b56;}
+#page-inventory .de-book-meter i {display:block;height:100%;background:repeating-linear-gradient(90deg,#719c5a 0 10px,#b6ce8b 10px 13px);}
+#page-inventory .de-book-spread {
+  position:relative; width:100%; aspect-ratio:1448 / 1086;
+  margin:0 auto; overflow:hidden;
+  background: url('./image%20jeux/livre-craft.jpg') no-repeat center/100% 100%;
+}
+#page-inventory .de-book-ticket {
+  position:absolute; width:35%;height:12.25%; padding:0;
+  border:1px solid rgba(87,51,29,.55);
+  border-radius:3px; overflow:hidden;
+  background:rgba(247,217,175,.66);
+  box-shadow:0 2px 4px #4c271f88;
+  transition:filter .14s,transform .14s;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  touch-action:manipulation;
+}
+#page-inventory .de-book-ticket:focus-visible {outline:3px solid #7e271a;outline-offset:1px;}
+#page-inventory .de-book-ticket:active {filter:brightness(1.10);transform:translateY(1px);}
+#page-inventory .de-book-ticket.is-found {border:2px solid #567747;}
+#page-inventory .de-book-ticket.is-missing {filter:saturate(.65) brightness(.89);}
+#page-inventory .de-book-ticket img {width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;}
+#page-inventory .de-book-ticket img[hidden] {display:none!important;}
+#page-inventory .de-book-ticket .de-book-ticket-fallback {
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;padding:3px 5px;
+  color:#50351f; background:#e4c39a;
+  font:900 clamp(6px,1.8vw,11px)/1.18 'Courier New',monospace;
+  text-align:center;overflow-wrap:anywhere;
+}
+#page-inventory .de-book-ticket .de-book-ticket-fallback[hidden] {display:none!important;}
+#page-inventory .de-book-ticket .de-book-lock {
+  position:absolute;right:1px;top:1px;background:#302c2bde;
+  color:#ffdbad; border-radius:3px;padding:1px 2px;
+  font-size:clamp(8px,2.6vw,12px);line-height:1.15;
   pointer-events:none;
 }
-#page-inventory .de-ticket-art.is-front {background-image:url('./image%20jeux/tickets-recto.jpg');}
-#page-inventory .de-ticket-art.is-back {background-image:url('./image%20jeux/tickets-verso.jpg');}
-#page-inventory .de-ticket-hero-button {display:block;width:100%;border:0;background:#1e2222;padding:0;border-radius:5px;overflow:hidden;box-shadow:0 4px 8px #0007;}
-#page-inventory .de-ticket-hero-button:focus-visible, #page-inventory .de-ticket-gallery-item:focus-visible {outline:3px solid #e9cf93;outline-offset:2px;}
-#page-inventory .de-ticket-controls {display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:13px 0 9px;}
-#page-inventory .de-ticket-controls button {
- min-height:43px;border:2px solid #9da78c;border-radius:5px;background:#35423b;
- color:#f8ebcd;font:900 11px/1.25 'Courier New',monospace;padding:8px 5px;
+#page-inventory .de-book-ticket .de-book-found {
+  position:absolute;right:1px;top:1px;background:#294d31de;
+  color:#d5ffc6;border-radius:3px;padding:1px 3px;
+  font-size:clamp(7px,2.5vw,11px);line-height:1.1;
+  pointer-events:none;
 }
-#page-inventory .de-ticket-controls button.selected {background:#75603c;border-color:#f1d29b;color:#fff1cf;}
-#page-inventory .de-ticket-controls button.is-locked {background:#343b38;border-color:#806b5d;color:#d7c7ad;}
-#page-inventory .de-ticket-hint {color:#dcd7c1;font:11px/1.5 'Courier New',monospace;margin:0;padding:6px 3px 1px;}
-#page-inventory .de-ticket-hint.owned {color:#b5e9b9;}
-#page-inventory .de-ticket-heading {font:900 13px/1.45 'Courier New',monospace;color:#ffe1aa;margin:15px 0 9px;border-bottom:2px solid #978366;padding:0 0 9px;}
-#page-inventory .de-ticket-filters {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:10px 0 12px;}
-#page-inventory .de-ticket-filters button {
- min-height:38px;border:1px solid #9d987e;color:#e0d4b7;background:#263a34;
- border-radius:4px;font:900 9px/1.25 'Courier New',monospace;
+#page-inventory .de-book-empty-page {position:absolute;color:#735439;font:900 9px 'Courier New',monospace;text-align:center;}
+#page-inventory .de-book-nav {
+  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:7px;
+  align-items:center;margin:8px 4px 0;
 }
-#page-inventory .de-ticket-filters button.selected {background:#576746;color:#fff7d2;border-color:#e3c488;}
-#page-inventory .de-ticket-gallery {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 7px;margin:0 0 15px;}
-#page-inventory .de-ticket-gallery-item {
- width:100%;min-width:0;background:#202d29;border:1px solid #677c70;border-radius:6px;
- padding:5px 3px 7px;display:flex;flex-direction:column;gap:5px;align-items:stretch;text-align:center;
- color:#f0e2be;box-shadow:0 3px 0 #101714;
+#page-inventory .de-book-nav button,
+#page-inventory .de-book-back-to-bag {
+  min-height:41px; border-radius:4px; border:2px solid #b68b60;
+  background:linear-gradient(#604937,#37281e);
+  color:#fff0c8; font:900 10px/1.3 'Courier New',monospace;
+  padding:7px 5px; text-align:center;
 }
-#page-inventory .de-ticket-gallery-item.chosen {border-color:#e6cd90;box-shadow:0 0 0 2px #cfb87b,0 3px 0 #101714;}
-#page-inventory .de-ticket-gallery-item .de-ticket-art {border-radius:3px;}
-#page-inventory .de-ticket-gallery-item.is-missing .de-ticket-art {filter:saturate(.45) brightness(.79);}
-#page-inventory .de-ticket-gallery-item strong {font:800 10px/1.2 'Courier New',monospace;overflow-wrap:anywhere;}
-#page-inventory .de-ticket-gallery-item small {font:800 9px/1.2 'Courier New',monospace;color:#b2cbb7;}
-#page-inventory .de-ticket-gallery-item.is-missing small {color:#d5aa8d;}
-#page-inventory .de-ticket-back-to-bag {position:sticky;bottom:0;display:block;width:100%;min-height:49px;margin-top:12px;border:2px solid #cfdb9d;border-radius:5px;background:#49694e;color:#fff8d5;font:900 12px 'Courier New',monospace;z-index:5;}
-#page-inventory .de-ticket-empty {font:12px/1.6 monospace;color:#dfcbb6;text-align:center;padding:15px 4px;}
-@media(max-width:365px){
-  #page-inventory .de-ticket-gallery-item strong{font-size:9px}
-  #page-inventory .de-ticket-focus-title {font-size:10px}
-  #page-inventory .de-ticket-gallery {gap:8px 5px}
+#page-inventory .de-book-nav button:disabled {opacity:.35;}
+#page-inventory .de-book-page-label {font:900 10px/1.4 'Courier New',monospace;color:#e9d9af;text-align:center;white-space:nowrap;}
+#page-inventory .de-book-help {
+  color:#dbc79e; font:11px/1.45 'Courier New',monospace;
+  text-align:center;margin:9px 10px 0;
+}
+#page-inventory .de-book-back-to-bag {display:block;width:calc(100% - 8px);margin:12px 4px 0;background:#446047;border-color:#b4c794;}
+#page-inventory .de-book-viewer {
+  position:fixed;inset:0; z-index:800;
+  padding:max(25px,env(safe-area-inset-top)) 14px max(22px,env(safe-area-inset-bottom));
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(10,13,11,.95);color:#fce4ba;
+}
+#page-inventory .de-book-viewer-panel {width:min(100%,520px);display:flex;flex-direction:column;gap:11px;align-items:stretch;}
+#page-inventory .de-book-viewer-top {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+#page-inventory .de-book-viewer-title {min-width:0;font:900 14px/1.35 'Courier New',monospace;}
+#page-inventory .de-book-viewer-close {width:43px;height:43px;flex:0 0 43px;background:#5d3b2a;border:2px solid #e4b77c;color:#fff0cb;font:900 24px monospace;}
+#page-inventory .de-book-viewer-art {width:100%;aspect-ratio:3.45/1;display:grid;place-items:center;background:#9d7c58;border:2px solid #a88b69;border-radius:6px;overflow:hidden;}
+#page-inventory .de-book-viewer-art img {width:100%;height:100%;object-fit:contain;}
+#page-inventory .de-book-viewer-art img[hidden] {display:none!important;}
+#page-inventory .de-book-viewer-art .de-book-viewer-fallback {padding:12px;text-align:center;font:900 12px/1.6 'Courier New',monospace;color:#3c271b;}
+#page-inventory .de-book-viewer-art .de-book-viewer-fallback[hidden] {display:none!important;}
+#page-inventory .de-book-viewer-controls {display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+#page-inventory .de-book-viewer-controls button {min-height:46px;padding:8px 5px;background:#394f40;border:2px solid #c1b491;color:#fff1cb;font:900 12px 'Courier New',monospace;border-radius:4px;}
+#page-inventory .de-book-viewer-controls button.active {background:#756141;border-color:#eed6ac;}
+#page-inventory .de-book-viewer-controls button:disabled {background:#343536;color:#b9b6b0;border-color:#646564;opacity:.75;}
+#page-inventory .de-book-viewer-hint {font:11px/1.45 'Courier New',monospace;color:#e6d6b8;text-align:center;}
+#page-inventory .de-book-viewer-cost {background:#29382d;border:1px dashed #9ab68c;padding:10px;font:11px/1.5 'Courier New',monospace;}
+@media (max-width:370px) {
+  #page-inventory .de-book-ticket {width:35.5%;}
+  #page-inventory .de-book-status {font-size:9px;}
+  #page-inventory .de-book-page-label {font-size:9px;}
+  #page-inventory .de-book-nav button {font-size:9px;}
 }
 </style>
 
@@ -1507,7 +1547,7 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
       <div class="de-bag-bottom-buttons" role="group" aria-label="Actions du sac">
         <button id="bagOwned" class="de-bag-hotspot de-bag-owned selected" type="button" aria-pressed="true">POSSÉDÉS</button>
         <button id="bagCatalogue" class="de-bag-hotspot de-bag-catalogue" type="button" aria-pressed="false">CATALOGUE</button>
-        <button id="bagCraftTrigger" class="de-bag-hotspot de-bag-craft" type="button" aria-label="Ouvrir la collection de tickets de craft"><span>🎟️ TICKETS<br>DE CRAFT</span></button>
+        <button id="bagCraftTrigger" class="de-bag-hotspot de-bag-craft" type="button" aria-label="Ouvrir le livre des tickets de craft"><span>📖 TICKETS<br>DE CRAFT</span></button>
       </div>
       <div class="de-bag-pagination" aria-label="Navigation entre les objets">
         <button id="bagPrev" type="button" aria-label="Objets précédents">‹</button>
@@ -4311,76 +4351,131 @@ const DEAD_EARTH_ICONS = Object.freeze({
     scene.style.height=`${imageHeight}px`;
   }
 
-  let selectedTicketId='bandage',selectedTicketFace='front',ticketAlbumFilter='all';
-  function ticketArtMarkup(id,side){
-    const i=CRAFT_TICKETS.findIndex(t=>t.id===id);
-    if(i<0)return '';
-    const row=Math.floor(i/2),col=i%2;
-    return `<span class="de-ticket-art ${side==='back'?'is-back':'is-front'}" style="background-position:${col*100}% ${row*12.5}%" aria-hidden="true"></span>`;
+  // Livre : 4 tickets sur chaque page, 8 par double-page, 3 doubles-pages.
+  // Noms de fichiers EXACTS (sensibles à la casse sur GitHub Pages) : Tr1.PNG...Tr18.PNG et Tv1.PNG...Tv18.PNG.
+  let ticketBookSpread=0,bookTicketViewerId=null,bookTicketViewerFace='front';
+  const BOOK_TICKETS_PER_SPREAD=8;
+  const BOOK_TICKET_Y=[19.8,35.9,52,68.1];
+  const BOOK_TOTAL_SPREADS=Math.ceil(CRAFT_TICKETS.length/BOOK_TICKETS_PER_SPREAD);
+  function ticketImageUrl(id,face='front'){
+    const index=CRAFT_TICKETS.findIndex(ticket=>ticket.id===id);
+    return index<0?'':`./image%20jeux/${face==='back'?'Tv':'Tr'}${index+1}.PNG`;
   }
-  function showCraftTicket(id){
-    const target=CRAFT_TICKETS.find(t=>t.id===id);
-    if(!target)return;
-    selectedTicketId=id;selectedTicketFace='front';
-    renderCraftTickets();
-    $('bagActionPanel')?.scrollTo({top:0,behavior:'smooth'});
+  function bookTicketCard(ticket,indexWithinSpread){
+    if(!ticket)return '';
+    const owned=hasCraftTicket(ticket.id);
+    const right=indexWithinSpread>=4;
+    const y=BOOK_TICKET_Y[indexWithinSpread%4];
+    const x=right?'54.5%':'10.2%';
+    return `<button type="button" class="de-book-ticket ${owned?'is-found':'is-missing'}"
+       style="left:${x};top:${y}%;" data-book-ticket="${ticket.id}"
+       aria-label="Ticket ${ticketName(ticket)}. ${owned?'Trouvé, verso consultable':'Non découvert, verso verrouillé'}. Agrandir le recto.">
+       <img src="${ticketImageUrl(ticket.id,'front')}" alt="" loading="lazy" />
+       <span class="de-book-ticket-fallback" hidden>${safe(ticketName(ticket).toUpperCase())}</span>
+       <span class="${owned?'de-book-found':'de-book-lock'}" aria-hidden="true">${owned?'✓':'🔒'}</span>
+     </button>`;
   }
-  function flipCraftTicket(face){
-    if(face==='back'&&!hasCraftTicket(selectedTicketId)){
-      return toast('🔒 Ce verso est secret : trouve ce ticket dans une fouille GPS.');
-    }
-    selectedTicketFace=face==='back'?'back':'front';
+  // Les images Tr/Tv peuvent être ajoutées progressivement au dépôt : affichage de secours si absentes.
+  function bindBookImageFallbacks(holder){
+    holder.querySelectorAll('.de-book-ticket img,.de-book-viewer-art img').forEach(img=>{
+      const failed=()=>{img.hidden=true;const placeholder=img.nextElementSibling;if(placeholder)placeholder.hidden=false;};
+      img.addEventListener('error',failed,{once:true});
+      if(img.complete&&img.naturalWidth===0)failed();
+    });
+  }
+  function openBookTicket(id){
+    if(!CRAFT_TICKETS.some(ticket=>ticket.id===id))return;
+    bookTicketViewerId=id;bookTicketViewerFace='front';
     renderCraftTickets();
+    $('deBookViewerClose')?.focus({preventScroll:true});
+  }
+  function closeBookTicket(){
+    bookTicketViewerId=null;bookTicketViewerFace='front';
+    renderCraftTickets();
+    $('deBookTicketOpenReturn')?.focus({preventScroll:true});
+  }
+  function flipBookTicket(face){
+    if(!bookTicketViewerId)return;
+    if(face==='back'&&!hasCraftTicket(bookTicketViewerId))return toast('🔒 Trouve ce ticket en fouille pour révéler son verso.');
+    bookTicketViewerFace=face;
+    renderCraftTickets();
+  }
+  function bookTicketViewerMarkup(){
+    const ticket=CRAFT_TICKETS.find(t=>t.id===bookTicketViewerId);
+    if(!ticket)return '';
+    const owned=hasCraftTicket(ticket.id);
+    const def=ticketDefinition(ticket);
+    // La description des matériaux n'est montrée qu'APRÈS découverte du ticket.
+    const ingredients=owned&&bookTicketViewerFace==='back'&&def?.cost?`<div class="de-book-viewer-cost">⚒ MATÉRIAUX : ${safe(costText(def.cost))}</div>`:'';
+    const fallback=bookTicketViewerFace==='back'
+      ?`Verso pas encore ajouté (Tv${CRAFT_TICKETS.indexOf(ticket)+1}.PNG). ${owned?'Recette débloquée.':''}`
+      :`Ticket recto n°${CRAFT_TICKETS.indexOf(ticket)+1} à ajouter (Tr${CRAFT_TICKETS.indexOf(ticket)+1}.PNG)`;
+    return `<div id="deBookViewer" class="de-book-viewer" role="dialog" aria-modal="true" aria-label="Ticket : ${safe(ticketName(ticket))}">
+      <div class="de-book-viewer-panel">
+        <div class="de-book-viewer-top"><strong class="de-book-viewer-title">🎟 ${safe(ticketName(ticket))}</strong>
+          <button type="button" class="de-book-viewer-close" id="deBookViewerClose" aria-label="Fermer le ticket">×</button></div>
+        <div class="de-book-viewer-art">
+          <img src="${ticketImageUrl(ticket.id,bookTicketViewerFace)}" alt="${bookTicketViewerFace==='front'?'Recto':'Verso'} du ticket ${safe(ticketName(ticket))}" />
+          <span class="de-book-viewer-fallback" hidden>${safe(fallback)}</span>
+        </div>
+        <div class="de-book-viewer-controls">
+          <button type="button" id="deBookFront" class="${bookTicketViewerFace==='front'?'active':''}">RECTO</button>
+          <button type="button" id="deBookBack" class="${bookTicketViewerFace==='back'?'active':''}" ${owned?'':'disabled'}>${owned?'↻ VERSO':'🔒 VERSO'}</button>
+        </div>
+        <div class="de-book-viewer-hint">${owned?'✓ Ticket trouvé : recette débloquée.': '🔒 Trouve ce ticket dans une fouille GPS pour accéder au verso.'}</div>
+        ${ingredients}
+        ${ticket.kind==='weapon'&&owned?'<div class="de-book-viewer-hint">⚡ Fabrication des armes à la Base.</div>':''}
+      </div></div>`;
   }
   function renderCraftTickets(){
     const holder=$('craftList');if(!holder)return;
-    const ticket=CRAFT_TICKETS.find(t=>t.id===selectedTicketId)||CRAFT_TICKETS[0];
-    const owned=hasCraftTicket(ticket.id);
+    ticketBookSpread=Math.max(0,Math.min(BOOK_TOTAL_SPREADS-1,ticketBookSpread));
+    const begin=ticketBookSpread*BOOK_TICKETS_PER_SPREAD;
+    const spread=CRAFT_TICKETS.slice(begin,begin+BOOK_TICKETS_PER_SPREAD);
     const found=(game.recipeTickets||[]).length;
-    const selected=CRAFT_TICKETS.filter(t=>ticketAlbumFilter==='all'||(ticketAlbumFilter==='owned'?hasCraftTicket(t.id):!hasCraftTicket(t.id)));
+    const leftPage=2*ticketBookSpread+1;
+    const rightPage=leftPage+1;
+    const pages=BOOK_TOTAL_SPREADS*2;
     holder.innerHTML=`
-      <div class="de-ticket-overview">
-        <div class="de-ticket-count"><span>🎟️ COLLECTION DE PLANS</span><b>${found} / ${CRAFT_TICKETS.length}</b></div>
-        <div class="de-ticket-meter"><i style="width:${100*found/CRAFT_TICKETS.length}%"></i></div>
-        <p>Les rectos sont visibles. Trouve les vrais tickets en fouillant des lieux GPS pour révéler les versos et apprendre les fabrications. Chaque ticket est conservé.</p>
+      <div class="de-book-status"><span>🎟 COLLECTION DE TICKETS</span><strong>${found} / ${CRAFT_TICKETS.length}</strong></div>
+      <div class="de-book-meter"><i style="width:${100*found/CRAFT_TICKETS.length}%"></i></div>
+      <div class="de-book-spread" id="deBookSpread" aria-label="Livre ouvert, pages ${leftPage} et ${rightPage}">
+        ${spread.map((t,i)=>bookTicketCard(t,i)).join('')}
       </div>
-      <div class="de-ticket-focus">
-        <div class="de-ticket-focus-title"><span>${safe(ticketName(ticket).toUpperCase())}</span><small>${owned?'✓ RETROUVÉ':'🔒 À DÉCOUVRIR'}</small></div>
-        <button id="deTicketFlipCard" type="button" class="de-ticket-hero-button" aria-label="${owned?'Retourner le ticket':'Ticket verrouillé, voir le recto'}">${ticketArtMarkup(ticket.id,selectedTicketFace)}</button>
-        <div class="de-ticket-controls"><button id="deTicketFront" type="button" class="${selectedTicketFace==='front'?'selected':''}">RECTO</button>
-          <button id="deTicketBack" type="button" class="${selectedTicketFace==='back'?'selected':''} ${owned?'':'is-locked'}">${owned?'VERSO ↻':'🔒 VERSO'}</button></div>
-        <p class="de-ticket-hint ${owned?'owned':''}">${owned?'✓ Plan découvert ! Le verso révèle les matériaux ; sa fabrication est débloquée.': '🔒 Le secret de fabrication est caché. Fouille des lieux pour récupérer ce ticket.'}</p>
-        ${owned&&ticket.kind==='weapon'?'<p class="de-ticket-hint">⚡ Les armes se fabriquent dans l’atelier de la BASE.</p>':''}
+      <div class="de-book-nav">
+        <button type="button" id="deBookPrev" ${ticketBookSpread===0?'disabled':''}>◀ PRÉCÉDENT</button>
+        <span class="de-book-page-label">${leftPage}–${rightPage} / ${pages}</span>
+        <button type="button" id="deBookNext" ${ticketBookSpread===BOOK_TOTAL_SPREADS-1?'disabled':''}>SUIVANT ▶</button>
       </div>
-      <h3 class="de-ticket-heading">LES TICKETS</h3>
-      <div class="de-ticket-filters">
-        <button type="button" data-ticket-filter="all" class="${ticketAlbumFilter==='all'?'selected':''}">TOUS · 18</button>
-        <button type="button" data-ticket-filter="owned" class="${ticketAlbumFilter==='owned'?'selected':''}">TROUVÉS · ${found}</button>
-        <button type="button" data-ticket-filter="missing" class="${ticketAlbumFilter==='missing'?'selected':''}">MANQUANTS · ${CRAFT_TICKETS.length-found}</button>
-      </div>
-      ${selected.length?`<div class="de-ticket-gallery">${selected.map(t=>`<button type="button" data-ticket-id="${t.id}" class="de-ticket-gallery-item ${hasCraftTicket(t.id)?'':'is-missing'} ${t.id===ticket.id?'chosen':''}">
-        ${ticketArtMarkup(t.id,'front')}<strong>${safe(ticketName(t))}</strong><small>${hasCraftTicket(t.id)?'✓ VERSO DÉBLOQUÉ':'🔒 À TROUVER'}</small></button>`).join('')}</div>`:'<p class="de-ticket-empty">Aucun ticket dans cette catégorie pour le moment.</p>'}
-      <button id="bagManualGoAssemble" class="de-ticket-back-to-bag" type="button">↩ RETOUR AU SAC</button>`;
-    holder.querySelectorAll('[data-ticket-id]').forEach(b=>b.addEventListener('click',()=>showCraftTicket(b.dataset.ticketId)));
-    holder.querySelectorAll('[data-ticket-filter]').forEach(b=>b.addEventListener('click',()=>{ticketAlbumFilter=b.dataset.ticketFilter;renderCraftTickets();}));
-    $('deTicketFront')?.addEventListener('click',()=>flipCraftTicket('front'));
-    $('deTicketBack')?.addEventListener('click',()=>flipCraftTicket('back'));
-    $('deTicketFlipCard')?.addEventListener('click',()=>flipCraftTicket(selectedTicketFace==='front'?'back':'front'));
-    $('bagManualGoAssemble')?.addEventListener('click',closeBagPanel);
+      <p class="de-book-help">4 tickets par page · touche un ticket pour l'agrandir.<br>🔒 Verso visible seulement après découverte en fouille.</p>
+      <button type="button" id="deBookBackToBag" class="de-book-back-to-bag">↩ RETOUR AU SAC</button>
+      ${bookTicketViewerId?bookTicketViewerMarkup():''}`;
+    bindBookImageFallbacks(holder);
+    holder.querySelectorAll('[data-book-ticket]').forEach(el=>el.addEventListener('click',()=>openBookTicket(el.dataset.bookTicket)));
+    $('deBookPrev')?.addEventListener('click',()=>{ticketBookSpread--;renderCraftTickets();});
+    $('deBookNext')?.addEventListener('click',()=>{ticketBookSpread++;renderCraftTickets();});
+    $('deBookBackToBag')?.addEventListener('click',closeBagPanel);
+    $('deBookViewerClose')?.addEventListener('click',closeBookTicket);
+    $('deBookFront')?.addEventListener('click',()=>flipBookTicket('front'));
+    $('deBookBack')?.addEventListener('click',()=>flipBookTicket('back'));
+    $('deBookViewer')?.addEventListener('click',e=>{if(e.target.id==='deBookViewer')closeBookTicket()});
   }
-
   function openBagPanel(kind){
     const panel=$('bagActionPanel');if(!panel)return;
     bagPanelOpen='tickets';
     panel.hidden=false;
     panel.classList.add('de-ticket-collection-mode');
-    $('bagPanelTitle').textContent='🎟️ PLANS DE CRAFT';
+    $('bagPanelTitle').textContent='📖 LIVRE DES TICKETS';
+    bookTicketViewerId=null;bookTicketViewerFace='front';
     renderCraftTickets();
     panel.scrollTop=0;
     $('bagPanelClose').focus({preventScroll:true});
   }
-  function closeBagPanel(){const p=$('bagActionPanel');if(p){p.hidden=true;p.classList.remove('de-ticket-collection-mode');}bagPanelOpen='';}
-  
+  function closeBagPanel(){
+    const p=$('bagActionPanel');if(p){p.hidden=true;p.classList.remove('de-ticket-collection-mode');}
+    bagPanelOpen='';bookTicketViewerId=null;bookTicketViewerFace='front';
+  }
+
   const normalizeSearch=str=>String(str||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const itemCondition=id=>clamp(Number(game.itemCondition?.[id]??100),0,100);
   const durableToolReady=id=>quantity(id)>0&&itemCondition(id)>0;
