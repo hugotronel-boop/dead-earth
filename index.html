@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V3.8 Accueil illustré</title>
+  <title>DEAD EARTH — V4.2 Sac visuel</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -643,23 +643,24 @@
 <style id="dead-earth-v38-home-hub">
 /* V3.8 — page d'accueil illustrée : la carte GPS reste le fond,
    et les zones cliquables sont intégrées dans l'illustration du survivant. */
-.de-home-hub{position:absolute;z-index:26;left:50%;top:50%;bottom:auto;width:min(100vw,470px);aspect-ratio:1086 / 810;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
-.de-home-hub-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
-.de-home-hit{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;margin:0;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* L'image fait elle-même la hauteur du conteneur : fiable sur Safari iPhone. */
+.de-home-hub{position:absolute;z-index:26;left:50%;bottom:0;top:auto;width:min(100%,470px);max-width:100%;height:auto;transform:translateX(-50%);pointer-events:none;user-select:none;overflow:visible}
+.de-home-hub-art{position:relative;display:block;width:100%;max-width:100%;height:auto;object-fit:contain;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 14px 28px rgba(0,0,0,.24))}
+.de-home-hit{position:absolute;pointer-events:auto;border:0;background:transparent;padding:0;margin:0;border-radius:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .de-home-hit:focus-visible{outline:2px dashed #f2cb8a;outline-offset:2px;background:rgba(255,227,163,.08)}
-.de-home-hit-base{left:3.5%;top:3.5%;width:25%;height:26%}
-.de-home-hit-map{left:1%;top:25%;width:24%;height:18%}
-.de-home-hit-fouille{left:31%;top:7%;width:16%;height:16%}
-.de-home-hit-quests{left:38%;top:18%;width:13%;height:15%}
-.de-home-hit-perso{left:45%;top:1%;width:19%;height:24%}
-.de-home-hit-bag{left:42%;top:28%;width:25%;height:45%}
-.de-home-village-anchor{position:absolute;z-index:27;left:79.2%;top:5.8%;width:18.5%;height:15.5%;pointer-events:auto}
+.de-home-hit-base{left:4%;top:4.4%;width:22.5%;height:23.2%}
+.de-home-hit-map{left:1.5%;top:26%;width:23%;height:16.5%}
+.de-home-hit-fouille{left:31.8%;top:7.6%;width:14.2%;height:11.6%}
+.de-home-hit-quests{left:38.3%;top:18.3%;width:12.6%;height:12.8%}
+.de-home-hit-perso{left:44.5%;top:1.8%;width:18.4%;height:21.5%}
+.de-home-hit-bag{left:43.2%;top:28.5%;width:22%;height:40%}
+.de-home-village-anchor{position:absolute;z-index:27;left:79%;top:6%;width:18%;height:13.5%;pointer-events:auto}
 .de-home-village-anchor #territoryCampaign{position:relative!important;inset:auto!important;width:100%!important;height:100%!important;max-height:none!important;overflow:visible!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;margin:0!important}
 .de-home-village-anchor .village-toggle{width:100%;height:100%;min-height:0!important;display:flex;align-items:center;justify-content:center;gap:0;padding:3px 8px 2px!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5d3a1d;text-shadow:0 1px rgba(255,247,214,.85);font:700 clamp(7px,1.9vw,10px)/1.15 'Courier New',monospace!important;letter-spacing:0;text-transform:uppercase;text-align:center}
 .de-home-village-anchor .village-title{display:block;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.05;max-width:100%}
 .de-home-village-anchor .village-arrow{display:none!important}
 .de-home-village-anchor .village-panel{position:absolute;top:calc(100% + 10px);right:-2px;width:min(316px,90vw);max-height:min(56dvh,420px);overflow-y:auto!important;background:#1d2b30f5;border:3px solid #819185;box-shadow:0 10px 22px rgba(0,0,0,.32);padding:10px;border-radius:6px;z-index:120}
-.de-home-option-anchor{position:absolute;z-index:32;top:max(8px,env(safe-area-inset-top));right:8px;pointer-events:auto}
+.de-home-option-anchor{position:absolute;z-index:32;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));pointer-events:auto}
 .de-home-option-anchor #mapTools{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
 .de-home-options-trigger{appearance:none;min-width:42px;height:42px;padding:0 12px;border:3px solid;border-color:#9aa7a4 #121b1f #121b1f #9aa7a4;background:#314148;color:#f3dfaf;box-shadow:inset 0 0 0 2px #455962,0 3px 0 #10171a;border-radius:4px;font:700 26px/1 'Courier New',monospace;text-shadow:1px 1px #111820;display:grid;place-items:center}
 .de-home-options-trigger:focus-visible{outline:2px dashed #f2cc8e;outline-offset:2px}
@@ -673,12 +674,142 @@ body.de-home-map #page-map #nightClock{left:auto;right:8px;bottom:8px;z-index:12
 body.de-home-map #page-map .map-attribution{left:8px;right:auto;bottom:8px;z-index:12;background:rgba(16,20,23,.46);padding:4px 6px;border-radius:4px}
 body.de-home-map #page-map .drawing-controls{z-index:35}
 @media (max-width:390px){
-  .de-home-hub{width:min(100vw,470px)}
+  .de-home-hub{width:min(100%,470px)}
   .de-home-option-anchor{right:6px}
   .de-home-options-trigger{min-width:39px;height:39px;font-size:24px}
 }
 @media (max-height:760px){
-  .de-home-hub{width:min(100vw,435px)}
+  .de-home-hub{width:min(100%,435px)}
+}
+</style>
+
+<style id="dead-earth-v40-sac-visuel">
+/* Inventaire visuel : le vrai fond existant et toutes les fonctions du jeu sont conservés. */
+body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
+#page-inventory.de-bag-active{padding:0!important;overflow:hidden!important;touch-action:pan-y;background:#292c27!important}
+#gameViewport[data-art-page="inventory"]::before{background-image:none!important;background-color:#272c24!important}
+#page-inventory .de-bag-scene{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);overflow:visible;pointer-events:none;user-select:none;isolation:isolate}
+#page-inventory .de-bag-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;image-rendering:auto;user-select:none}
+#page-inventory .de-bag-hotspot{position:absolute;z-index:4;pointer-events:auto;touch-action:manipulation;margin:0;padding:3px 4px;min-height:34px;appearance:none;border-radius:7px;border:2px solid #c9b58c;background:linear-gradient(135deg,#423b31ed,#211f1bcf);box-shadow:0 3px 0 #10110fd8,0 1px 9px #0006;color:#f8e8bb;text-shadow:1px 1px #17150f;font:700 clamp(8px,1.95vw,10px)/1.25 'Courier New',monospace;letter-spacing:.1px;text-align:center;cursor:pointer;display:grid;place-items:center;white-space:normal}
+#page-inventory .de-bag-hotspot:focus-visible,#page-inventory .de-bag-back:focus-visible,#page-inventory .de-bag-pagination button:focus-visible{outline:3px solid #ffe4a1;outline-offset:2px}
+#page-inventory .de-bag-hotspot:active{filter:brightness(1.22)}
+#page-inventory .de-bag-hotspot.selected{background:linear-gradient(130deg,#7c6d45ef,#3c3a2ee5);border-color:#f7d18a}
+/* Ces pourcentages suivent les objets de l'illustration, pas la taille de l'écran. */
+#page-inventory .de-bag-equipment{left:11%;top:8.6%;width:29%;height:5.3%;font-size:clamp(7px,1.85vw,10px)}
+#page-inventory .de-bag-owned{left:16.3%;top:17.2%;width:27%;height:4.2%}
+#page-inventory .de-bag-catalogue{left:16.3%;top:22.1%;width:27%;height:4.2%}
+#page-inventory .de-bag-craft{left:15%;top:27%;width:13%;height:11.3%;writing-mode:vertical-rl;transform:rotate(180deg);font-size:clamp(7px,1.8vw,9px);padding:1px;line-height:1.1}
+#page-inventory .de-bag-scattered-items{position:absolute;inset:0;pointer-events:none;z-index:3}
+#page-inventory .de-bag-loot{position:absolute;z-index:3;width:clamp(53px,15.4%,78px);min-height:clamp(49px,7.6%,68px);transform:translate(-50%,-50%) rotate(var(--scatter-angle,0deg));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 2px 3px;gap:0;background:transparent;color:#f1e5c4;border:0;box-shadow:none;text-shadow:1px 2px 2px #15160df7;pointer-events:auto;touch-action:manipulation;cursor:pointer;filter:drop-shadow(1px 2px 1px #0e100e9c);-webkit-tap-highlight-color:transparent}
+#page-inventory .de-bag-loot:focus-visible{outline:2px dashed #ffe6a4;outline-offset:2px;background:#1c2c2b91;border-radius:10px}
+#page-inventory .de-bag-loot:active{filter:brightness(1.25) drop-shadow(1px 2px 1px #0c1110)}
+#page-inventory .de-bag-loot-icon{font:clamp(27px,7.8vw,40px)/1.13 'Apple Color Emoji','Segoe UI Emoji',system-ui,sans-serif;display:block;white-space:nowrap}
+#page-inventory .de-bag-loot-qty{position:absolute;right:0;top:0;font:700 clamp(9px,2.7vw,12px)/1 monospace;color:#fff3ce;background:#26322ddd;border:1px solid #bdb68e;padding:1px 2px;border-radius:3px;transform:rotate(calc(-1 * var(--scatter-angle,0deg)))}
+#page-inventory .de-bag-loot-label{max-width:100%;font:700 clamp(8px,2.2vw,10px)/1.15 monospace;text-align:center;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 1px;background:#26322d95;border-radius:3px}
+#page-inventory .de-bag-loot.unowned{opacity:.5;filter:grayscale(.8)}
+#page-inventory .de-bag-empty{position:absolute;left:28%;top:48%;width:58%;padding:11px;text-align:center;color:#fff0c7;font:700 12px/1.55 monospace;background:#253631dd;border:2px solid #9eab90;border-radius:7px;pointer-events:none}
+#page-inventory .de-bag-back{position:absolute;top:max(9px,env(safe-area-inset-top));right:max(9px,env(safe-area-inset-right));z-index:14;min-height:42px;padding:9px 12px;border:3px solid;border-color:#98a4a0 #141a1a #141a1a #98a4a0;border-radius:5px;background:#28363ae9;color:#f6e6bc;font:700 11px monospace;box-shadow:0 3px 0 #111b1c}
+#page-inventory .de-bag-capacity{position:absolute;top:max(9px,env(safe-area-inset-top));left:max(9px,env(safe-area-inset-left));z-index:12;width:min(40%,178px);padding:7px 8px;color:#f6e4b6;background:#1c2a29e7;border:2px solid #83958b;border-radius:5px;box-shadow:0 2px 0 #111b1a;pointer-events:none}
+#page-inventory .de-bag-capacity>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:4px;font:700 10px monospace}
+#page-inventory .de-bag-capacity strong{font-size:10px;white-space:nowrap}
+#page-inventory .de-bag-capacity-track{height:6px;margin-top:6px;background:#121e1e;border:1px solid #a2ab91;overflow:hidden}
+#page-inventory .de-bag-capacity-track i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,#d38d3b 0 12px,#f4be69 12px 15px)}
+#page-inventory .de-bag-pagination{position:absolute;z-index:10;bottom:max(11px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;background:#1b2927df;border:2px solid #697d70;box-shadow:0 3px #101719;border-radius:5px;padding:4px;color:#ffeac0;font:700 11px monospace}
+#page-inventory .de-bag-pagination button{border:2px solid #b2a480;border-radius:3px;background:#445746;color:#ffedbc;width:38px;min-height:34px;font:700 22px monospace;cursor:pointer}
+#page-inventory .de-bag-pagination button:disabled{opacity:.36}
+#page-inventory .de-bag-panel{position:absolute;inset:0;z-index:35;padding:12px 12px max(25px,env(safe-area-inset-bottom));background:linear-gradient(160deg,#24352eef,#151d1cf8);overflow-y:auto;overscroll-behavior:contain;color:#eadcba;box-shadow:inset 0 0 0 4px #64786d}
+#page-inventory .de-bag-panel-header{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:0;background:#21342ef2;border-bottom:2px solid #849186;padding:9px 0;z-index:3}
+#page-inventory .de-bag-panel-header h2{font:700 clamp(13px,4vw,18px)/1.4 'Courier New',monospace;margin:0}
+#page-inventory .de-bag-panel-header button{min-width:44px;min-height:44px;border:2px solid #b1baa4;background:#3b4d49;color:#fff1c3;font-size:22px}
+#page-inventory .de-bag-panel-intro{font:12px/1.5 monospace;color:#d0d2b8}
+#page-inventory .de-bag-loadout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+#page-inventory .de-bag-loadout-item{min-height:82px;padding:9px;border:2px solid #718b85;border-radius:4px;background:#243c3c;color:#fff0ce;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;font:11px/1.2 monospace}
+#page-inventory .de-bag-loadout-item .de-bag-loadout-icon{font-size:23px}
+#page-inventory .de-bag-loadout-item small{font-size:10px;color:#a9bcaf}
+#page-inventory .de-bag-panel .upgrade-card{background:#22332e;border-color:#647d70 #15231f #15231f #647d70}
+@media (max-width:355px){#page-inventory .de-bag-hotspot{font-size:8px}#page-inventory .de-bag-craft{font-size:7px}#page-inventory .de-bag-capacity{width:43%}#page-inventory .de-bag-loot-icon{font-size:27px}}
+@media (max-height:650px){#page-inventory .de-bag-capacity{padding:4px 6px}#page-inventory .de-bag-capacity-track{display:none}#page-inventory .de-bag-back{min-height:34px;padding:5px 8px}#page-inventory .de-bag-pagination{bottom:max(4px,env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:reduce){#page-inventory .de-bag-loot{transition:none!important}}
+</style>
+
+<style id="dead-earth-v42-bag-bottom-actions">
+/* Quatre vraies commandes visibles au bas du tapis, au-dessus de la pagination.
+   Leur position suit l'écran (et non l'image de fond recadrée). */
+#page-inventory .de-bag-bottom-buttons{
+  position:absolute;
+  z-index:19;
+  left:max(8px,env(safe-area-inset-left));
+  right:max(8px,env(safe-area-inset-right));
+  bottom:calc(76px + env(safe-area-inset-bottom,0px));
+  width:auto;
+  min-width:0;
+  max-width:calc(100% - 16px);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:stretch;
+  gap:5px;
+  padding:0;
+  pointer-events:auto;
+}
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot,
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot.selected,
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot:hover,
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot:active{
+  position:relative!important;
+  inset:auto!important;
+  width:auto!important;
+  height:55px!important;
+  min-height:51px!important;
+  margin:0!important;
+  padding:5px 3px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:2px solid #ad9d7c!important;
+  border-radius:5px!important;
+  background:linear-gradient(165deg,rgba(59,69,61,.97),rgba(32,42,39,.97))!important;
+  box-shadow:0 3px 0 #111a18, inset 0 0 0 1px #788579!important;
+  color:#f6e8c0!important;
+  text-shadow:1px 1px #121a16!important;
+  font:700 clamp(8px,2.35vw,11px)/1.2 'Courier New',monospace!important;
+  text-align:center!important;
+  letter-spacing:0!important;
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  writing-mode:horizontal-tb!important;
+  transform:none!important;
+  filter:none!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot span{
+  visibility:visible!important;
+  display:block!important;
+  color:inherit!important;
+  font:inherit!important;
+  text-align:center!important;
+}
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot.selected{
+  border-color:#f0d18b!important;
+  background:linear-gradient(165deg,rgba(107,98,65,.98),rgba(61,65,50,.98))!important;
+  color:#ffe7ac!important;
+}
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot:active{filter:brightness(1.2)!important;}
+#page-inventory .de-bag-bottom-buttons .de-bag-hotspot:focus-visible{
+  outline:3px solid #ffe4a1!important;outline-offset:2px;
+}
+#page-inventory .de-bag-pagination{
+  bottom:calc(10px + env(safe-area-inset-bottom,0px));
+}
+@media (max-width:355px){
+  #page-inventory .de-bag-bottom-buttons{left:5px;right:5px;max-width:calc(100% - 10px);gap:3px;bottom:calc(73px + env(safe-area-inset-bottom,0px));}
+  #page-inventory .de-bag-bottom-buttons .de-bag-hotspot{height:50px!important;min-height:49px!important;padding:3px 1px!important;font-size:8px!important;}
+}
+@media (max-height:660px){
+  #page-inventory .de-bag-bottom-buttons{bottom:calc(62px + env(safe-area-inset-bottom,0px));}
+  #page-inventory .de-bag-bottom-buttons .de-bag-hotspot{height:45px!important;min-height:43px!important;}
+  #page-inventory .de-bag-pagination{bottom:calc(4px + env(safe-area-inset-bottom,0px));}
 }
 </style>
 </head>
@@ -769,7 +900,7 @@ body.de-home-map #page-map .drawing-controls{z-index:35}
 
       <div class="de-home-option-anchor" id="homeOptionsAnchor"></div>
       <div class="de-home-hub" id="homeHub" aria-label="Accueil illustré de Dead Earth">
-        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village">
+        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png?v=39" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village" decoding="async">
         <button class="de-home-hit de-home-hit-base" type="button" data-hub-tab="base" aria-label="Ouvrir la base"></button>
         <button class="de-home-hit de-home-hit-map" type="button" data-hub-tab="map" aria-label="Ouvrir la carte GPS"></button>
         <button class="de-home-hit de-home-hit-perso" type="button" data-hub-tab="survivor" aria-label="Ouvrir la fiche du personnage"></button>
@@ -882,12 +1013,40 @@ body.de-home-map #page-map .drawing-controls{z-index:35}
 </div></div></details><p class="help-text base-privacy">⌂ Refuge virtuel privé. Les améliorations et équipements sont sauvegardés sur cet appareil.</p>
 </section>
 
-    <section id="page-inventory" class="page scroll-page" aria-label="Inventaire">
-      <h1>▦ INVENTAIRE</h1><div class="pixel-frame page-panel"><div class="metric-row"><span>CHARGE DU SAC</span><strong id="capacityText">0/30 KG</strong></div><div class="pixel-track dark"><i id="capacityBar" class="gold"></i></div>
-      <div class="bag-catalog"><div class="bag-mode-buttons"><button id="bagOwned" class="pixel-button selected" type="button">🎒 POSSÉDÉS</button><button id="bagCatalogue" class="pixel-button" type="button">📖 CATALOGUE</button></div>
-      <div class="bag-filter-row"><label class="sr-only" for="bagCategory">Catégorie d’objets</label><select id="bagCategory"><option value="all">Toutes catégories</option><option value="nourriture">🥫 Nourriture et eau</option><option value="soins">🩹 Santé et soins</option><option value="materiaux">🪵 Matériaux</option><option value="outils">🔧 Outils</option><option value="electricite">🔋 Électricité</option><option value="equipements">🎒 Survie</option></select><label class="sr-only" for="bagRarity">Rareté des objets</label><select id="bagRarity"><option value="all">Toutes raretés</option><option value="commun">Commun</option><option value="peu commun">Peu commun</option><option value="rare">Rare</option><option value="legendaire">Légendaire</option></select><label class="sr-only" for="bagSearch">Rechercher un objet</label><input id="bagSearch" type="search" placeholder="🔍 Rechercher un objet…" autocomplete="off" spellcheck="false" maxlength="50"></div>
-      <p id="bagCount" class="bag-count" aria-live="polite"></p></div><div id="inventoryGrid" class="inventory-grid"></div></div>
-      <div class="pixel-frame page-panel"><div class="pixel-heading">ATELIER DE FABRICATION</div><div id="craftList" class="item-list"></div></div>
+    <section id="page-inventory" class="page scroll-page" aria-label="Sac de survie">
+      <!-- V4.0 : l'image existante Fond sac .PNG sert de scène, les actions sont sur ses objets. -->
+      <div class="de-bag-scene" id="bagScene" aria-label="Tapis de survie et objets en possession">
+        <img class="de-bag-backdrop" src="./image%20jeux/Fond%20sac%20.PNG" alt="Sac de survie posé sur une bâche dans la forêt" draggable="false">
+        <div id="inventoryGrid" class="de-bag-scattered-items" aria-label="Objets disposés sur la bâche"></div>
+      </div>
+      <button id="bagReturn" class="de-bag-back" type="button" aria-label="Retourner à la carte d'accueil">← CARTE</button>
+      <div class="de-bag-capacity" aria-label="Poids de l'inventaire">
+        <div><span>🎒 SAC</span><strong id="capacityText">0/30 KG</strong></div>
+        <div class="de-bag-capacity-track"><i id="capacityBar" class="gold"></i></div>
+      </div>
+      <div class="de-bag-bottom-buttons" role="group" aria-label="Actions du sac">
+        <button type="button" class="de-bag-hotspot de-bag-equipment" id="bagEquipmentTrigger" aria-label="Voir les équipements à porter"><span>ÉQUIPEMENT<br>À PORTER</span></button>
+        <button id="bagOwned" class="de-bag-hotspot de-bag-owned selected" type="button" aria-pressed="true">POSSÉDÉS</button>
+        <button id="bagCatalogue" class="de-bag-hotspot de-bag-catalogue" type="button" aria-pressed="false">CATALOGUE</button>
+        <button id="bagCraftTrigger" class="de-bag-hotspot de-bag-craft" type="button" aria-label="Ouvrir l'atelier de fabrication sur la corde"><span>ATELIER<br>FABRICATION</span></button>
+      </div>
+      <div class="de-bag-pagination" aria-label="Navigation entre les objets">
+        <button id="bagPrev" type="button" aria-label="Objets précédents">‹</button>
+        <span id="bagPageText" aria-live="polite">1 / 1</span>
+        <button id="bagNext" type="button" aria-label="Objets suivants">›</button>
+      </div>
+      <p id="bagCount" class="de-bag-count sr-only" aria-live="polite"></p>
+      <div class="de-bag-panel" id="bagActionPanel" hidden role="dialog" aria-modal="false" aria-labelledby="bagPanelTitle">
+        <div class="de-bag-panel-header"><h2 id="bagPanelTitle">ATELIER DE FABRICATION</h2><button type="button" id="bagPanelClose" aria-label="Fermer le panneau">✕</button></div>
+        <div id="bagCraftContent"><p class="de-bag-panel-intro">Fabrique des objets avec les matériaux récupérés pendant tes fouilles.</p><div id="craftList" class="item-list"></div></div>
+        <div id="bagEquipmentContent" hidden>
+          <p class="de-bag-panel-intro">Ton équipement actuellement porté. Touche une case pour la changer.</p>
+          <div class="de-bag-loadout" id="bagLoadout"></div>
+          <button type="button" id="bagEquipToPerso" class="pixel-button full">OUVRIR LA PAGE PERSO</button>
+          <div class="pixel-heading gear-craft-card">FABRIQUER DES ÉQUIPEMENTS</div>
+          <div class="item-list" id="gearCraftList"></div>
+        </div>
+      </div>
     </section>
 
     <section id="page-missions" class="page scroll-page" aria-label="Quêtes">
@@ -3441,7 +3600,34 @@ const DEAD_EARTH_ICONS = Object.freeze({
     modal({tag:'RAPPORT DE DÉFENSE',title:success?'REFUGE DÉFENDU':'BARRICADES ROMPUES',text:`${horde} infectés ont attaqué ton refuge virtuel. Résistance restante : ${game.fort}/${maxFort()}${isConsumerPowered('defense')?' · défenses électriques actives':''}. Test lancé uniquement sur demande.`,actions:[{name:'CONTINUER',fn:closeModal}]});
   }
   // ——— V3.0 : catalogue, fouilles, objets actifs, rangement et démontage ———
-  let bagCatalogue=false,bagCategory='all',bagRarity='all',bagQuery='';
+  let bagCatalogue=false,bagCategory='all',bagRarity='all',bagQuery='',bagPage=0;
+  const BAG_PAGE_SIZE=15;
+  const BAG_SCATTER_POINTS=[
+    [47,35,-9],[66,36,10],[79,40,-7],[32,45,14],[54,46,-12],
+    [77,50,8],[43,55,-5],[64,58,13],[80,62,-15],[34,66,5],
+    [56,68,-9],[76,71,12],[39,77,-10],[61,79,5],[79,83,-8]
+  ];
+  let bagPanelOpen='';
+  function fitBagScene(){
+    const page=$('page-inventory'),scene=$('bagScene');
+    if(!page||!scene||!page.clientWidth||!page.clientHeight)return;
+    const ratio=864/1536;
+    const imageHeight=Math.max(page.clientHeight,page.clientWidth/ratio);
+    scene.style.width=`${imageHeight*ratio}px`;
+    scene.style.height=`${imageHeight}px`;
+  }
+  function openBagPanel(kind){
+    const panel=$('bagActionPanel');if(!panel)return;
+    bagPanelOpen=kind;
+    panel.hidden=false;
+    $('bagPanelTitle').textContent=kind==='craft'?'⚒ ATELIER DE FABRICATION':'🎒 ÉQUIPEMENT À PORTER';
+    $('bagCraftContent').hidden=kind!=='craft';
+    $('bagEquipmentContent').hidden=kind!=='equipment';
+    panel.scrollTop=0;
+    $('bagPanelClose').focus({preventScroll:true});
+  }
+  function closeBagPanel(){const p=$('bagActionPanel');if(p)p.hidden=true;bagPanelOpen='';}
+  
   const normalizeSearch=str=>String(str||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   const itemCondition=id=>clamp(Number(game.itemCondition?.[id]??100),0,100);
   const durableToolReady=id=>quantity(id)>0&&itemCondition(id)>0;
@@ -3681,32 +3867,49 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function renderInventory(){
     $('capacityText').textContent=`${inventoryWeight().toFixed(1)} / ${bagCapacity()} KG`;
     $('capacityBar').style.width=`${Math.min(100,inventoryWeight()/bagCapacity()*100)}%`;
-    const allItems=Object.entries(ITEMS).filter(([id,item])=>(bagCatalogue||quantity(id)>0)&&
-      (bagCategory==='all'||item.category===bagCategory)&&
-      (bagRarity==='all'||item.rarity===bagRarity)&&
-      (!bagQuery||normalizeSearch(item.label+' '+item.desc).includes(normalizeSearch(bagQuery))))
+    const allItems=Object.entries(ITEMS).filter(([id,item])=>(bagCatalogue||quantity(id)>0))
       .sort(([idA,a],[idB,b])=>{
         if(!bagCatalogue&&quantity(idA)!==quantity(idB))return quantity(idB)-quantity(idA);
         return a.label.localeCompare(b.label,'fr');
       });
-    $('bagCount').textContent=allItems.length+' type(s) '+(bagCatalogue?'au catalogue':'dans le sac')+' · '+EXTRA_ITEM_LIST.length+' nouveaux objets à découvrir';
-    $('bagOwned').classList.toggle('selected',!bagCatalogue);$('bagCatalogue').classList.toggle('selected',bagCatalogue);
-    $('inventoryGrid').innerHTML=allItems.length?allItems.map(([id,item])=>`<button type="button" class="item-card ${quantity(id)===0?'empty':''} rarity-${item.rarity==='peu commun'?'uncommon':item.rarity}" data-item-id="${safe(id)}" aria-label="Afficher ${safe(item.label)}">
-      <div class="item-symbol"><span class="item-emoji" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span></div><b>${safe(item.label)}</b><span class="bag-rarity">${safe(RARITY_LABELS[item.rarity])}</span><small>× ${quantity(id)} · ${item.weight} kg</small>${game.inventoryGear?.[id]?'<span class="bag-equipped" aria-label="Équipé">✓</span>':''}</button>`).join(''):'<div class="bag-empty">Aucun objet dans ce filtre. Regarde le catalogue ou change de catégorie.</div>';
+    const pages=Math.max(1,Math.ceil(allItems.length/BAG_PAGE_SIZE));
+    bagPage=clamp(bagPage,0,pages-1);
+    const visible=allItems.slice(bagPage*BAG_PAGE_SIZE,(bagPage+1)*BAG_PAGE_SIZE);
+    $('bagCount').textContent=allItems.length+' type(s) '+(bagCatalogue?'au catalogue':'dans le sac');
+    $('bagPageText').textContent=`${bagPage+1} / ${pages}`;
+    $('bagPrev').disabled=bagPage===0;
+    $('bagNext').disabled=bagPage>=pages-1;
+    $('bagOwned').classList.toggle('selected',!bagCatalogue);
+    $('bagCatalogue').classList.toggle('selected',bagCatalogue);
+    $('bagOwned').setAttribute('aria-pressed',String(!bagCatalogue));
+    $('bagCatalogue').setAttribute('aria-pressed',String(bagCatalogue));
+    $('inventoryGrid').innerHTML=visible.length?visible.map(([id,item],i)=>{
+      const [x,y,angle]=BAG_SCATTER_POINTS[i];
+      const owned=quantity(id);
+      return `<button type="button" class="de-bag-loot ${owned===0?'unowned':''}" data-item-id="${safe(id)}" style="left:${x}%;top:${y}%;--scatter-angle:${angle}deg" aria-label="${safe(item.label)} : ${owned} dans le sac. Voir la fiche.">
+        <span class="de-bag-loot-icon" aria-hidden="true">${DEAD_EARTH_ICONS[id] || item.icon || '📦'}</span><span class="de-bag-loot-qty">×${owned}</span>
+        <span class="de-bag-loot-label">${safe(item.label)}</span></button>`;
+    }).join(''):'<div class="de-bag-empty">Ton sac est vide. Explore la carte pour récupérer des ressources !</div>';
     $('inventoryGrid').querySelectorAll('[data-item-id]').forEach(el=>el.addEventListener('click',()=>showItemDetail(el.dataset.itemId)));
+
     $('craftList').innerHTML=RECIPES.map(r=>`<div class="upgrade-card"><div><strong>${safe(r.name)}</strong><p>${safe(r.desc)}</p><p>${safe(costText(r.cost))}</p></div><button class="btn outlined" data-craft="${r.id}" ${(!r.requiresWorkshop||isConsumerPowered('workbench'))&&canPay(r.cost)&&inventoryWeight()-Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)+Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0)<=bagCapacity()?'':'disabled'}>FABRIQUER</button></div>`).join('');
-    $('craftList').insertAdjacentHTML('beforeend',`<div class="pixel-heading gear-craft-card">◈ ÉQUIPEMENT À PORTER</div>`+GEAR_CRAFTS.map(g=>`<div class="upgrade-card gear-craft-card"><div><strong>${g.icon} ${safe(g.name)}</strong><p>${safe(g.desc)}</p><p class="gear-craft-cost">${safe(costText(g.cost))}</p></div><button type="button" class="pixel-button" data-craft-gear="${g.id}" ${game.craftedGear[g.id]||!canPay(g.cost)?'disabled':''}>${game.craftedGear[g.id]?'DÉJÀ FABRIQUÉ':'FABRIQUER'}</button></div>`).join(''));
-    $('craftList').querySelectorAll('[data-craft-gear]').forEach(el=>el.addEventListener('click',()=>craftEquipment(el.dataset.craftGear)));
+    $('gearCraftList').innerHTML=GEAR_CRAFTS.map(g=>`<div class="upgrade-card gear-craft-card"><div><strong>${g.icon} ${safe(g.name)}</strong><p>${safe(g.desc)}</p><p class="gear-craft-cost">${safe(costText(g.cost))}</p></div><button type="button" class="pixel-button" data-craft-gear="${g.id}" ${game.craftedGear[g.id]||!canPay(g.cost)?'disabled':''}>${game.craftedGear[g.id]?'DÉJÀ FABRIQUÉ':'FABRIQUER'}</button></div>`).join('');
+    $('gearCraftList').querySelectorAll('[data-craft-gear]').forEach(el=>el.addEventListener('click',()=>craftEquipment(el.dataset.craftGear)));
+    $('bagLoadout').innerHTML=['primary','bag','secondary','armor','flashlight'].map(slot=>{
+      const gear=gearDetails(slot),label=LOADOUT_LABELS[slot];
+      return `<button type="button" class="de-bag-loadout-item" data-bag-slot="${slot}" aria-label="Modifier ${safe(label)}"><span class="de-bag-loadout-icon">${gear?.icon||{primary:'⚔️',bag:'🎒',secondary:'🎯',armor:'🛡️',flashlight:'🔦'}[slot]}</span><strong>${safe(label)}</strong><small>${safe(gear?.label||'VIDE')}</small></button>`;
+    }).join('');
+    $('bagLoadout').querySelectorAll('[data-bag-slot]').forEach(el=>el.addEventListener('click',()=>openEquipment(el.dataset.bagSlot)));
     $('craftList').querySelectorAll('[data-craft]').forEach(el=>el.addEventListener('click',()=>{
       const r=RECIPES.find(r=>r.id===el.dataset.craft);if(!r||!canPay(r.cost))return;
       if(r.requiresWorkshop&&!isConsumerPowered('workbench'))return toast('Munitions : atelier électrique indispensable.');
-      // Poids final vérifié avant de consommer les ingrédients.
       const gained=Object.entries(r.gain).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0);
       const spent=Object.entries(r.cost).reduce((a,[id,n])=>a+ITEMS[id].weight*n,0);
       if(inventoryWeight()-spent+gained>bagCapacity())return toast('Le sac est trop lourd.');
       pay(r.cost);for(const [id,num] of Object.entries(r.gain))game.inventory[id]+=num;
       xpGain(10);commit(`${r.name} fabriqué !`);
     }));
+    if(currentTab==='inventory')requestAnimationFrame(fitBagScene);
   }
   function renderMissions(){
     $('missionList').innerHTML=missions.map(m=>{
@@ -3831,11 +4034,20 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('detectionToggle').addEventListener('click',toggleDetectionMic);
     $('flashlightToggle').addEventListener('click',toggleFlashlight);
     $('micSensitivity').addEventListener('input',event=>setDetectionSensitivity(event.target.value));
-    $('bagOwned').addEventListener('click',()=>{bagCatalogue=false;renderInventory()});
-    $('bagCatalogue').addEventListener('click',()=>{bagCatalogue=true;renderInventory()});
-    $('bagCategory').addEventListener('change',ev=>{bagCategory=ev.target.value;renderInventory()});
-    $('bagRarity').addEventListener('change',ev=>{bagRarity=ev.target.value;renderInventory()});
-    $('bagSearch').addEventListener('input',ev=>{bagQuery=ev.target.value.trim();renderInventory()});
+    $('bagOwned').addEventListener('click',()=>{bagCatalogue=false;bagPage=0;renderInventory()});
+    $('bagCatalogue').addEventListener('click',()=>{bagCatalogue=true;bagPage=0;renderInventory()});
+    $('bagPrev').addEventListener('click',()=>{bagPage=Math.max(0,bagPage-1);renderInventory()});
+    $('bagNext').addEventListener('click',()=>{bagPage++;renderInventory()});
+    $('bagCraftTrigger').addEventListener('click',()=>openBagPanel('craft'));
+    $('bagEquipmentTrigger').addEventListener('click',()=>openBagPanel('equipment'));
+    $('bagPanelClose').addEventListener('click',closeBagPanel);
+    $('bagReturn').addEventListener('click',()=>{closeBagPanel();switchTab('map')});
+    $('bagEquipToPerso').addEventListener('click',()=>{closeBagPanel();switchTab('survivor')});
+    window.addEventListener('resize',()=>{if(currentTab==='inventory')fitBagScene()});
+    window.addEventListener('de:tab',e=>{
+      if(e.detail.tab!=='inventory')closeBagPanel();
+      else requestAnimationFrame(fitBagScene);
+    });
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));
     $('healBtn').addEventListener('click',()=>useItem('bandage','hp',30,'Bandage utilisé. +30 santé.'));
@@ -3975,9 +4187,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
   function syncHomeState(){
     const current=document.querySelector('.nav-item.active')?.dataset.tab || 'map';
     document.body.classList.toggle('de-home-map', current==='map');
+    document.body.classList.toggle('de-bag-view', current==='inventory');
+    $('page-inventory')?.classList.toggle('de-bag-active',current==='inventory');
     const panel=$('mapToolsPanel');
     if(panel) homeOptionsBtn.setAttribute('aria-expanded', String(!panel.hidden));
   }
+
 
   moveHomeControls();
   syncHomeState();
@@ -3986,6 +4201,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     btn.addEventListener('click',()=>{
       document.querySelector(`.nav-item[data-tab="${btn.dataset.hubTab}"]`)?.click();
       syncHomeState();
+      if(btn.dataset.hubTab==='inventory')requestAnimationFrame(()=>{const scene=$('bagScene'),page=$('page-inventory');if(scene&&page&&page.clientHeight){const h=Math.max(page.clientHeight,page.clientWidth/(864/1536));scene.style.width=(h*(864/1536))+'px';scene.style.height=h+'px';}});
     });
   });
   $('homeLootTrigger')?.addEventListener('click',()=>$('openLoot')?.click());
