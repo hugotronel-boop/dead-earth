@@ -812,102 +812,6 @@ body.de-bag-view .topbar,body.de-bag-view .mobile-nav{display:none!important}
   #page-inventory .de-bag-pagination{bottom:calc(4px + env(safe-area-inset-bottom,0px));}
 }
 </style>
-
-<style id="dead-earth-v43-accueil-fond-et-zones">
-/* L'accueil affiche uniquement l'image Fond carte.PNG : plus d'illustrations
-   accolées au-dessus. Les objets sont désormais des commandes CSS/texte. */
-body.de-home-map:not(.de-map-explore) #page-map::before {
-  content:"";
-  position:absolute;inset:0;z-index:23;
-  background:
-    linear-gradient(180deg,rgba(8,13,17,.24),rgba(8,13,17,.12) 45%,rgba(8,13,17,.38)),
-    var(--de-bg-carte) center center / cover no-repeat;
-  pointer-events:auto;
-}
-body.de-home-map:not(.de-map-explore) #page-map .map-wrap {
-  pointer-events:none;
-}
-body.de-home-map:not(.de-map-explore) #page-map .detection-hud,
-body.de-home-map:not(.de-map-explore) #page-map .map-attribution,
-body.de-home-map:not(.de-map-explore) #page-map #nightClock {
-  display:none!important;
-}
-body.de-home-map #page-map .de-home-hub {
-  position:absolute!important;inset:0!important;left:0!important;top:0!important;
-  bottom:0!important;right:0!important;
-  transform:none!important;width:100%!important;height:100%!important;
-  max-width:none!important;overflow:visible!important;
-  z-index:26;pointer-events:none;
-}
-/* Pas de recouvrement entre le personnage (en haut) et le sac (en bas). */
-body.de-home-map .de-home-hit {
-  min-width:0;min-height:54px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  padding:7px 3px!important;
-  color:#f5e5bc!important;
-  background:linear-gradient(155deg,rgba(34,48,48,.93),rgba(16,26,30,.92))!important;
-  border:2px solid #b0a57b!important;
-  border-radius:9px!important;
-  box-shadow:0 4px 0 #0b1116, 0 3px 16px rgba(0,0,0,.22)!important;
-  font:700 clamp(9px,2.45vw,12px)/1.15 'Courier New',monospace!important;
-  letter-spacing:.3px;white-space:nowrap;
-  user-select:none;-webkit-user-select:none;
-}
-body.de-home-map .de-home-hit .de-home-icon {
-  display:block;font:clamp(23px,7vw,35px)/1 system-ui,sans-serif!important;
-  filter:drop-shadow(0 2px 1px #111);
-}
-body.de-home-map .de-home-hit:active {filter:brightness(1.2);transform:translateY(2px)!important}
-body.de-home-map .de-home-hit-base {left:8%!important;top:31%!important;width:25%!important;height:10%!important}
-body.de-home-map .de-home-hit-map {left:6%!important;top:51%!important;width:26%!important;height:10%!important}
-body.de-home-map .de-home-hit-perso {left:40%!important;top:32%!important;width:24%!important;height:10%!important}
-body.de-home-map .de-home-hit-bag {left:42%!important;top:64%!important;width:25%!important;height:10%!important}
-body.de-home-map .de-home-hit-quests {left:71%!important;top:50%!important;width:26%!important;height:10%!important}
-body.de-home-map .de-home-hit-fouille {left:12%!important;top:74%!important;width:29%!important;height:10%!important}
-body.de-home-map .de-home-village-anchor {
-  left:auto!important;right:4%!important;top:14%!important;
-  width:33%!important;height:auto!important;min-height:60px!important;
-  pointer-events:auto!important;z-index:31!important;
-  background:linear-gradient(130deg,#5d4730ef,#2e2e28f2);
-  border:3px solid #bda577;border-radius:5px;
-  box-shadow:2px 5px 0 #121513a8;
-}
-body.de-home-map .de-home-village-anchor .village-toggle {
-  min-height:53px!important;color:#ffe8ab!important;
-  text-shadow:1px 1px #251d14!important;
-  font-size:clamp(10px,2.7vw,13px)!important;
-}
-body.de-home-map .de-home-village-anchor .village-toggle::before {
-  content:"🪧";display:block;font:18px/1 system-ui;margin-right:4px;
-}
-body.de-home-map .de-home-village-anchor .village-panel {right:0!important;z-index:150}
-body.de-home-map #homeOptionsAnchor {
-  right:max(8px,env(safe-area-inset-right))!important;
-  top:max(8px,env(safe-area-inset-top))!important;z-index:36!important
-}
-body.de-home-map #homeOptionsBtn {font-size:26px!important;min-width:48px!important;min-height:46px}
-body.de-home-map.de-map-explore #homeHub {display:none!important}
-body.de-home-map.de-map-explore #page-map .map-wrap {pointer-events:auto}
-#returnToHub {
-  display:none;position:absolute;z-index:36;
-  top:max(8px,env(safe-area-inset-top));left:max(9px,env(safe-area-inset-left));
-  min-height:46px;padding:8px 12px;
-  background:#25383be8;color:#ffe8bd;
-  border:3px solid #b9b08d;border-radius:6px;
-  font:700 12px 'Courier New',monospace;cursor:pointer;
-  touch-action:manipulation;
-}
-body.de-home-map.de-map-explore #returnToHub {display:block}
-#returnToHub[hidden]{display:none!important}
-@media(max-height:670px) {
-  body.de-home-map .de-home-hit {min-height:45px;padding:3px!important}
-  body.de-home-map .de-home-hit .de-home-icon {font-size:22px!important}
-  body.de-home-map .de-home-hit-base {top:28%!important}
-  body.de-home-map .de-home-hit-perso {top:28%!important}
-  body.de-home-map .de-home-hit-bag {top:62%!important}
-  body.de-home-map .de-home-hit-fouille {top:79%!important}
-}
-</style>
 </head>
 <body>
 <div id="app">
@@ -995,17 +899,16 @@ body.de-home-map.de-map-explore #returnToHub {display:block}
       <div class="status-toast" id="heroAction" aria-hidden="true"></div>
 
       <div class="de-home-option-anchor" id="homeOptionsAnchor"></div>
-      <!-- Accueil sur le seul décor Fond carte : objets/boutons sans images ajoutées. -->
-      <div class="de-home-hub" id="homeHub" aria-label="Accueil de Dead Earth">
-        <button class="de-home-hit de-home-hit-base" type="button" data-hub-tab="base" aria-label="Ouvrir la base sur la maquette"><span class="de-home-icon" aria-hidden="true">🏚️</span><span>BASE</span></button>
-        <button class="de-home-hit de-home-hit-map" type="button" data-hub-tab="map" aria-label="Ouvrir la carte GPS"><span class="de-home-icon" aria-hidden="true">🧭</span><span>CARTE</span></button>
-        <button class="de-home-hit de-home-hit-perso" type="button" data-hub-tab="survivor" aria-label="Ouvrir le personnage"><span class="de-home-icon" aria-hidden="true">🧍</span><span>PERSO</span></button>
-        <button class="de-home-hit de-home-hit-bag" type="button" data-hub-tab="inventory" aria-label="Ouvrir le sac"><span class="de-home-icon" aria-hidden="true">🎒</span><span>SAC</span></button>
-        <button class="de-home-hit de-home-hit-quests" type="button" data-hub-tab="missions" aria-label="Ouvrir les quêtes sur le téléphone"><span class="de-home-icon" aria-hidden="true">📱</span><span>QUÊTES</span></button>
-        <button class="de-home-hit de-home-hit-fouille" type="button" id="homeLootTrigger" aria-label="Fouiller avec la lampe torche"><span class="de-home-icon" aria-hidden="true">🔦</span><span>FOUILLE</span></button>
+      <div class="de-home-hub" id="homeHub" aria-label="Accueil illustré de Dead Earth">
+        <img class="de-home-hub-art" src="./image%20jeux/accueil-hub.png?v=39" alt="Survivant à sa table, avec maquette de base, GPS, lampe torche, téléphone et panneau de village" decoding="async">
+        <button class="de-home-hit de-home-hit-base" type="button" data-hub-tab="base" aria-label="Ouvrir la base"></button>
+        <button class="de-home-hit de-home-hit-map" type="button" data-hub-tab="map" aria-label="Ouvrir la carte GPS"></button>
+        <button class="de-home-hit de-home-hit-perso" type="button" data-hub-tab="survivor" aria-label="Ouvrir la fiche du personnage"></button>
+        <button class="de-home-hit de-home-hit-bag" type="button" data-hub-tab="inventory" aria-label="Ouvrir le sac"></button>
+        <button class="de-home-hit de-home-hit-quests" type="button" data-hub-tab="missions" aria-label="Ouvrir les quêtes"></button>
+        <button class="de-home-hit de-home-hit-fouille" type="button" id="homeLootTrigger" aria-label="Fouiller avec la lampe torche"></button>
         <div class="de-home-village-anchor" id="homeVillageAnchor" aria-label="Accès au village"></div>
       </div>
-      <button id="returnToHub" type="button" aria-label="Retour à l'accueil" hidden>← ACCUEIL</button>
 
     </section>
 
@@ -4294,29 +4197,13 @@ const DEAD_EARTH_ICONS = Object.freeze({
   moveHomeControls();
   syncHomeState();
 
-  function setExploreMode(enabled){
-    document.body.classList.toggle('de-map-explore',!!enabled);
-    const back=$('returnToHub');
-    if(back)back.hidden=!enabled;
-    if(enabled)requestAnimationFrame(()=>window.DEAD_EARTH_MAP?.invalidateSize());
-  }
   document.querySelectorAll('[data-hub-tab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      const tab=btn.dataset.hubTab;
-      if(tab==='map'){
-        setExploreMode(true);
-        return;
-      }
-      setExploreMode(false);
-      document.querySelector(`.nav-item[data-tab="${tab}"]`)?.click();
+      document.querySelector(`.nav-item[data-tab="${btn.dataset.hubTab}"]`)?.click();
       syncHomeState();
-      if(tab==='inventory')requestAnimationFrame(()=>{const scene=$('bagScene'),page=$('page-inventory');if(scene&&page&&page.clientHeight){const h=Math.max(page.clientHeight,page.clientWidth/(864/1536));scene.style.width=(h*(864/1536))+'px';scene.style.height=h+'px';}});
+      if(btn.dataset.hubTab==='inventory')requestAnimationFrame(()=>{const scene=$('bagScene'),page=$('page-inventory');if(scene&&page&&page.clientHeight){const h=Math.max(page.clientHeight,page.clientWidth/(864/1536));scene.style.width=(h*(864/1536))+'px';scene.style.height=h+'px';}});
     });
   });
-  $('returnToHub')?.addEventListener('click',()=>setExploreMode(false));
-  /* Poser son refuge demande un accès à la vraie carte. */
-  $('editSafeZone')?.addEventListener('click',()=>setExploreMode(true));
-  window.addEventListener('de:tab',ev=>{if(ev.detail.tab!=='map')setExploreMode(false)});
   $('homeLootTrigger')?.addEventListener('click',()=>$('openLoot')?.click());
   homeOptionsBtn.addEventListener('click',ev=>{
     ev.preventDefault();
