@@ -966,15 +966,15 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 
 <!-- DEAD EARTH / CORRECTION LISIBILITÉ DU PANNEAU REFUGE -->
 <style id="de-refuge-legibilite-v2">
-/* Cadre en bois conservé. Un cartouche sombre isole le texte des nervures. */
+/* Panneau en bois visible : aucun cartouche sombre, aucune bordure autour du texte. */
 #homeVillageAnchor .village-panel .de-village-wood-scroll {
-  background: linear-gradient(150deg, rgba(26,20,16,.88), rgba(35,26,20,.91)) !important;
-  border: 2px solid rgba(238,191,120,.88) !important;
-  border-radius: 6px !important;
-  box-shadow: inset 0 0 0 1px rgba(22,12,7,.75), 0 1px 10px rgba(17,9,5,.40) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   padding: 10px 9px 15px !important;
   margin: 0 !important;
-  scrollbar-color: #e6b77c #281a13 !important;
+  scrollbar-color: #e6b77c transparent !important;
   -webkit-overflow-scrolling: touch;
 }
 /* Typo claire, grasse et réellement lisible sur Safari iPhone. */
