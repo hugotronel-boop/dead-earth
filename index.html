@@ -1320,6 +1320,105 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 }
 </style>
 
+
+<!-- DEAD EARTH V4.8 - tickets bien dimensionnés, centrés et non rognés sur iPhone -->
+<style id="de-ticket-book-v48-responsive">
+/* Livre centré, tickets parfaitement dans les marges de ses pages. */
+#page-inventory .de-book-spread {
+  width: min(100%, 760px) !important;
+  margin: 6px auto 0 !important;
+  position: relative !important;
+  aspect-ratio: 1448/1086 !important;
+  background-position: center center !important;
+  background-size: contain !important;
+}
+#page-inventory .de-book-ticket {
+  width: 36% !important;
+  height: 17.2% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+#page-inventory .de-book-ticket img {
+  display: block !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  flex: 0 0 auto !important;
+  margin: auto !important;
+}
+#page-inventory .de-book-ticket .de-book-ticket-fallback {
+  border: 1px dashed #9c7753;
+  border-radius: 4px;
+}
+#page-inventory .de-book-lock,
+#page-inventory .de-book-found {
+  right: 4px !important;
+  top: 1px !important;
+  z-index: 2 !important;
+}
+/* Le ticket agrandi n'est jamais coupé par une hauteur trop faible.
+   La zone est centrée sur l'écran et l'image reste entière. */
+#page-inventory .de-book-viewer {
+  inset: 0 !important;
+  padding: max(18px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom)) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow-y: auto !important;
+}
+#page-inventory .de-book-viewer-panel {
+  width: min(100%, 630px) !important;
+  margin: auto !important;
+  min-width: 0 !important;
+  max-height: calc(100dvh - 54px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 5px 0 !important;
+  box-sizing: border-box !important;
+}
+#page-inventory .de-book-viewer-art {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 160px !important;
+  max-height: min(43dvh, 390px) !important;
+  aspect-ratio: 2.85 / 1 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+#page-inventory .de-book-viewer-art img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  margin: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  flex: 0 1 auto !important;
+}
+#page-inventory .de-book-viewer-art img[hidden] { display: none !important; }
+@media (max-width: 380px) {
+  #page-inventory .de-book-ticket { width: 36% !important; }
+  #page-inventory .de-book-viewer-panel { width: 100% !important; gap: 8px !important; }
+  #page-inventory .de-book-viewer-art { min-height: 120px !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -4355,7 +4454,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   // Noms de fichiers EXACTS (sensibles à la casse sur GitHub Pages) : Tr1.png...Tr18.png et Tv1.png...Tv18.png.
   let ticketBookSpread=0,bookTicketViewerId=null,bookTicketViewerFace='front';
   const BOOK_TICKETS_PER_SPREAD=8;
-  const BOOK_TICKET_Y=[19.8,35.9,52,68.1];
+  const BOOK_TICKET_Y=[15.0,32.6,50.2,67.8];
   const BOOK_TOTAL_SPREADS=Math.ceil(CRAFT_TICKETS.length/BOOK_TICKETS_PER_SPREAD);
   function ticketImageUrl(id,face='front'){
     const index=CRAFT_TICKETS.findIndex(ticket=>ticket.id===id);
@@ -4366,7 +4465,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const owned=hasCraftTicket(ticket.id);
     const right=indexWithinSpread>=4;
     const y=BOOK_TICKET_Y[indexWithinSpread%4];
-    const x=right?'54.5%':'10.2%';
+    const x=right?'54%':'10%';
     return `<button type="button" class="de-book-ticket ${owned?'is-found':'is-missing'}"
        style="left:${x};top:${y}%;" data-book-ticket="${ticket.id}"
        aria-label="Ticket ${ticketName(ticket)}. ${owned?'Trouvé, verso consultable':'Non découvert, verso verrouillé'}. Agrandir le recto.">
@@ -4375,12 +4474,74 @@ const DEAD_EARTH_ICONS = Object.freeze({
        <span class="${owned?'de-book-found':'de-book-lock'}" aria-hidden="true">${owned?'✓':'🔒'}</span>
      </button>`;
   }
+  // Recadre uniquement l'espace transparent autour des Tr1.png / Tv1.png.
+  // Les fichiers d'origine restent intacts. Les résultats sont mis en cache.
+  const trimmedTicketImages = new Map();
+  function displayTrimmedTicket(img){
+    const uri=img.getAttribute('src')||'';
+    if(!/\/(?:Tr|Tv)\d+\.png(?:\?.*)?$/i.test(uri))return;
+    if(trimmedTicketImages.has(uri)){
+      const ready=trimmedTicketImages.get(uri);
+      if(ready && img.isConnected)img.src=ready;
+      return;
+    }
+    const recadre=()=>{
+      if(!img.naturalWidth||!img.naturalHeight)return;
+      // Une empreinte réduite évite de parcourir les millions de pixels du PNG original.
+      try{
+        const sw=Math.max(1,Math.round(Math.min(440,img.naturalWidth)));
+        const sh=Math.max(1,Math.round(img.naturalHeight*sw/img.naturalWidth));
+        const low=document.createElement('canvas');low.width=sw;low.height=sh;
+        const cx=low.getContext('2d',{willReadFrequently:true});
+        if(!cx)return;
+        cx.drawImage(img,0,0,sw,sh);
+        const pixels=cx.getImageData(0,0,sw,sh).data;
+        let minX=sw,minY=sh,maxX=-1,maxY=-1;
+        for(let y=0;y<sh;y++){
+          for(let x=0;x<sw;x++){
+            // Ignore les traces presque transparentes dues à l'anticrénelage.
+            if(pixels[(y*sw+x)*4+3]<42)continue;
+            minX=Math.min(minX,x);minY=Math.min(minY,y);
+            maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+          }
+        }
+        if(maxX<minX||maxY<minY)return;
+        // Une petite marge préserve le bord irrégulier du ticket.
+        const margin=Math.max(1,Math.round(sw*.009));
+        minX=Math.max(0,minX-margin);maxX=Math.min(sw-1,maxX+margin);
+        minY=Math.max(0,minY-margin);maxY=Math.min(sh-1,maxY+margin);
+        if(minX===0 && minY===0 && maxX===sw-1 && maxY===sh-1)return;
+        const factor=img.naturalWidth/sw;
+        const sx=Math.max(0,Math.floor(minX*factor));
+        const sy=Math.max(0,Math.floor(minY*factor));
+        const cropW=Math.min(img.naturalWidth-sx,Math.ceil((maxX-minX+1)*factor));
+        const cropH=Math.min(img.naturalHeight-sy,Math.ceil((maxY-minY+1)*factor));
+        const outputScale=Math.min(1,1400/cropW);
+        const cropped=document.createElement('canvas');
+        cropped.width=Math.max(1,Math.round(cropW*outputScale));
+        cropped.height=Math.max(1,Math.round(cropH*outputScale));
+        const out=cropped.getContext('2d');if(!out)return;
+        out.drawImage(img,sx,sy,cropW,cropH,0,0,cropped.width,cropped.height);
+        // Non bloquant : l'iPhone peut continuer à interagir pendant l'encodage.
+        cropped.toBlob(blob=>{
+          if(!blob)return;
+          const preview=URL.createObjectURL(blob);
+          trimmedTicketImages.set(uri,preview);
+          if(img.isConnected && img.getAttribute('data-ticket-original')===uri)img.src=preview;
+        },'image/png');
+      }catch(err){/* Le fichier d'origine reste visible si le canvas échoue. */}
+    };
+    img.setAttribute('data-ticket-original',uri);
+    if(img.complete&&img.naturalWidth)recadre();
+    else img.addEventListener('load',recadre,{once:true});
+  }
   // Les images Tr/Tv peuvent être ajoutées progressivement au dépôt : affichage de secours si absentes.
   function bindBookImageFallbacks(holder){
     holder.querySelectorAll('.de-book-ticket img,.de-book-viewer-art img').forEach(img=>{
       const failed=()=>{img.hidden=true;const placeholder=img.nextElementSibling;if(placeholder)placeholder.hidden=false;};
       img.addEventListener('error',failed,{once:true});
       if(img.complete&&img.naturalWidth===0)failed();
+      else displayTrimmedTicket(img);
     });
   }
   function openBookTicket(id){
@@ -4408,7 +4569,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     // La description des matériaux n'est montrée qu'APRÈS découverte du ticket.
     const ingredients=owned&&bookTicketViewerFace==='back'&&def?.cost?`<div class="de-book-viewer-cost">⚒ MATÉRIAUX : ${safe(costText(def.cost))}</div>`:'';
     const fallback=bookTicketViewerFace==='back'
-      ?`Verso pas encore ajouté (Tv${CRAFT_TICKETS.indexOf(ticket)+1}.PNG). ${owned?'Recette débloquée.':''}`
+      ?`Verso pas encore ajouté (Tv${CRAFT_TICKETS.indexOf(ticket)+1}.png). ${owned?'Recette débloquée.':''}`
       :`Ticket recto n°${CRAFT_TICKETS.indexOf(ticket)+1} à ajouter (Tr${CRAFT_TICKETS.indexOf(ticket)+1}.png)`;
     return `<div id="deBookViewer" class="de-book-viewer" role="dialog" aria-modal="true" aria-label="Ticket : ${safe(ticketName(ticket))}">
       <div class="de-book-viewer-panel">
