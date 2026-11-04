@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V5.4 Livre des tickets</title>
+  <title>DEAD EARTH — V5.6 Livre des tickets</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -1542,6 +1542,63 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 }
 </style>
 
+
+<!-- DEAD EARTH V5.6 : page Perso immersive, fiche d'identité interactive -->
+<style id="de-v56-survivor-identity">
+body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!important}
+#page-survivor.de-survivor-page{position:absolute!important;inset:0;overflow:hidden!important;padding:0!important;background:#352b25!important;overscroll-behavior:none}
+#gameViewport[data-art-page="survivor"]::before{background-image:none!important;background:#342922!important}
+#page-survivor .de-survivor-scene{position:absolute;left:50%;top:50%;width:100%;height:100%;transform:translate(-50%,-50%);overflow:hidden;pointer-events:none;user-select:none;-webkit-user-select:none;isolation:isolate}
+#page-survivor .de-survivor-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none;-webkit-user-select:none}
+#page-survivor .de-survivor-return{pointer-events:auto;position:absolute;z-index:13;right:10%;top:1.4%;min-height:38px;min-width:75px;border:2px solid #a69d80;border-radius:4px;background:#1a282ae8;color:#fff0d0;font:900 11px/1.2 'Courier New',monospace;box-shadow:0 3px 9px #0007;text-shadow:1px 2px #000;cursor:pointer}
+#page-survivor .de-survivor-topinfo{position:absolute;left:10.5%;top:5.6%;width:79%;height:20%;color:white;z-index:4;pointer-events:none;text-shadow:1px 2px 3px #000,0 0 5px #000,2px 2px 0 #000;}
+#page-survivor .de-survivor-title{display:flex;justify-content:space-between;align-items:center;font:900 clamp(10px,2.55vw,14px)/1.2 var(--pixel,monospace);color:#fff9e8;letter-spacing:.3px;margin-bottom:10px;padding-right:0;}
+#page-survivor #deSurvHp{color:#ffcebb;font:900 clamp(10px,2.4vw,14px)/1.3 'Courier New',monospace;}
+#page-survivor .de-survivor-stat-grid{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row;gap:2px 13px;align-content:start;color:#fff;padding:0;line-height:1.2;}
+#page-survivor .de-survivor-stat-grid .info-line{display:flex;align-items:center;justify-content:space-between;gap:3px;min-width:0;margin:1px 0;padding:0;border:0;background:none;font:900 clamp(9px,2.2vw,12px)/1.4 'Courier New',monospace;color:#fff;}
+#page-survivor .de-survivor-stat-grid .info-line strong{font:900 clamp(9px,2.2vw,12px)/1.4 'Courier New',monospace;color:#fff0c5;text-align:right;min-width:0;}
+#page-survivor .de-survivor-stat-grid .info-line span{min-width:0;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
+#page-survivor .de-survivor-details{position:absolute;z-index:17;pointer-events:auto;top:24.5%;right:10%;max-width:61%;color:#fff6df;}
+#page-survivor .de-survivor-details>summary{cursor:pointer;list-style:none;text-align:center;color:#fff8dd;background:#202b2bdf;border:1px solid #b2a88a;padding:7px;border-radius:4px;font:900 10px/1.2 'Courier New',monospace;box-shadow:1px 2px 5px #0008;}
+#page-survivor .de-survivor-details>summary::-webkit-details-marker{display:none;}
+#page-survivor .de-survivor-details-body{max-height:38vh;overflow-y:auto;margin-top:5px;padding:11px;background:#1a2729f5;border:2px solid #baad89;border-radius:5px;color:#fff3d5;font:11px/1.45 'Courier New',monospace;box-shadow:0 5px 16px #000a;}
+#page-survivor .de-survivor-details-body .help-text{color:#e7dfcb;font:10px/1.45 monospace;}
+#page-survivor .de-survivor-details-body .rest-cycle-panel{background:#253533;box-shadow:none;margin:8px 0;border:1px solid #aa9876;padding:7px;}
+#page-survivor .de-survivor-details-body .rest-cycle-panel strong{font-size:9px;}
+#page-survivor .de-survivor-details-body .rest-cycle-panel span,#page-survivor .de-survivor-details-body .rest-cycle-panel small{font-size:10px;}
+/* Nom inscrit au-dessus de la ligne noire de la carte. */
+#page-survivor .de-survivor-name{pointer-events:auto;position:absolute;z-index:7;top:50.8%;left:36.5%;width:47.6%;height:5.3%;display:flex;align-items:center;justify-content:flex-start;gap:3px;min-width:0;padding:0 3px 3px 0;color:#241409;text-shadow:0 1px 0 #edc69d;}
+#page-survivor #survivorDisplayName{font:900 clamp(10px,2.55vw,15px)/1.2 'Courier New',monospace;color:#2b190c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 29px);text-shadow:0 1px 0 #ecd1a6;}
+#page-survivor #editSurvivorName.survivor-edit-pencil{position:static;min-width:27px;min-height:27px;height:27px;width:27px;flex:0 0 27px;padding:2px 3px;border:1px solid #715133;border-radius:3px;background:#dbc3a0cf;color:#3c2917;font:900 18px/1 monospace;box-shadow:none;text-shadow:none;}
+#page-survivor .de-survivor-name-form{pointer-events:auto;position:absolute;z-index:21;left:28%;top:44%;width:60%;margin:0!important;padding:11px;border:2px solid #af8c5e;border-radius:7px;background:#17282bef;color:white;box-shadow:0 4px 18px #000a;}
+#page-survivor .de-survivor-name-form .survivor-name-label{color:#fff0c7;}
+#page-survivor .de-survivor-name-form .survivor-name-controls{flex-wrap:nowrap;}
+#page-survivor .de-survivor-name-form .survivor-name-controls input{width:100%;flex:1 1 auto;min-width:0;}
+#page-survivor .de-survivor-name-form .survivor-name-controls button{min-width:29px;flex:0 0 29px;max-width:35px;}
+/* Quatre carrés et un rectangle, exactement sur la carte d'identité. */
+#page-survivor .de-survivor-gear{position:absolute;z-index:7;inset:0!important;width:100%!important;height:100%!important;display:block!important;pointer-events:none;}
+#page-survivor .de-survivor-gear .equip-slot{position:absolute;z-index:8;min-width:0!important;min-height:0!important;width:13.8%;height:6.8%;padding:2px 0!important;gap:0!important;display:flex!important;flex-direction:column;justify-content:center;align-items:center;pointer-events:auto;color:#3a2211;border:0!important;border-radius:6px;background:transparent!important;box-shadow:none!important;text-align:center;transition:none;touch-action:manipulation;overflow:hidden;}
+#page-survivor .de-survivor-gear .equip-slot:nth-child(1){left:37.3%;top:58.1%;}
+#page-survivor .de-survivor-gear .equip-slot:nth-child(2){left:52.3%;top:58.1%;}
+#page-survivor .de-survivor-gear .equip-slot:nth-child(3){left:37.3%;top:65.7%;}
+#page-survivor .de-survivor-gear .equip-slot:nth-child(4){left:52.3%;top:65.7%;}
+#page-survivor .de-survivor-gear .equip-slot:nth-child(5){left:68.7%;top:57.7%;width:13.5%;height:14.3%;grid-column:auto;}
+#page-survivor .de-survivor-gear .equip-slot .equip-symbol{font:clamp(16px,4.5vw,25px)/1.1 system-ui;color:#f5dfa6;text-shadow:0 2px 2px #140d06,1px 1px #140d06;min-height:0;}
+#page-survivor .de-survivor-gear .equip-slot .equip-equipped{font:900 clamp(7px,1.62vw,10px)/1.1 'Courier New',monospace;color:#fff3dc;text-shadow:1px 2px 2px #1d1205,0 0 3px #000;white-space:normal;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+#page-survivor .de-survivor-gear .equip-slot small{font:900 clamp(6px,1.45vw,8px)/1 'Courier New',monospace;color:#f8e1ba;text-shadow:1px 1px 2px #170c06;}
+#page-survivor .de-survivor-gear .equip-slot:focus-visible,#page-survivor .de-survivor-action:focus-visible{outline:2px solid #ffe49e!important;outline-offset:1px;}
+#page-survivor .de-survivor-gear .equip-slot:active{background:rgba(112,81,40,.2)!important;filter:brightness(1.2);}
+/* Les objets du décor deviennent des commandes, sans masquer l'illustration. */
+#page-survivor .de-survivor-action{position:absolute;z-index:8;pointer-events:auto;cursor:pointer;min-width:0;min-height:38px;border:0;background:transparent!important;box-shadow:none;outline-offset:2px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+#page-survivor .de-survivor-action span{position:absolute;bottom:1px;left:0;right:0;display:block;color:#fff3d8;font:900 clamp(9px,2.1vw,12px)/1.25 'Courier New',monospace;text-shadow:0 2px 4px #000,0 0 6px #000,2px 2px #000;text-align:center;}
+#page-survivor .de-survivor-action:active{filter:brightness(1.35);}
+#page-survivor .de-survivor-action:disabled{opacity:.46;}
+#page-survivor .de-survivor-drink{left:52.5%;top:29.2%;width:24%;height:12.9%;}
+#page-survivor .de-survivor-eat{left:62.5%;top:39.2%;width:35%;height:8.6%;}
+#page-survivor .de-survivor-heal{left:26%;top:38.5%;width:25%;height:8.5%;}
+#page-survivor .de-survivor-rest{left:0;top:21.0%;width:30%;height:12.4%;}
+@media(prefers-reduced-motion:reduce){#page-survivor .de-survivor-action:active{filter:none}}
+</style>
 </head>
 <body>
 <div id="app">
@@ -1644,45 +1701,58 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 
     </section>
 
-    <section id="page-survivor" class="page scroll-page" aria-label="Survivant">
-      <h1>◈ SURVIVANT</h1>
-      <div class="pixel-frame character-card">
-        <div class="character-profile"><div class="character-portrait-column"><div class="character-image"><div class="survivor-avatar-symbol" role="img" aria-label="Survivant avec équipement"><span class="survivor-head-icon" aria-hidden="true">🥷</span><span class="survivor-pack-icon" aria-hidden="true">🎒</span></div></div>
-          <div class="equip-grid" id="equipGrid" aria-label="Équipement porté">
-            <button type="button" class="equip-slot" data-equip-slot="primary" aria-label="Choisir arme principale"><span class="equip-symbol">⚔</span><small>ARME</small></button>
-            <button type="button" class="equip-slot" data-equip-slot="bag" aria-label="Choisir sac à dos"><span class="equip-symbol">▣</span><small>SAC</small></button>
-            <button type="button" class="equip-slot" data-equip-slot="secondary" aria-label="Choisir arme secondaire"><span class="equip-symbol">⌁</span><small>TIR</small></button>
-            <button type="button" class="equip-slot" data-equip-slot="armor" aria-label="Choisir protection"><span class="equip-symbol">⛨</span><small>ARMURE</small></button>
-            <button type="button" class="equip-slot lamp-equip-slot" data-equip-slot="flashlight" aria-label="Choisir lampe torche"><span class="equip-symbol">🔦</span><small>LAMPE</small></button>
-          </div>
-        </div><div class="character-summary">
-          <div class="survivor-name-heading">
-            <b id="survivorDisplayName">SURVIVANT #001</b>
-            <button type="button" id="editSurvivorName" class="survivor-edit-pencil" title="Modifier le nom" aria-label="Modifier le nom du survivant" aria-controls="survivorNameForm" aria-expanded="false">✎</button>
-          </div>
-          <form id="survivorNameForm" class="survivor-name-inline" autocomplete="off" hidden>
-            <label class="survivor-name-label" for="survivorNameInput">Nouveau nom</label>
-            <div class="survivor-name-controls">
-              <input id="survivorNameInput" name="survivorName" type="text" maxlength="20" placeholder="Ton surnom" aria-describedby="survivorNameHint" spellcheck="false" autocomplete="off">
-              <button type="submit" class="pixel-button" aria-label="Enregistrer le nom">✓</button>
-              <button type="button" id="cancelSurvivorName" class="pixel-button" aria-label="Annuler la modification du nom">✕</button>
-            </div>
-            <p id="survivorNameHint" class="help-text" aria-live="polite">Entre 2 et 20 caractères.</p>
-          </form>
-          <span>STATUT : <strong id="survivorStatus">OPÉRATIONNEL</strong></span><div id="survivorStats"></div>
-        </div></div>
-        <div class="pixel-heading">◉ DISCRÉTION / MICROPHONE</div>
-        <div class="metric-row"><span>DISCRÉTION ACTUELLE</span><strong id="stealthValue">100%</strong></div><div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
-        <p class="help-text" id="micExplanation">Deux modes : sans micro, les zombies te détectent à 35 m ; avec le micro activé, ils peuvent entendre les bruits autour de toi jusqu’à environ 120 m selon la sensibilité. Le micro reste actif pendant la session visible, jamais en arrière-plan. Aucun audio n’est enregistré ni envoyé.</p>
-        <p class="help-text" id="lastMicReading">Micro coupé : détection automatique de proximité.</p>
-      </div>
-      <div class="pixel-frame page-panel"><div class="pixel-heading">ACTIONS DE SURVIE</div>
-        <div class="action-list"><button id="eatBtn" class="pixel-button">▣ MANGER UNE CONSERVE</button><button id="drinkBtn" class="pixel-button">◉ BOIRE DE L'EAU</button><button id="healBtn" class="pixel-button">✚ UTILISER UN BANDAGE</button><button id="restBtn" class="pixel-button">☾ SE REPOSER AU REFUGE</button></div>
-        <div id="restCyclePanel" class="rest-cycle-panel pixel-frame" role="status" aria-live="polite">
-          <strong id="restCycleTitle">☀ CYCLE JOUR / NUIT</strong>
-          <span id="restCycleDescription">Calcul du repos en cours…</span>
-          <small id="restCycleSource">Selon l'heure réelle du téléphone.</small>
+    <section id="page-survivor" class="page de-survivor-page" aria-label="Fiche du survivant">
+      <div id="deSurvivorScene" class="de-survivor-scene">
+        <img src="./image%20jeux/fiche-survivant.jpg" class="de-survivor-art" alt="Refuge en pixel art avec carte d'identité, bouteilles d'eau, conserves, pharmacie et lit" draggable="false">
+        <button id="deSurvivorBack" type="button" class="de-survivor-return" aria-label="Revenir à la carte">← CARTE</button>
+
+        <div class="de-survivor-topinfo" aria-label="Statistiques du survivant">
+          <div class="de-survivor-title">☣ SURVIVANT <span id="deSurvHp">100 PV</span></div>
+          <div id="survivorStats" class="de-survivor-stat-grid"></div>
         </div>
+
+        <details class="de-survivor-details">
+          <summary>◉ DÉTAILS</summary>
+          <div class="de-survivor-details-body">
+            <b>STATUT : <span id="survivorStatus">OPÉRATIONNEL</span></b>
+            <div>DISCRÉTION : <strong id="stealthValue">100%</strong></div>
+            <div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
+            <p id="micExplanation" class="help-text">Micro coupé : les zombies détectent la proximité. Active les réglages du micro dans les Options de la carte.</p>
+            <p id="lastMicReading" class="help-text">Micro coupé : détection automatique de proximité.</p>
+            <div id="restCyclePanel" class="rest-cycle-panel" role="status" aria-live="polite">
+              <strong id="restCycleTitle">☀ CYCLE JOUR / NUIT</strong>
+              <span id="restCycleDescription">Calcul du repos en cours…</span>
+              <small id="restCycleSource">Selon l'heure réelle du téléphone.</small>
+            </div>
+          </div>
+        </details>
+
+        <div class="de-survivor-name" aria-label="Nom du survivant">
+          <span id="survivorDisplayName">SURVIVANT #001</span>
+          <button type="button" id="editSurvivorName" class="survivor-edit-pencil" title="Modifier le nom" aria-label="Modifier le nom du survivant" aria-controls="survivorNameForm" aria-expanded="false">✎</button>
+        </div>
+        <form id="survivorNameForm" class="survivor-name-inline de-survivor-name-form" autocomplete="off" hidden>
+          <label class="survivor-name-label" for="survivorNameInput">Nouveau nom</label>
+          <div class="survivor-name-controls">
+            <input id="survivorNameInput" name="survivorName" type="text" maxlength="20" placeholder="Ton surnom" aria-describedby="survivorNameHint" spellcheck="false" autocomplete="off">
+            <button type="submit" class="pixel-button" aria-label="Enregistrer le nom">✓</button>
+            <button type="button" id="cancelSurvivorName" class="pixel-button" aria-label="Annuler la modification du nom">✕</button>
+          </div>
+          <p id="survivorNameHint" class="help-text" aria-live="polite">Entre 2 et 20 caractères.</p>
+        </form>
+
+        <div class="equip-grid de-survivor-gear" id="equipGrid" aria-label="Équipement sur la carte d'identité">
+          <button type="button" class="equip-slot" data-equip-slot="primary" aria-label="Choisir arme principale"><span class="equip-symbol">⚔</span></button>
+          <button type="button" class="equip-slot" data-equip-slot="bag" aria-label="Choisir sac à dos"><span class="equip-symbol">▣</span></button>
+          <button type="button" class="equip-slot" data-equip-slot="secondary" aria-label="Choisir arme secondaire"><span class="equip-symbol">⌁</span></button>
+          <button type="button" class="equip-slot" data-equip-slot="armor" aria-label="Choisir protection"><span class="equip-symbol">⛨</span></button>
+          <button type="button" class="equip-slot lamp-equip-slot" data-equip-slot="flashlight" aria-label="Choisir lampe torche"><span class="equip-symbol">🔦</span></button>
+        </div>
+
+        <button type="button" id="drinkBtn" class="de-survivor-action de-survivor-drink" aria-label="Boire une bouteille d'eau"><span>◉ BOIRE</span></button>
+        <button type="button" id="eatBtn" class="de-survivor-action de-survivor-eat" aria-label="Manger une conserve"><span>▣ MANGER</span></button>
+        <button type="button" id="healBtn" class="de-survivor-action de-survivor-heal" aria-label="Utiliser un bandage"><span>✚ SOINS</span></button>
+        <button type="button" id="restBtn" class="de-survivor-action de-survivor-rest" aria-label="Se reposer au refuge"><span>☾ REPOS</span></button>
       </div>
     </section>
 
@@ -3881,6 +3951,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   function renderSurvivor(){
     $('survivorDisplayName').textContent=game.survivorName||'SURVIVANT #001';
+    const hpBadge=$('deSurvHp');if(hpBadge)hpBadge.textContent=`${game.hp} PV`;
     renderEquipment();
     const nameInput=$('survivorNameInput');
     if(document.activeElement!==nameInput&&nameInput.value!==game.survivorName)nameInput.value=game.survivorName||'';
@@ -5191,6 +5262,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tab)));
     $('gpsMode').addEventListener('click',setGPS);
     $('equipGrid').addEventListener('click',ev=>{const slot=ev.target.closest('[data-equip-slot]')?.dataset.equipSlot;if(slot)openEquipment(slot)});
+    $('deSurvivorBack').addEventListener('click',()=>switchTab('map'));
     $('recenter').addEventListener('click',()=>{if(map)map.setView(game.safeZone && game.mode==='demo'?game.safeZone.center:center,15);else toast('Carte indisponible. La liste des lieux reste utilisable.')});
     $('editSafeZone').addEventListener('click',startDrawing);
     $('drawingDone').addEventListener('click',finishDrawing);
@@ -5387,6 +5459,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     document.body.classList.toggle('de-map-explore',current==='map' && mapExploring);
     document.body.classList.toggle('de-home-map', current==='map');
     document.body.classList.toggle('de-bag-view', current==='inventory');
+    document.body.classList.toggle('de-survivor-view', current==='survivor');
     $('page-inventory')?.classList.toggle('de-bag-active',current==='inventory');
     const panel=$('mapToolsPanel');
     if(panel) homeOptionsBtn.setAttribute('aria-expanded', String(!panel.hidden));
@@ -5428,6 +5501,23 @@ const DEAD_EARTH_ICONS = Object.freeze({
   });
   document.addEventListener('pointerup',()=>setTimeout(syncHomeState,0));
   window.addEventListener('de:tab',()=>setTimeout(()=>{moveHomeControls();syncHomeState();},0));
+  function fitSurvivorScene(){
+    const page=$('page-survivor'),scene=$('deSurvivorScene');
+    if(!page||!scene||!page.clientHeight||!page.clientWidth)return;
+    const imageRatio=864/1536;
+    const height=Math.max(page.clientHeight,page.clientWidth/imageRatio);
+    scene.style.width=`${Math.round(height*imageRatio)}px`;
+    scene.style.height=`${Math.round(height)}px`;
+  }
+  window.addEventListener('de:tab',event=>{
+    if(event.detail?.tab==='survivor'){
+      requestAnimationFrame(()=>requestAnimationFrame(fitSurvivorScene));
+      setTimeout(fitSurvivorScene,90);
+    }
+  });
+  window.addEventListener('resize',()=>{if($('page-survivor')?.classList.contains('active'))fitSurvivorScene();});
+  $('deSurvivorBack')?.addEventListener('click',()=>{if($('page-survivor')?.classList.contains('active'))setTimeout(syncHomeState,0);});
+
 })();
 </script>
 </body>

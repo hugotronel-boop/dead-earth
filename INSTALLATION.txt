@@ -1,0 +1,7 @@
+DEAD EARTH V5.6 - Fiche Perso interactive
+
+1. Remplacer le index.html a la racine de ton depot GitHub.
+2. Ajouter le fichier image jeux/fiche-survivant.jpg dans le dossier image jeux de GitHub.
+3. Patienter la publication GitHub Pages puis recharger le site.
+
+Les autres images et sauvegardes sont conservees.
