@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V5.6 Livre des tickets</title>
+  <title>DEAD EARTH — V5.7 Livre des tickets</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -1599,6 +1599,100 @@ body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!imp
 #page-survivor .de-survivor-rest{left:0;top:21.0%;width:30%;height:12.4%;}
 @media(prefers-reduced-motion:reduce){#page-survivor .de-survivor-action:active{filter:none}}
 </style>
+<!-- DEAD EARTH V5.7 : réglages fins de la fiche Perso selon les repères iPhone -->
+<style id="de-v57-survivor-placement">
+/* Le nom est désormais écrit juste au-dessus de la ligne d'identité, dans la carte. */
+#page-survivor .de-survivor-name {
+  left: 45.1% !important;
+  top: 50.9% !important;
+  width: 36.9% !important;
+  height: 4.6% !important;
+  padding: 0 !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+#page-survivor #survivorDisplayName {
+  font-size: clamp(12px, 3vw, 17px) !important;
+  color: #2c1a10 !important;
+  text-shadow: 0 1px 1px #f0d1ab, 0 0 2px #f0d1ab !important;
+  max-width: calc(100% - 28px) !important;
+}
+#page-survivor #editSurvivorName.survivor-edit-pencil {
+  flex: 0 0 23px !important;
+  width: 23px !important;
+  height: 27px !important;
+  min-width: 23px !important;
+  min-height: 27px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 3px !important;
+  background: rgba(236, 205, 162, .18) !important;
+  color: #2b190c !important;
+  box-shadow: none !important;
+  font-size: 18px !important;
+}
+/* Le bouton Détails reste dans la zone entourée, à droite de la carte murale. */
+#page-survivor .de-survivor-details {
+  top: 22.0% !important;
+  right: 7.1% !important;
+  width: min(120px, 27%) !important;
+  max-width: none !important;
+}
+#page-survivor .de-survivor-details > summary {
+  padding: 8px 7px !important;
+  min-height: 37px;
+  display: grid;
+  place-items: center;
+  font-size: clamp(10px, 2.3vw, 12px) !important;
+  text-shadow: 0 2px 3px #000, 0 0 5px #000;
+  background: rgba(24, 34, 31, .66) !important;
+  border: 1px solid rgba(228, 207, 157, .75) !important;
+}
+#page-survivor .de-survivor-details[open] { z-index: 23 !important; }
+#page-survivor .de-survivor-details-body {
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  width: min(280px, 79vw);
+  max-height: min(42dvh, 350px) !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Les bouteilles et les conserves sont les surfaces de commande elles-mêmes. */
+#page-survivor .de-survivor-drink {
+  left: 52.1% !important;
+  top: 26.2% !important;
+  width: 23.1% !important;
+  height: 15.5% !important;
+}
+#page-survivor .de-survivor-eat {
+  left: 73.0% !important;
+  top: 34.3% !important;
+  width: 23.5% !important;
+  height: 11.7% !important;
+}
+#page-survivor .de-survivor-drink span,
+#page-survivor .de-survivor-eat span {
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: 63% !important;
+  transform: translate(-50%, -50%);
+  display: inline-block !important;
+  width: max-content;
+  max-width: 97%;
+  padding: 4px 6px;
+  border-radius: 3px;
+  background: rgba(15, 23, 22, .66);
+  color: #fff1d0;
+  font: 900 clamp(10px, 2.2vw, 12px)/1.2 'Courier New', monospace !important;
+  text-shadow: 0 2px 3px #000, 0 0 5px #000 !important;
+  white-space: nowrap;
+}
+#page-survivor .de-survivor-eat span { top: 63% !important; }
+/* Ne change pas les cases d'équipement, la lampe, les soins ou le repos. */
+</style>
+
 </head>
 <body>
 <div id="app">
