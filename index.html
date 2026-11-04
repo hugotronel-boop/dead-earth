@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V5.7 Livre des tickets</title>
+  <title>DEAD EARTH — V5.8 Fiche Perso épurée</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -1693,6 +1693,104 @@ body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!imp
 /* Ne change pas les cases d'équipement, la lampe, les soins ou le repos. */
 </style>
 
+
+<!-- DEAD EARTH V5.8 : fiche Perso épurée et statistiques rangées dans Détails -->
+<style id="de-v58-survivor-clean">
+/* Les statistiques sont désormais à l'intérieur du menu Détails et plus sur le décor. */
+#page-survivor .de-survivor-topinfo { display: none !important; }
+#page-survivor .de-survivor-details-body .de-survivor-details-metrics {
+  margin-bottom: 11px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed rgba(222,194,137,.58);
+}
+#page-survivor .de-survivor-details-body .de-survivor-title {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 8px; padding: 0 0 7px; margin: 0 0 5px;
+  font: 900 11px/1.45 'Courier New',monospace;
+  color: #fff0c8;
+}
+#page-survivor .de-survivor-details-body #deSurvHp {
+  font: 900 12px/1.4 'Courier New',monospace;
+  color: #ffd0bf; white-space: nowrap;
+}
+#page-survivor .de-survivor-details-body .de-survivor-stat-grid {
+  display: grid; grid-template-columns: 1fr;
+  gap: 2px; padding: 0 0 5px;
+}
+#page-survivor .de-survivor-details-body .de-survivor-stat-grid .info-line {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 7px; margin: 0; padding: 4px 0;
+  border: 0; border-bottom: 1px solid rgba(210,207,172,.17);
+  background: transparent; color: #fff8e3;
+  font: 800 11px/1.32 'Courier New',monospace;
+}
+#page-survivor .de-survivor-details-body .de-survivor-stat-grid .info-line span {
+  white-space: normal; overflow: visible; text-overflow: clip;
+}
+#page-survivor .de-survivor-details-body .de-survivor-stat-grid .info-line strong {
+  flex: 0 0 auto; white-space: nowrap; font: 900 11px 'Courier New',monospace;
+  color: #ffe2a9;
+}
+#page-survivor .de-survivor-details[open] { z-index: 35 !important; }
+#page-survivor .de-survivor-details-body {
+  width: min(315px, 87vw) !important;
+  max-height: min(55dvh, 520px) !important;
+  padding: 13px !important;
+  background: rgba(19,27,27,.96) !important;
+  border: 1px solid rgba(222,194,137,.62) !important;
+}
+/* Aucun fond/bordure sur les boutons : les libellés restent cliquables. */
+#page-survivor .de-survivor-return,
+#page-survivor .de-survivor-details > summary {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none;
+  padding: 5px 0 !important;
+  min-height: 39px;
+  color: #fff8df !important;
+  text-shadow: 0 2px 4px #000, 0 0 7px #000, 1px 1px #000 !important;
+}
+#page-survivor .de-survivor-return:focus-visible,
+#page-survivor .de-survivor-details > summary:focus-visible {
+  outline: 2px solid #ffe0a2 !important;
+  outline-offset: 2px;
+}
+#page-survivor .de-survivor-details > summary { min-width: 85px; }
+#page-survivor .de-survivor-action,
+#page-survivor .de-survivor-action span {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+#page-survivor .de-survivor-action span {
+  padding: 0 !important;
+  color: #fff5d7 !important;
+  text-shadow: 0 2px 3px #000, 0 0 6px #000, 1px 1px #000 !important;
+}
+#page-survivor .de-survivor-gear .equip-slot {
+  border: none !important; background: transparent !important;
+  box-shadow: none !important;
+}
+#page-survivor #editSurvivorName.survivor-edit-pencil {
+  border: none !important; background: transparent !important;
+  box-shadow: none !important;
+}
+/* La ligne imprimée monte légèrement vers la droite : incliner le pseudo avec elle. */
+#page-survivor .de-survivor-name {
+  left: 45.1% !important; top: 50.55% !important;
+  transform: rotate(-2deg);
+  transform-origin: 0 50%;
+  align-items: center !important;
+}
+#page-survivor #survivorDisplayName {
+  line-height: 1.15 !important;
+}
+@media(max-width:375px) {
+  #page-survivor .de-survivor-details-body { width: min(300px,88vw) !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -1800,14 +1898,13 @@ body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!imp
         <img src="./image%20jeux/fiche-survivant.jpg" class="de-survivor-art" alt="Refuge en pixel art avec carte d'identité, bouteilles d'eau, conserves, pharmacie et lit" draggable="false">
         <button id="deSurvivorBack" type="button" class="de-survivor-return" aria-label="Revenir à la carte">← CARTE</button>
 
-        <div class="de-survivor-topinfo" aria-label="Statistiques du survivant">
-          <div class="de-survivor-title">☣ SURVIVANT <span id="deSurvHp">100 PV</span></div>
-          <div id="survivorStats" class="de-survivor-stat-grid"></div>
-        </div>
-
         <details class="de-survivor-details">
-          <summary>◉ DÉTAILS</summary>
+          <summary>DÉTAILS</summary>
           <div class="de-survivor-details-body">
+            <div class="de-survivor-details-metrics" aria-label="Toutes les statistiques du survivant">
+              <div class="de-survivor-title">☣ SURVIVANT <span id="deSurvHp">100 PV</span></div>
+              <div id="survivorStats" class="de-survivor-stat-grid"></div>
+            </div>
             <b>STATUT : <span id="survivorStatus">OPÉRATIONNEL</span></b>
             <div>DISCRÉTION : <strong id="stealthValue">100%</strong></div>
             <div class="pixel-track dark"><i id="stealthBar" class="green"></i></div>
@@ -1843,10 +1940,10 @@ body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!imp
           <button type="button" class="equip-slot lamp-equip-slot" data-equip-slot="flashlight" aria-label="Choisir lampe torche"><span class="equip-symbol">🔦</span></button>
         </div>
 
-        <button type="button" id="drinkBtn" class="de-survivor-action de-survivor-drink" aria-label="Boire une bouteille d'eau"><span>◉ BOIRE</span></button>
-        <button type="button" id="eatBtn" class="de-survivor-action de-survivor-eat" aria-label="Manger une conserve"><span>▣ MANGER</span></button>
-        <button type="button" id="healBtn" class="de-survivor-action de-survivor-heal" aria-label="Utiliser un bandage"><span>✚ SOINS</span></button>
-        <button type="button" id="restBtn" class="de-survivor-action de-survivor-rest" aria-label="Se reposer au refuge"><span>☾ REPOS</span></button>
+        <button type="button" id="drinkBtn" class="de-survivor-action de-survivor-drink" aria-label="Boire une bouteille d'eau"><span>BOIRE</span></button>
+        <button type="button" id="eatBtn" class="de-survivor-action de-survivor-eat" aria-label="Manger une conserve"><span>MANGER</span></button>
+        <button type="button" id="healBtn" class="de-survivor-action de-survivor-heal" aria-label="Utiliser un bandage"><span>SOINS</span></button>
+        <button type="button" id="restBtn" class="de-survivor-action de-survivor-rest" aria-label="Se reposer au refuge"><span>REPOS</span></button>
       </div>
     </section>
 
@@ -3970,7 +4067,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('restCycleSource').textContent=cycle.hasGPS
       ?'Jour/nuit estimé d’après la position GPS et la saison.'
       :'Jour : 7 h–20 h · Nuit : 20 h–7 h (horloge du téléphone).';
-    $('restBtn').textContent=`${cycle.isDay?'☀':'☾'} SE REPOSER · +${cycle.gain} ENDURANCE`;
+    const restButton=$('restBtn');
+    const restCaption=restButton?.querySelector('span');
+    if(restCaption)restCaption.textContent='REPOS';
+    else if(restButton)restButton.textContent='REPOS';
+    if(restButton)restButton.setAttribute('aria-label',`Se reposer : +${cycle.gain} endurance (${cycle.isDay?'jour':'nuit'})`);
   }
   function equippedWeaponFor(type){
     const id=type==='melee'?game.loadout.primary:game.loadout.secondary;
