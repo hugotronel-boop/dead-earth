@@ -2176,29 +2176,43 @@ const DEAD_EARTH_ICONS = Object.freeze({
 
   // Les 18 tickets et leurs illustrations sont ordonnés comme les deux planches recto/verso.
   // Les tickets sont des connaissances acquises, sans poids dans l'inventaire.
+  // Chaque numero correspond exactement aux noms de fichiers TrN.png / TvN.png fournis par Hugo.
+  // L'identifiant est stable pour conserver les tickets deja decouverts dans les sauvegardes.
   const CRAFT_TICKETS=[
-    {id:'bandage',kind:'item',weight:9},{id:'medkit',kind:'item',weight:6},
-    {id:'ammo',kind:'item',weight:5},{id:'bolts',kind:'item',weight:5},
-    {id:'field_bandage',kind:'item',weight:9},{id:'cordage',kind:'item',weight:8},
-    {id:'electrical_parts',kind:'item',weight:5},{id:'reinforced',kind:'gear',weight:6},
-    {id:'padded',kind:'gear',weight:6},{id:'axe',kind:'weapon',weight:6},
-    {id:'bat',kind:'weapon',weight:7},{id:'spear',kind:'weapon',weight:6},
-    {id:'machete',kind:'weapon',weight:4},{id:'pistol',kind:'weapon',weight:4},
-    {id:'rifle',kind:'weapon',weight:2},{id:'shotgun',kind:'weapon',weight:2},
-    {id:'crossbow',kind:'weapon',weight:4},{id:'shock_baton',kind:'weapon',weight:2}
+    {id:'bandage',kind:'item',weight:9,number:1}, // Tr1.png / Tv1.png - Bandage
+    {id:'ammo',kind:'item',weight:5,number:2}, // Tr2.png / Tv2.png - Munitions de fortune
+    {id:'field_bandage',kind:'item',weight:9,number:3}, // Tr3.png / Tv3.png - Bandage de terrain
+    {id:'electrical_parts',kind:'item',weight:5,number:4}, // Tr4.png / Tv4.png - Pièces recyclées
+    {id:'padded',kind:'gear',weight:6,number:5}, // Tr5.png / Tv5.png - Gilet rembourré
+    {id:'bat',kind:'weapon',weight:7,number:6}, // Tr6.png / Tv6.png - Batte renforcée
+    {id:'machete',kind:'weapon',weight:4,number:7}, // Tr7.png / Tv7.png - Machette de récupération
+    {id:'rifle',kind:'weapon',weight:2,number:8}, // Tr8.png / Tv8.png - Carabine rafistolée
+    {id:'crossbow',kind:'weapon',weight:4,number:9}, // Tr9.png / Tv9.png - Arbalète artisanale
+    {id:'medkit',kind:'item',weight:6,number:10}, // Tr10.png / Tv10.png - Trousse de secours
+    {id:'bolts',kind:'item',weight:5,number:11}, // Tr11.png / Tv11.png - Carreaux (arbalète)
+    {id:'cordage',kind:'item',weight:8,number:12}, // Tr12.png / Tv12.png - Cordage de fortune
+    {id:'reinforced',kind:'gear',weight:6,number:13}, // Tr13.png / Tv13.png - Sac renforcé
+    {id:'axe',kind:'weapon',weight:6,number:14}, // Tr14.png / Tv14.png - Hache de récupération
+    {id:'spear',kind:'weapon',weight:6,number:15}, // Tr15.png / Tv15.png - Lance de fortune
+    {id:'pistol',kind:'weapon',weight:4,number:16}, // Tr16.png / Tv16.png - Pistolet récupéré
+    {id:'shotgun',kind:'weapon',weight:2,number:17}, // Tr17.png / Tv17.png - Fusil à pompe de récupération
+    {id:'shock_baton',kind:'weapon',weight:2,number:18}, // Tr18.png / Tv18.png - Matraque électrique
   ];
+  // Deux plans sont connus dès le départ, même dans les anciennes sauvegardes.
+  const STARTER_TICKET_IDS=['bandage','cordage'];
   function ticketDefinition(ticket){
     return ticket?.kind==='item'?RECIPES.find(r=>r.id===ticket.id)
       :ticket?.kind==='gear'?GEAR_CRAFTS.find(r=>r.id===ticket.id)
       :BASE_WEAPONS.find(w=>w.id===ticket?.id);
   }
   function ticketName(ticket){return ticketDefinition(ticket)?.name||ticket?.id||'Ticket inconnu';}
-  function hasCraftTicket(id){return Array.isArray(game.recipeTickets)&&game.recipeTickets.includes(id);}
+  function hasCraftTicket(id){return STARTER_TICKET_IDS.includes(id)||(Array.isArray(game.recipeTickets)&&game.recipeTickets.includes(id));}
   function rollCraftTicketAfterSearch(){
     const remaining=CRAFT_TICKETS.filter(t=>!hasCraftTicket(t.id));
     if(!remaining.length)return null;
     // Premier plan garanti pour découvrir la mécanique ; ensuite hasard et anti-malchance.
-    const foundFirst=!(game.recipeTickets||[]).length;
+    // La première découverte après les deux tickets de départ reste garantie.
+    const foundFirst=!CRAFT_TICKETS.some(t=>!STARTER_TICKET_IDS.includes(t.id)&&hasCraftTicket(t.id));
     const drop=foundFirst||(game.ticketDrySpell||0)>=2||Math.random()<.37;
     if(!drop){game.ticketDrySpell=Math.min(2,(game.ticketDrySpell||0)+1);return null;}
     const weightTotal=remaining.reduce((sum,t)=>sum+t.weight,0);
@@ -2260,7 +2274,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     craftedGear:{reinforced:false,padded:false},loadout:{...GEAR_DEFAULTS},flashlightOn:false,
     inventoryGear:{},itemCondition:{},biscuitsPortions:3,canteenCharges:0,gardenSeedBonus:0,energyCrashQueue:[],portableBattery:0,rechargeableCharge:0,portableRadioDay:'',solarChargeDay:'',solarInstalled:false,collectorCover:false,greenhouse:false,lightingOptimized:false,distraction:null,flareEffect:null,infection:0,painReliefUntil:0,
     inventory:{...Object.fromEntries(Object.keys(ITEMS).map(id=>[id,0])),water:3,food:3,bandage:2,wood:4,metal:3,cloth:2,ammo:5,parts:2,medkit:0,fuel:0,flashlight:0},
-    recipeTickets:[],ticketDrySpell:0,
+    recipeTickets:[...STARTER_TICKET_IDS],ticketDrySpell:0,
     claimed:[],cooldowns:{},logs:[{time:Date.now(),message:'Transmission reçue. Bienvenue dans DEAD EARTH.'}]});
   function load(){
     try {
@@ -2321,7 +2335,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
           condition:clamp(Number(obj.generatorState.condition??100),0,100)
         }:{running:false,fuel:0,condition:100,updatedAt:Date.now()},
         electricSwitches:{...ELECTRIC_DEFAULTS,...(obj.electricSwitches||{})},
-        recipeTickets:Array.isArray(obj.recipeTickets)?[...new Set(obj.recipeTickets.filter(id=>CRAFT_TICKETS.some(t=>t.id===id)))]:[],
+        recipeTickets:[...new Set([...STARTER_TICKET_IDS,...(Array.isArray(obj.recipeTickets)?obj.recipeTickets.filter(id=>CRAFT_TICKETS.some(t=>t.id===id)):[])])],
         ticketDrySpell:Math.max(0,Math.min(2,Math.floor(Number(obj.ticketDrySpell)||0))),
         claimed:Array.isArray(obj.claimed)?obj.claimed:[],cooldowns:obj.cooldowns||{},logs:obj.logs.slice(0,55),
         homeConfirmed:obj.homeConfirmed===true,protectedZones:Array.isArray(obj.protectedZones)?obj.protectedZones.filter(z=>Array.isArray(z.center)&&Number.isFinite(z.center[0])&&Number.isFinite(z.center[1])).map(z=>({id:String(z.id),center:z.center.map(Number),level:clamp(Number(z.level)||1,1,10),createdAt:z.createdAt||Date.now()})):[],dailyRemote:obj.dailyRemote||base.dailyRemote,zombieRespawns:obj.zombieRespawns&&typeof obj.zombieRespawns==='object'?obj.zombieRespawns:{},defeatedZombies:Array.isArray(obj.defeatedZombies)?obj.defeatedZombies.slice(-5000):[],safeZone:obj.safeZone||null,territory:obj.territory&&Array.isArray(obj.territory.center)?{...obj.territory,defeatedIds:Array.isArray(obj.territory.defeatedIds)?obj.territory.defeatedIds:[],expansion:Number(obj.territory.expansion)||0,patrolKills:Number(obj.territory.patrolKills)||0}:null,micEnabled:!!obj.micEnabled,lastMicLevel:Number.isFinite(obj.lastMicLevel)?obj.lastMicLevel:null,
@@ -4457,8 +4471,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const BOOK_TICKET_Y=[15.0,32.6,50.2,67.8];
   const BOOK_TOTAL_SPREADS=Math.ceil(CRAFT_TICKETS.length/BOOK_TICKETS_PER_SPREAD);
   function ticketImageUrl(id,face='front'){
-    const index=CRAFT_TICKETS.findIndex(ticket=>ticket.id===id);
-    return index<0?'':`./image%20jeux/${face==='back'?'Tv':'Tr'}${index+1}.png`;
+    const ticket=CRAFT_TICKETS.find(entry=>entry.id===id);
+    return ticket?`./image%20jeux/${face==='back'?'Tv':'Tr'}${ticket.number}.png`:'';
   }
   function bookTicketCard(ticket,indexWithinSpread){
     if(!ticket)return '';
@@ -4569,8 +4583,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     // La description des matériaux n'est montrée qu'APRÈS découverte du ticket.
     const ingredients=owned&&bookTicketViewerFace==='back'&&def?.cost?`<div class="de-book-viewer-cost">⚒ MATÉRIAUX : ${safe(costText(def.cost))}</div>`:'';
     const fallback=bookTicketViewerFace==='back'
-      ?`Verso pas encore ajouté (Tv${CRAFT_TICKETS.indexOf(ticket)+1}.png). ${owned?'Recette débloquée.':''}`
-      :`Ticket recto n°${CRAFT_TICKETS.indexOf(ticket)+1} à ajouter (Tr${CRAFT_TICKETS.indexOf(ticket)+1}.png)`;
+      ?`Verso pas encore ajouté (Tv${ticket.number}.png). ${owned?'Recette débloquée.':''}`
+      :`Ticket recto n°${ticket.number} à ajouter (Tr${ticket.number}.png)`;
     return `<div id="deBookViewer" class="de-book-viewer" role="dialog" aria-modal="true" aria-label="Ticket : ${safe(ticketName(ticket))}">
       <div class="de-book-viewer-panel">
         <div class="de-book-viewer-top"><strong class="de-book-viewer-title">🎟 ${safe(ticketName(ticket))}</strong>
