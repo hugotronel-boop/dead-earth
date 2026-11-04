@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V5.8 Fiche Perso épurée</title>
+  <title>DEAD EARTH — V5.9 Fiche Perso épurée</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -1788,6 +1788,45 @@ body.de-survivor-view .topbar,body.de-survivor-view .mobile-nav{display:none!imp
 }
 @media(max-width:375px) {
   #page-survivor .de-survivor-details-body { width: min(300px,88vw) !important; }
+}
+</style>
+
+
+<!-- DEAD EARTH V5.9 : nombres de récupération animés sur les objets de la fiche Perso -->
+<style id="de-v59-survivor-gains">
+#page-survivor .de-survivor-gain {
+  position:absolute;
+  z-index:40;
+  pointer-events:none;
+  display:block;
+  width:max-content;
+  max-width:46%;
+  padding:3px 5px;
+  font:900 clamp(13px,3.4vw,19px)/1.15 'Courier New',monospace;
+  color:#baffd1;
+  white-space:nowrap;
+  letter-spacing:-.3px;
+  text-align:center;
+  -webkit-text-stroke:.3px #17442c;
+  text-shadow: 0 2px 3px #081711,1px 1px 0 #0c2318,-1px -1px 2px #0d261a,0 0 12px rgba(110,255,164,.65);
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.48));
+  transform:translate(-50%, -10%);
+  animation:deSurvivorGainFloat 1.45s cubic-bezier(.17,.68,.35,1) forwards;
+  will-change: transform, opacity;
+}
+#page-survivor .de-survivor-gain.is-water {color:#b7f4ff;-webkit-text-stroke:.3px #194d69;text-shadow:0 2px 3px #0b2335,0 0 10px #247fca;}
+#page-survivor .de-survivor-gain.is-food {color:#fff0b6;-webkit-text-stroke:.3px #684218;text-shadow:0 2px 3px #38220a,0 0 10px #bd8638;}
+#page-survivor .de-survivor-gain.is-rest {color:#c6ffd0;-webkit-text-stroke:.3px #1e5132;text-shadow:0 2px 3px #0d2111,0 0 10px #47a463;}
+@keyframes deSurvivorGainFloat {
+  0%   {opacity:0;transform:translate(-50%, 12px) scale(.65);}
+  17%  {opacity:1;transform:translate(-50%, 0) scale(1.08);}
+  40%  {opacity:1;transform:translate(-50%, -12px) scale(1);}
+  75%  {opacity:1;transform:translate(-50%, -33px) scale(1);}
+  100% {opacity:0;transform:translate(-50%, -55px) scale(.94);}
+}
+@media (prefers-reduced-motion:reduce) {
+  #page-survivor .de-survivor-gain {animation:deSurvivorGainAccessible 1.45s ease-out forwards;}
+  @keyframes deSurvivorGainAccessible {0%{opacity:0}15%,70%{opacity:1}100%{opacity:0}}
 }
 </style>
 
@@ -4160,9 +4199,33 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('restBtn').disabled=game.energy>=100;
     updateRestCycleUI();
   }
+  // Affiche le gain réel au-dessus de l'objet touché, sur la fiche Perso.
+  // Ne change aucune mécanique de consommation, de sauvegarde ou de repos.
+  function showSurvivorGain(buttonId,amount,label,type){
+    if(!(amount>0))return;
+    const scene=$('deSurvivorScene'),button=$(buttonId);
+    if(!scene||!button||!scene.isConnected||!button.isConnected)return;
+    const sceneRect=scene.getBoundingClientRect(),rect=button.getBoundingClientRect();
+    if(!sceneRect.width||!sceneRect.height)return;
+    const tag=document.createElement('span');
+    tag.className='de-survivor-gain is-'+type;
+    tag.textContent=`+${amount} ${label}`;
+    tag.style.left=`${rect.left-sceneRect.left+rect.width/2}px`;
+    tag.style.top=`${rect.top-sceneRect.top+rect.height*.36}px`;
+    tag.setAttribute('aria-hidden','true');
+    scene.appendChild(tag);
+    // Chaque animation s'efface indépendamment, même si on appuie plusieurs fois.
+    tag.addEventListener('animationend',()=>tag.remove(),{once:true});
+    setTimeout(()=>tag.remove(),1900);
+  }
   function useItem(id,prop,points,msg){
     if(quantity(id)<1||game[prop]>=100)return;
-    game.inventory[id]--;game[prop]=clamp(game[prop]+points);window.dispatchEvent(new CustomEvent('de:action',{detail:{type:id==='food'?'eat':id==='water'?'drink':'heal'}}));commit(msg);
+    const previous=game[prop];
+    game.inventory[id]--;game[prop]=clamp(game[prop]+points);
+    const gained=Math.max(0,game[prop]-previous);
+    window.dispatchEvent(new CustomEvent('de:action',{detail:{type:id==='food'?'eat':id==='water'?'drink':'heal'}}));commit(msg);
+    if(id==='water')showSurvivorGain('drinkBtn',gained,'HYDRATATION','water');
+    if(id==='food')showSurvivorGain('eatBtn',gained,'SATIÉTÉ','food');
   }
   function rest(){
     const cycle=realRestCycle();
@@ -4174,6 +4237,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     game.food=clamp(game.food-4);game.water=clamp(game.water-4);
     if(buildingLevel('infirmary'))game.hp=clamp(game.hp+15+(isConsumerPowered('infirmary')?5*(buildingLevel('infirmary')-1):0));
     commit(`${cycle.isDay?'☀ Repos de jour':'☾ Repos de nuit'} (${cycle.clock}) : +${recovered} endurance${buildingLevel('infirmary')?' · soins infirmiers '+(isConsumerPowered('infirmary')?'électriques':'manuels'):''}.`);
+    showSurvivorGain('restBtn',recovered,'ENDURANCE','rest');
   }
   function costText(cost){return Object.entries(cost).map(([id,num])=>`${num} ${ITEMS[id].label}`).join(' · ')}
   function maxFort(){return BASE_TIERS[clamp(game.baseLevel,1,5)-1].max}
