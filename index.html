@@ -1291,7 +1291,7 @@ body:not(.de-home-map) #app > header.de-phone-topbar {
 #page-inventory .de-book-spread {
   position:relative; width:100%; aspect-ratio:1448 / 1086;
   margin:0 auto; overflow:hidden;
-  background: url('./image%20jeux/livre-craft.png') no-repeat center/100% 100%;
+  background: url('./image%20jeux/Livre-craft.PNG') no-repeat center/100% 100%;
 }
 #page-inventory .de-book-ticket {
   position:absolute; width:35%;height:12.25%; padding:0;
@@ -4597,7 +4597,12 @@ const DEAD_EARTH_ICONS = Object.freeze({
   const BOOK_TOTAL_SPREADS=Math.ceil(CRAFT_TICKETS.length/BOOK_TICKETS_PER_SPREAD);
   function ticketImageUrl(id,face='front'){
     const ticket=CRAFT_TICKETS.find(entry=>entry.id===id);
-    return ticket?`./image%20jeux/${face==='back'?'Tv':'Tr'}${ticket.number}.png`:'';
+    if(!ticket)return '';
+    // Compatibilité avec les noms EXACTS actuellement présents dans le dossier GitHub.
+    // Tr9 possède un espace avant « .png » et TV5 utilise V majuscule.
+    if(face==='front' && ticket.number===9)return './image%20jeux/Tr9%20.png';
+    if(face==='back' && ticket.number===5)return './image%20jeux/TV5.png';
+    return `./image%20jeux/${face==='back'?'Tv':'Tr'}${ticket.number}.png`;
   }
   function bookTicketCard(ticket,indexWithinSpread){
     if(!ticket)return '';
