@@ -262,6 +262,52 @@
 .bag-actions button{min-height:40px}
 .bag-empty{grid-column:1/-1;padding:18px;text-align:center;color:#c3bfaa;font:12px/1.6 monospace}
 
+
+/* DEAD EARTH V6.1 — Refuge simplifié sur fond illustré */
+#page-base{padding:0 0 18px;overflow:hidden;background:#15110d;}
+#page-base>h1{position:absolute;top:14px;left:16px;z-index:4;margin:0;color:#f4e4c1;text-shadow:2px 2px 0 #000;font-size:14px;letter-spacing:.5px;}
+#page-base .base-scene-shell{position:relative;min-height:100%;height:100%;background:center/cover no-repeat;isolation:isolate;}
+#page-base .base-scene-shell::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.10) 0%,rgba(0,0,0,.08) 42%,rgba(0,0,0,.22) 100%);pointer-events:none;}
+#page-base .base-scene-topline{position:absolute;top:56px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2;pointer-events:none;}
+#page-base .base-scene-rank,#page-base .base-scene-subtitle{display:inline-block;padding:6px 10px;border:2px solid rgba(255,235,189,.5);background:rgba(22,18,14,.58);backdrop-filter:blur(2px);color:#fff2cd;text-shadow:2px 2px 0 rgba(0,0,0,.75);font:10px var(--pixel,monospace);letter-spacing:.4px;border-radius:10px;box-shadow:0 8px 18px rgba(0,0,0,.28);}
+#page-base .base-scene-subtitle{max-width:58%;text-align:right;}
+#page-base .base-blueprint-hotspot{position:absolute;left:23%;bottom:6.5%;width:54%;height:16.5%;z-index:3;border:0;background:transparent;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+#page-base .base-blueprint-hotspot::before{content:'';position:absolute;inset:6% 2% 12%;border-radius:18px;background:rgba(243,197,126,.10);border:2px dashed rgba(248,229,190,.18);opacity:0;transition:opacity .18s ease, transform .18s ease;}
+#page-base .base-blueprint-hotspot:active::before,#page-base .base-blueprint-hotspot:focus-visible::before{opacity:1;transform:scale(.985);}
+#page-base .base-hotspot-label,#page-base .base-hotspot-note{position:relative;z-index:1;display:inline-block;background:rgba(18,16,14,.68);color:#f8e2b6;text-shadow:2px 2px 0 rgba(0,0,0,.72);border:2px solid rgba(237,196,125,.55);font:10px var(--pixel,monospace);letter-spacing:.35px;}
+#page-base .base-hotspot-label{padding:7px 10px;border-radius:12px 12px 0 0;margin-bottom:0;}
+#page-base .base-hotspot-note{padding:6px 12px;border-radius:0 0 12px 12px;min-width:66px;}
+#page-base .base-book-overlay{position:absolute;inset:0;z-index:12;display:block;}
+#page-base .base-book-overlay[hidden]{display:none;}
+#page-base .base-book-backdrop{position:absolute;inset:0;background:rgba(7,8,10,.46);backdrop-filter:blur(2px);}
+#page-base .base-book-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+#page-base .base-book-art{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:min(92vw,680px);max-height:90vh;object-fit:contain;filter:drop-shadow(0 18px 36px rgba(0,0,0,.55));pointer-events:none;}
+#page-base .base-book-content{position:absolute;left:50%;bottom:8.5%;transform:translateX(-50%);width:min(72vw,520px);max-height:41vh;display:flex;flex-direction:column;gap:10px;padding:0 4px;}
+#page-base .base-book-header{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#392517;text-shadow:0 1px 0 rgba(255,245,220,.25);font:11px var(--pixel,monospace);letter-spacing:.35px;padding:0 10px;}
+#page-base .base-book-pages{background:rgba(241,226,195,.32);border:2px solid rgba(105,71,40,.4);border-radius:14px;padding:10px 10px 12px;box-shadow:inset 0 1px 0 rgba(255,250,238,.52);overflow:hidden;}
+#page-base .base-book-page{max-height:calc(41vh - 90px);overflow:auto;padding-right:2px;}
+#page-base .base-book-page::-webkit-scrollbar{width:6px}#page-base .base-book-page::-webkit-scrollbar-thumb{background:rgba(96,64,33,.45);border-radius:999px}
+#page-base .base-book-mini-title{font:10px var(--pixel,monospace);color:#5d3b20;margin-bottom:8px;}
+#page-base .base-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+#page-base .base-overview-card{background:rgba(255,247,232,.48);border:2px solid rgba(120,84,48,.28);border-radius:12px;padding:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4);}
+#page-base .base-book-page .help-text,#page-base .base-book-page .metric-row,#page-base .base-book-page .base-section-hint,#page-base .base-book-page p{color:#4a321c;}
+#page-base .base-upgrade-list .upgrade-card{background:rgba(255,246,230,.5);border:2px solid rgba(120,84,48,.25);}
+#page-base .base-book-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+#page-base .base-book-nav .pixel-button{padding:11px 8px;}
+#page-base .base-book-close{position:absolute;top:22px;right:18px;z-index:2;width:48px;height:48px;border:3px solid #edc47d;background:rgba(54,30,16,.72);color:#fff2d0;font:26px/1 monospace;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.28);}
+#page-base .base-hidden-support{display:none!important;}
+body.base-book-open #page-base .base-blueprint-hotspot{pointer-events:none;}
+@media (max-width:560px){
+  #page-base .base-scene-topline{top:52px;gap:8px}
+  #page-base .base-scene-rank,#page-base .base-scene-subtitle{font-size:9px;padding:5px 8px}
+  #page-base .base-hotspot-label,#page-base .base-hotspot-note{font-size:9px}
+  #page-base .base-book-art{width:min(98vw,620px);bottom:0}
+  #page-base .base-book-content{width:min(81vw,460px);bottom:8%;max-height:43vh}
+  #page-base .base-overview-grid{grid-template-columns:1fr}
+  #page-base .base-build-grid{grid-template-columns:1fr}
+  #page-base .base-book-close{top:18px;right:12px;width:42px;height:42px}
+}
+
 </style>
 <style>
 
@@ -2115,61 +2161,69 @@ body.de-quest-view .mobile-nav {display:none!important}
 
     <section aria-label="Base" class="page scroll-page" id="page-base">
 <h1>⌂ MON REFUGE</h1>
-
-
-
-
-
-
-
-
-
-
-<details class="pixel-frame base-accordion" data-base-section="protection"><summary class="base-accordion-summary"><span class="base-accordion-title">☣ PROTECTION DU VILLAGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div></div></details><details class="pixel-frame base-accordion" data-base-section="zone"><summary class="base-accordion-summary"><span class="base-accordion-title">⌂ ZONE SÉCURISÉE</span><span class="base-mini-rank" id="baseRank">NIV. 1 / 5</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
-
-<div aria-label="Refuge : abri de branchages" class="base-diorama tier-1" id="baseDiorama" role="img">
-<div class="base-sky"></div><div class="base-ground"></div>
-<div class="base-hut"><div class="base-roof"></div><div class="base-wall"></div><div class="base-door"></div><div class="base-window"></div></div>
-<div class="base-fence left"></div><div class="base-fence right"></div>
-<div class="base-scene-details"><span>✦</span><span>▤</span><span>✦</span></div>
-<div class="base-scene-label" id="baseTierName">ABRI DE BRANCHAGES</div>
+<div class="base-scene-shell" id="baseSceneShell">
+  <div class="base-scene-topline">
+    <div class="base-scene-rank" id="baseRank">NIV. 1 / 5</div>
+    <div class="base-scene-subtitle" id="baseTierName">ABRI DE BRANCHAGES</div>
+  </div>
+  <button class="base-blueprint-hotspot" id="baseBlueprintButton" type="button" aria-label="Ouvrir le plan d'amélioration du refuge">
+    <span class="base-hotspot-label" id="baseMapLabel">AMÉLIORATION DU REFUGE</span>
+    <span class="base-hotspot-note" id="basePlanNote">1 / 2</span>
+  </button>
 </div>
-<div class="base-details">
-<div class="metric-row"><span>NIVEAU DU REFUGE</span><strong id="baseLevel">1 / 5</strong></div>
-<div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
-<div class="pixel-track dark"><i class="green" id="fortBar"></i></div>
-<p class="help-text" id="baseLevelDesc">Quelques branches maintiennent l'abri debout. Il protège à peine des rôdeurs.</p>
+
+<div class="base-book-overlay" id="baseBookOverlay" hidden>
+  <div class="base-book-backdrop" id="baseBookBackdrop"></div>
+  <div class="base-book-stage">
+    <img src="image jeux/livre-refuge.png" alt="Plan du refuge" class="base-book-art" id="baseBookArt">
+    <button type="button" class="base-book-close" id="baseBookClose" aria-label="Fermer le livre">×</button>
+    <div class="base-book-content">
+      <div class="base-book-header">
+        <b id="baseBookTitle">ÉVOLUTION DU REFUGE</b>
+        <span id="baseBookPageCount">1 / 2</span>
+      </div>
+      <div class="base-book-pages">
+        <section class="base-book-page active" id="baseBookPage0">
+          <div class="base-overview-grid">
+            <div class="base-overview-card">
+              <div class="metric-row"><span>NIVEAU DU REFUGE</span><strong id="baseLevel">1 / 5</strong></div>
+              <div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
+              <div class="pixel-track dark"><i class="green" id="fortBar"></i></div>
+              <p class="help-text" id="baseLevelDesc">Des branches et des bâches. Protège peu, mais c’est un début.</p>
+            </div>
+            <div class="base-overview-card">
+              <div class="base-book-mini-title">PROGRESSION</div>
+              <div aria-label="Progression du refuge" class="base-level-steps" id="baseLevelSteps"></div>
+              <p class="help-text">Les fonds du refuge changent automatiquement selon le niveau atteint.</p>
+            </div>
+          </div>
+          <div class="item-list base-upgrade-list" id="upgradeList"></div>
+          <button class="pixel-button full danger-button" id="defendBtn" type="button">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
+          <p class="help-text">Le test de défense reste manuel. Le plan sert maintenant d’accès aux améliorations du refuge.</p>
+        </section>
+        <section class="base-book-page" id="baseBookPage1" hidden>
+          <p class="base-section-hint">Structure prête : on pourra encore affiner la présentation des constructions ensuite. Pour l’instant, tout est déjà centralisé dans ce plan.</p>
+          <div class="base-build-grid" id="baseBuildList"></div>
+        </section>
+      </div>
+      <div class="base-book-nav">
+        <button type="button" class="pixel-button" id="baseBookPrev">◀ PAGE PRÉCÉDENTE</button>
+        <button type="button" class="pixel-button" id="baseBookNext">PAGE SUIVANTE ▶</button>
+      </div>
+    </div>
+  </div>
 </div>
-<div aria-label="Progression du refuge" class="base-level-steps" id="baseLevelSteps"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="ameliorer"><summary class="base-accordion-summary"><span class="base-accordion-title">⬆ AMÉLIORER LE REFUGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
 
-<div class="item-list" id="upgradeList"></div>
-<button class="pixel-button full danger-button" id="defendBtn">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
-<p class="help-text">Les hordes ne frappent pas hors ligne : le test de défense est lancé uniquement avec ce bouton.</p>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="constructions"><summary class="base-accordion-summary"><span class="base-accordion-title">🔨 CONSTRUCTIONS DE SURVIE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
-
-<p class="base-section-hint">Débloque les bâtiments en améliorant ton refuge. Les ressources viennent du sac ou de la réserve. Les constructions déjà possédées restent acquises.</p>
-<div class="base-build-grid" id="baseBuildList"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="surveillance"><summary class="base-accordion-summary"><span class="base-accordion-title">🔭 SURVEILLANCE DU REFUGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="watchtowerPanel">
-
-<div aria-live="polite" class="base-feature-content" id="watchtowerIntel"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="stockage"><summary class="base-accordion-summary"><span class="base-accordion-title">📦 RÉSERVE DE STOCKAGE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="baseStoragePanel">
-
-<div class="base-feature-content" id="baseStorage"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="infirmerie"><summary class="base-accordion-summary"><span class="base-accordion-title">✚ INFIRMERIE ÉLECTRIQUE</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="advancedMedicalPanel">
-<div id="advancedMedical"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="radio"><summary class="base-accordion-summary"><span class="base-accordion-title">📻 STATION RADIO</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel" id="baseRadioPanel">
-
-<div class="base-feature-content" id="baseRadio"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="production"><summary class="base-accordion-summary"><span class="base-accordion-title">⚡ PRODUCTION &amp; ÉLECTRICITÉ</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
-
-<p class="base-section-hint">Les productions se récupèrent une fois par jour. Les équipements électriques demandent du carburant et une puissance suffisante.</p>
-<div class="item-list" id="baseProduction"></div>
-</div></div></details><details class="pixel-frame base-accordion" data-base-section="atelier"><summary class="base-accordion-summary"><span class="base-accordion-title">⚒ ATELIER D’ARMES</span><span aria-hidden="true" class="base-chevron">▼</span></summary><div class="base-accordion-content"><div class="pixel-frame page-panel base-panel">
-
-<p class="base-section-hint">⚡ L’atelier nécessite le générateur en marche et son alimentation activée. Sans courant, la fabrication et les réparations sont bloquées.</p>
-<div class="item-list" id="baseWeapons"></div>
-</div></div></details><p class="help-text base-privacy">⌂ Refuge virtuel privé. Les améliorations et équipements sont sauvegardés sur cet appareil.</p>
+<div class="base-hidden-support" aria-hidden="true">
+  <div class="pixel-frame page-panel base-panel territory-base" id="territoryBaseCard"></div>
+  <button id="editSafeZone" class="pixel-button full" type="button">⌖ PLACER MON REFUGE</button>
+  <div id="watchtowerIntel"></div>
+  <div id="baseStorage"></div>
+  <div id="advancedMedical"></div>
+  <div id="baseRadio"></div>
+  <div id="baseProduction"></div>
+  <div id="baseWeapons"></div>
+</div>
 </section>
 
     <section id="page-inventory" class="page scroll-page" aria-label="Sac de survie">
@@ -4752,14 +4806,42 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const hint=$('electricHint');if(hint)hint.textContent=on?'✅ Réseau opérationnel.':'⚠ Les équipements électriques sont hors service.';
     $('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');
   }
+  let baseBookPage=0;
+  const BASE_SCENE_IMAGES=[
+    'image jeux/refuge-niveau-1.jpg',
+    'image jeux/refuge-niveau-2.jpg',
+    'image jeux/refuge-niveau-3.jpg',
+    'image jeux/refuge-niveau-4.jpg',
+    'image jeux/refuge-niveau-5.jpg'
+  ];
+  function showBaseBookPage(page){
+    const pages=[...document.querySelectorAll('#page-base .base-book-page')];
+    if(!pages.length)return;
+    baseBookPage=Math.max(0,Math.min(page,pages.length-1));
+    pages.forEach((el,i)=>{el.hidden=i!==baseBookPage;el.classList.toggle('active',i===baseBookPage)});
+    const title=$('baseBookTitle');if(title)title.textContent=baseBookPage===0?'ÉVOLUTION DU REFUGE':'CONSTRUCTIONS DE SURVIE';
+    const count=$('baseBookPageCount');if(count)count.textContent=`${baseBookPage+1} / ${pages.length}`;
+    if($('baseBookPrev'))$('baseBookPrev').disabled=baseBookPage===0;
+    if($('baseBookNext'))$('baseBookNext').disabled=baseBookPage===pages.length-1;
+  }
+  function openBaseBook(page=0){
+    const overlay=$('baseBookOverlay');if(!overlay)return;
+    overlay.hidden=false;document.body.classList.add('base-book-open');showBaseBookPage(page);
+  }
+  function closeBaseBook(){
+    const overlay=$('baseBookOverlay');if(!overlay)return;
+    overlay.hidden=true;document.body.classList.remove('base-book-open');
+  }
   function renderBase(){
     const tier=BASE_TIERS[game.baseLevel-1];
+    const scene=$('baseSceneShell');
+    if(scene){scene.style.backgroundImage=`url("${BASE_SCENE_IMAGES[game.baseLevel-1]||BASE_SCENE_IMAGES[0]}")`;scene.dataset.level=String(game.baseLevel);}
     $('baseLevel').textContent=`${game.baseLevel} / ${BASE_TIERS.length}`;
     $('baseRank').textContent=`NIV. ${game.baseLevel} / 5`;
     $('baseTierName').textContent=tier.name.toUpperCase();
+    $('baseMapLabel').textContent=`AMÉLIORATION DU REFUGE · NIV. ${game.baseLevel}`;
+    $('basePlanNote').textContent='1 / 2';
     $('baseLevelDesc').textContent=tier.desc;
-    $('baseDiorama').className=`base-diorama tier-${game.baseLevel}`;
-    $('baseDiorama').setAttribute('aria-label',`Refuge niveau ${game.baseLevel} : ${tier.name}`);
     $('fortValue').textContent=`${game.fort} / ${tier.max}`;
     $('fortBar').style.width=`${100*game.fort/tier.max}%`;
     $('baseLevelSteps').innerHTML=BASE_TIERS.map((t,i)=>`<span class="base-level-step ${i<game.baseLevel?'done':''} ${i===game.baseLevel-1?'current':''}" title="${safe(t.name)}">${i+1}</span>`).join('');
@@ -4768,7 +4850,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       $('upgradeList').innerHTML=`<div class="upgrade-card"><div><strong>↑ NIVEAU ${game.baseLevel+1} : ${safe(next.name)}</strong><p>${safe(next.desc)}</p><p>Résistance maximale : ${next.max}</p><p class="base-cost-line">${baseCostStock(next.cost)}</p></div><button class="pixel-button" id="levelUpBtn" ${canPayBase(next.cost)?'':'disabled'}>AMÉLIORER</button></div>`;
       $('levelUpBtn').addEventListener('click',upgradeShelter);
     }else{
-      $('upgradeList').innerHTML='<div class="upgrade-card"><strong>★ FORTERESSE MAXIMALE · NIVEAU 5</strong><p>Les améliorations suivantes sont à venir.</p></div>';
+      $('upgradeList').innerHTML='<div class="upgrade-card"><strong>★ FORTERESSE MAXIMALE · NIVEAU 5</strong><p>Les améliorations du refuge sont terminées.</p></div>';
     }
     $('upgradeList').insertAdjacentHTML('beforeend',`<div class="upgrade-card"><div><strong>⚒ RÉPARER LES BARRICADES</strong><p>Restaure jusqu’à 25 points de résistance.</p><p>${safe(costText({wood:2,metal:1}))}</p></div><button class="pixel-button" id="repairShelterBtn" ${game.fort>=tier.max||!canPayBase({wood:2,metal:1})?'disabled':''}>RÉPARER</button></div>`);
     $('repairShelterBtn').addEventListener('click',repairShelter);
@@ -4847,6 +4929,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('baseWeapons').querySelectorAll('[data-repair-weapon]').forEach(b=>b.addEventListener('click',()=>repairWeapon(b.dataset.repairWeapon)));
     $('baseWeapons').querySelectorAll('[data-upgrade-weapon]').forEach(b=>b.addEventListener('click',()=>upgradeWeapon(b.dataset.upgradeWeapon)));
     $('baseWeapons').querySelectorAll('[data-make-weapon]').forEach(b=>b.addEventListener('click',()=>makeWeapon(b.dataset.makeWeapon)));
+    showBaseBookPage(Math.min(baseBookPage,1));
   }
   function updateGeneratorPanel(){
     if(!game.generatorState)return;
@@ -5675,6 +5758,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('deSurvivorBack').addEventListener('click',()=>switchTab('map'));
     $('recenter').addEventListener('click',()=>{if(map)map.setView(game.safeZone && game.mode==='demo'?game.safeZone.center:center,15);else toast('Carte indisponible. La liste des lieux reste utilisable.')});
     $('editSafeZone').addEventListener('click',startDrawing);
+    $('baseBlueprintButton')?.addEventListener('click',()=>openBaseBook(0));
+    $('baseBookClose')?.addEventListener('click',closeBaseBook);
+    $('baseBookBackdrop')?.addEventListener('click',closeBaseBook);
+    $('baseBookPrev')?.addEventListener('click',()=>showBaseBookPage(baseBookPage-1));
+    $('baseBookNext')?.addEventListener('click',()=>showBaseBookPage(baseBookPage+1));
     $('drawingDone').addEventListener('click',finishDrawing);
     $('drawingCancel').addEventListener('click',cancelDrawing);
     const nameForm=$('survivorNameForm'), nameField=$('survivorNameInput'), namePencil=$('editSurvivorName');
@@ -5726,6 +5814,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
       if(e.detail.tab!=='inventory')closeBagPanel();
       else requestAnimationFrame(fitBagScene);
     });
+    window.addEventListener('de:tab',e=>{if(e.detail.tab!=='base')closeBaseBook();});
     $('eatBtn').addEventListener('click',()=>useItem('food','food',30,'Conserve consommée. +30 satiété.'));
     $('drinkBtn').addEventListener('click',()=>useItem('water','water',30,'Eau consommée. +30 hydratation.'));
     $('healBtn').addEventListener('click',()=>useItem('bandage','hp',30,'Bandage utilisé. +30 santé.'));
