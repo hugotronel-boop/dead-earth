@@ -2425,6 +2425,19 @@ body.base-book-open .mobile-nav{
   #page-base .base-book-nav .pixel-button{min-height:32px !important;padding:5px 2px !important;}
   #page-base .base-book-return{min-height:32px !important;padding:5px 2px !important;}
 }
+
+/* V6.6 — Le menu Refuge occupe tout l'espace disponible, sans barre inférieure. */
+body.de-base-view .mobile-nav {display:none !important;}
+#page-base .base-map-return {
+  position:absolute;right:12px;top:12px;z-index:10;
+  min-height:40px;padding:8px 12px;
+  background:rgba(40,35,29,.82);border:2px solid #c9aa78;
+  color:#fff0d2;border-radius:5px;
+  font:900 11px/1.2 var(--pixel,monospace);
+  text-shadow:1px 2px 2px #000;box-shadow:0 3px 9px #0008;
+  cursor:pointer;
+}
+#page-base .base-map-return:focus-visible {outline:3px solid #ffdc9b;outline-offset:3px;}
 </style>
 
 </head>
@@ -2585,6 +2598,7 @@ body.base-book-open .mobile-nav{
 
     <section aria-label="Base" class="page scroll-page" id="page-base">
 <h1>⌂ MON REFUGE</h1>
+<button type="button" class="base-map-return" id="baseMapReturn" aria-label="Retourner à la carte">← CARTE</button>
 <div class="base-scene-shell" id="baseSceneShell">
   <div class="base-scene-topline">
     <div class="base-scene-rank" id="baseRank">NIV. 1 / 5</div>
@@ -6112,7 +6126,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('journal').innerHTML=game.logs.map(e=>`<div class="log-entry"><time>${new Date(e.time).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</time><span>${safe(e.message)}</span></div>`).join('');
   }
   function renderAll(){advanceSurvivalEffects();advanceGenerator();renderHud();$('nightClock').textContent=realRestCycle().isDay?'☀ JOUR':'☾ NUIT'+(flashlightActive()?' · 🔦 LAMPE':'')+(isConsumerPowered('lighting')?' · 💡 REFUGE':'');map?.queueDraw();renderPois();renderSurvivor();renderBase();renderInventory();renderMissions();renderSafe();renderTerritory();window.dispatchEvent(new CustomEvent('de:render',{detail:{hp:game.hp,energy:game.energy,water:game.water,food:game.food,level:game.level,xp:game.xp,noise:game.noise,inventory:{...game.inventory},mode:game.mode,dailyRemaining:0,capacity:inventoryWeight(),threat:danger(),drawing:safeDrawing}}));}
-  function switchTab(tab){document.getElementById('gameViewport').dataset.artPage=tab;window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
+  function switchTab(tab){document.body.classList.toggle('de-base-view',tab==='base');document.getElementById('gameViewport').dataset.artPage=tab;window.dispatchEvent(new CustomEvent('de:tab',{detail:{tab}}));currentTab=tab;document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));document.querySelectorAll('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${tab}`));if(tab==='map'&&map)setTimeout(()=>map.invalidateSize(),150);window.scrollTo({top:0,behavior:'instant'});}
   function createMap(){
     if(!window.DeadEarthFastMap){$('mapFallback').hidden=false;return}
     try{
@@ -6195,6 +6209,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('deSurvivorBack').addEventListener('click',()=>switchTab('map'));
     $('recenter').addEventListener('click',()=>{if(map)map.setView(game.safeZone && game.mode==='demo'?game.safeZone.center:center,15);else toast('Carte indisponible. La liste des lieux reste utilisable.')});
     $('editSafeZone').addEventListener('click',startDrawing);
+    $('baseMapReturn')?.addEventListener('click',()=>{closeBaseBook();switchTab('map');});
     $('baseBlueprintButton')?.addEventListener('click',()=>openBaseBook(0));
     $('baseBookClose')?.addEventListener('click',closeBaseBook);
     $('baseBookReturn')?.addEventListener('click',closeBaseBook);
