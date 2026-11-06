@@ -2164,12 +2164,18 @@ body.de-quest-view .mobile-nav {display:none!important}
   inset:0 !important;
   display:flex !important;
   flex-direction:column !important;
-  justify-content:center !important;
+  justify-content:flex-start !important;
   align-items:center !important;
-  gap:clamp(5px,.8vh,11px) !important;
-  padding:14px 9px 16px !important;
+  gap:clamp(4px,.7vh,10px) !important;
+  padding:12px 9px 16px !important;
   box-sizing:border-box !important;
   overflow:hidden !important;
+}
+body.base-book-open .mobile-nav{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transform:translateY(120%) !important;
 }
 #page-base .base-book-stage::before {display:none !important;}
 #page-base .base-book-toolbar {
@@ -2178,7 +2184,24 @@ body.de-quest-view .mobile-nav {display:none!important}
   font:900 clamp(12px,2.9vw,17px)/1.3 var(--pixel,monospace);
   text-shadow:2px 2px 1px rgba(0,0,0,.92);
   flex:0 0 auto;z-index:2;
+  gap:8px;
 }
+#page-base .base-book-toolbar-left{
+  display:flex;align-items:center;gap:8px;min-width:0;
+}
+#page-base .base-book-map-return{
+  flex:0 0 auto;
+  min-height:41px;
+  padding:0 12px;
+  border:2px solid #c8a273 !important;
+  background:rgba(53,34,22,.93) !important;
+  color:#ffe4b3 !important;
+  border-radius:5px !important;
+  font:900 12px/1 var(--pixel,monospace) !important;
+  box-shadow:0 3px 5px rgba(0,0,0,.3) !important;
+  cursor:pointer;
+}
+#page-base .base-book-map-return:hover{filter:brightness(1.08)}
 #page-base .base-book-close {
   position:static !important;
   flex:0 0 41px !important;
@@ -2198,6 +2221,7 @@ body.de-quest-view .mobile-nav {display:none!important}
   letter-spacing:.2px;color:#ecd2a5;
   text-shadow:1px 2px 2px #000;
   flex:0 0 auto;
+  margin-bottom:2px;
 }
 #page-base .base-book-progress strong {color:#bed9aa;white-space:nowrap}
 #page-base .base-book-progress-track {
@@ -2211,10 +2235,11 @@ body.de-quest-view .mobile-nav {display:none!important}
 }
 #page-base .base-book-sheet {
   display:block;position:relative;flex:0 1 auto;
-  width:min(96vw,650px,calc((100dvh - 230px)*1.15));
+  width:min(96vw,650px,calc((100dvh - 250px)*1.15));
   max-width:100%;aspect-ratio:941/805;
-  max-height: min(64dvh,555px);
+  max-height: min(60dvh,520px);
   min-height:0;
+  margin-top:14px;
   filter:drop-shadow(0 9px 14px rgba(0,0,0,.34));
 }
 #page-base .base-book-art {
@@ -2230,10 +2255,10 @@ body.de-quest-view .mobile-nav {display:none!important}
 }
 #page-base .base-book-content {
   position:absolute !important;
-  left:16% !important;
-  top:9.5% !important;
-  bottom:22% !important;
-  width:68% !important;
+  left:16.8% !important;
+  top:15.5% !important;
+  bottom:17% !important;
+  width:66.5% !important;
   height:auto !important;
   max-height:none !important;
   min-height:0 !important;
@@ -2362,6 +2387,7 @@ body.de-quest-view .mobile-nav {display:none!important}
   gap:7px !important;
   width:min(93%,610px) !important;
   flex:0 0 auto !important;
+  margin-top:-2px !important;
 }
 #page-base .base-book-nav .pixel-button {
   display:block !important;
@@ -2388,12 +2414,14 @@ body.de-quest-view .mobile-nav {display:none!important}
   box-shadow:0 3px 10px rgba(0,0,0,.3);
   cursor:pointer;
 }
+#page-base .base-book-overlay .mobile-nav{display:none !important;}
 @media(max-height:650px){
   #page-base .base-book-stage {padding:6px 6px !important;gap:4px !important;}
   #page-base .base-book-toolbar-title{font-size:11px !important;}
   #page-base .base-book-progress {font-size:8px !important;}
   #page-base .base-book-sheet {width:min(96vw,calc((100dvh - 160px)*1.15),540px) !important;max-height:60dvh !important;}
   #page-base .base-book-close{width:32px !important;height:32px !important;flex-basis:32px !important;}
+  #page-base .base-book-map-return{min-height:32px !important;padding:0 9px !important;font-size:10px !important;}
   #page-base .base-book-nav .pixel-button{min-height:32px !important;padding:5px 2px !important;}
   #page-base .base-book-return{min-height:32px !important;padding:5px 2px !important;}
 }
@@ -2572,7 +2600,10 @@ body.de-quest-view .mobile-nav {display:none!important}
   <div class="base-book-backdrop" id="baseBookBackdrop"></div>
   <div class="base-book-stage" role="dialog" aria-modal="true" aria-label="Livre des plans du refuge">
     <header class="base-book-toolbar">
-      <span class="base-book-toolbar-title">📖 LIVRE DES PLANS</span>
+      <div class="base-book-toolbar-left">
+        <button type="button" class="base-book-map-return" id="baseBookMapReturn" aria-label="Retourner à la carte">← CARTE</button>
+        <span class="base-book-toolbar-title">📖 LIVRE DES PLANS</span>
+      </div>
       <button type="button" class="base-book-close" id="baseBookClose" aria-label="Fermer le livre et retourner au refuge">×</button>
     </header>
     <div class="base-book-progress"><span>🏕 REFUGE — ÉVOLUTION & CONSTRUCTIONS</span><strong id="baseBookProgressLevel">1 / 5</strong></div>
@@ -2613,7 +2644,7 @@ body.de-quest-view .mobile-nav {display:none!important}
       <span id="baseBookNavPage" aria-live="polite">1 / 2</span>
       <button type="button" class="pixel-button" id="baseBookNext">SUIVANT ▶</button>
     </nav>
-    <button type="button" class="base-book-return" id="baseBookReturn">↩ FERMER LE LIVRE · RETOUR AU REFUGE</button>
+    <button type="button" class="base-book-return" id="baseBookReturn">↩ RETOUR AU REFUGE</button>
   </div>
 </div>
 
@@ -6167,6 +6198,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('baseBlueprintButton')?.addEventListener('click',()=>openBaseBook(0));
     $('baseBookClose')?.addEventListener('click',closeBaseBook);
     $('baseBookReturn')?.addEventListener('click',closeBaseBook);
+    $('baseBookMapReturn')?.addEventListener('click',()=>{ closeBaseBook(); switchTab('map'); });
     $('baseBookBackdrop')?.addEventListener('click',closeBaseBook);
     $('baseBookPrev')?.addEventListener('click',()=>showBaseBookPage(baseBookPage-1));
     $('baseBookNext')?.addEventListener('click',()=>showBaseBookPage(baseBookPage+1));
