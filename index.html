@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<!-- DEAD EARTH V5.4 — LIVRE DE TICKETS ET RETOURNEMENT 3D — fichier index.html à installer à la racine -->
+<!-- DEAD EARTH V6.3 — PLAN DU REFUGE COMME LIVRE DE TICKETS — fichier index.html à installer à la racine -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
   <meta name="theme-color" content="#151b20">
@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   
-  <title>DEAD EARTH — V6.0 Quêtes téléphone</title>
+  <title>DEAD EARTH — V6.3 Refuge / Livre des plans</title>
 <style>
 :root{--bg:#15191c;--ink:#eadbc0;--muted:#b8ad92;--panel:#29383e;--panel-deep:#1b282f;--panel-light:#60727a;--edge:#8d9691;--dark:#0e161a;--red:#da4c4b;--gold:#e6a450;--blue:#59b9da;--green:#8dc07c;--orange:#e08c55;--pixel:'Press Start 2P','Courier New',monospace}
 *{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,'Trebuchet MS',sans-serif;color:var(--ink);background:radial-gradient(circle at center,#3b2f2c,#171b1b 78%)}button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:disabled{opacity:.52;cursor:not-allowed;filter:grayscale(.3)}button:focus-visible,input:focus-visible{outline:2px solid #f0cb77;outline-offset:2px}button:active:not(:disabled){transform:translateY(2px)}[hidden]{display:none!important}.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -2106,6 +2106,297 @@ body.de-quest-view .mobile-nav {display:none!important}
  #page-base .base-book-art{width:min(100vw,500px) !important;max-height:82% !important;}
  #page-base .base-book-content{height:32vh !important;max-height:36% !important;top:45% !important;}
 }
+
+/* DEAD EARTH V6.3 — Livre du refuge, look de l'album de tickets */
+#page-base .base-blueprint-hotspot {
+  left: 20% !important;
+  top: 59.5% !important;
+  bottom: auto !important;
+  width: 64% !important;
+  height: 25% !important;
+  z-index: 5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-direction: column !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#page-base .base-blueprint-hotspot::before {display:none !important;}
+#page-base .base-hotspot-label {
+  font-size: clamp(8px,2vw,10px) !important;
+  line-height:1.35 !important;
+  background:rgba(24,19,13,.62) !important;
+  padding:5px 7px !important;
+  border:1px solid rgba(232,181,104,.46) !important;
+  border-radius:4px !important;
+  box-shadow:none !important;
+  max-width:90%;
+  text-align:center;
+  pointer-events:none;
+}
+#page-base .base-hotspot-note {
+  font-size:10px !important;
+  line-height:1.15 !important;
+  margin-top:2px !important;
+  padding:3px 7px !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  pointer-events:none;
+}
+#page-base .base-blueprint-hotspot:active {filter:brightness(1.18)}
+#page-base .base-blueprint-hotspot:focus-visible {outline:3px solid #f5d39a !important;outline-offset:-2px;}
+#page-base .base-book-overlay {position:absolute !important;inset:0 !important;z-index:22 !important;overflow:hidden !important;}
+#page-base .base-book-overlay[hidden] {display:none !important;}
+#page-base .base-book-backdrop {
+  position:absolute !important;inset:0 !important;
+  background:rgba(8,11,11,.30) !important;
+  backdrop-filter:blur(2px) !important;
+  -webkit-backdrop-filter:blur(2px) !important;
+}
+#page-base .base-book-stage {
+  position:absolute !important;
+  inset:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  align-items:center !important;
+  gap:clamp(5px,.8vh,11px) !important;
+  padding:14px 9px 16px !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+#page-base .base-book-stage::before {display:none !important;}
+#page-base .base-book-toolbar {
+  display:flex;align-items:center;justify-content:space-between;
+  width:min(96%,625px);color:#ffe5b8;
+  font:900 clamp(12px,2.9vw,17px)/1.3 var(--pixel,monospace);
+  text-shadow:2px 2px 1px rgba(0,0,0,.92);
+  flex:0 0 auto;z-index:2;
+}
+#page-base .base-book-close {
+  position:static !important;
+  flex:0 0 41px !important;
+  width:41px !important;height:41px !important;
+  border:2px solid #c8a273 !important;
+  background:rgba(53,34,22,.93) !important;
+  color:#ffe4b3 !important;
+  border-radius:5px !important;
+  font:bold 27px/1 monospace !important;
+  box-shadow:0 3px 5px rgba(0,0,0,.3) !important;
+  cursor:pointer;
+}
+#page-base .base-book-progress {
+  width:min(95%,615px);
+  display:flex;justify-content:space-between;align-items:center;gap:9px;
+  font:800 clamp(8px,1.9vw,11px)/1.4 var(--pixel,monospace);
+  letter-spacing:.2px;color:#ecd2a5;
+  text-shadow:1px 2px 2px #000;
+  flex:0 0 auto;
+}
+#page-base .base-book-progress strong {color:#bed9aa;white-space:nowrap}
+#page-base .base-book-progress-track {
+  flex:0 0 3px;width:min(95%,615px);height:3px;
+  border:1px solid #b0916c;background:rgba(9,12,11,.72);
+  box-sizing:content-box;
+}
+#page-base .base-book-progress-track i {
+  display:block;height:100%;width:20%;background:#b8c783;
+  transition:width .25s ease;
+}
+#page-base .base-book-sheet {
+  display:block;position:relative;flex:0 1 auto;
+  width:min(96vw,650px,calc((100dvh - 230px)*1.15));
+  max-width:100%;aspect-ratio:941/805;
+  max-height: min(64dvh,555px);
+  min-height:0;
+  filter:drop-shadow(0 9px 14px rgba(0,0,0,.34));
+}
+#page-base .base-book-art {
+  position:absolute !important;
+  inset:0 !important;
+  top:0 !important;bottom:0 !important;left:0 !important;
+  transform:none !important;
+  width:100% !important;height:100% !important;
+  max-width:100% !important;max-height:100% !important;
+  object-fit:contain !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+}
+#page-base .base-book-content {
+  position:absolute !important;
+  left:16% !important;
+  top:9.5% !important;
+  bottom:22% !important;
+  width:68% !important;
+  height:auto !important;
+  max-height:none !important;
+  min-height:0 !important;
+  transform:none !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:4px !important;
+  padding:0 2px !important;
+  z-index:2 !important;
+}
+#page-base .base-book-header {
+  flex:0 0 auto !important;
+  display:flex;justify-content:space-between;gap:4px;align-items:center;
+  font:900 clamp(11px,2.8vw,13px)/1.35 'Courier New',monospace !important;
+  text-shadow:0 1px 0 rgba(255,239,209,.45) !important;
+  color:#432719 !important;
+  padding:0 0 5px !important;
+  border-bottom:1px dashed rgba(87,48,20,.6);
+}
+#page-base .base-book-header b {overflow-wrap:anywhere}
+#page-base .base-book-header span {white-space:nowrap}
+#page-base .base-book-pages {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  width:100% !important;
+  overflow:hidden !important;
+  background:none !important;
+  border:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  box-shadow:none !important;
+}
+#page-base .base-book-page {
+  display:block;
+  width:100% !important;
+  height:100% !important;
+  max-height:100% !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:#986b40 transparent;
+  padding:2px 1px 5px !important;
+}
+#page-base .base-book-page[hidden]{display:none !important;}
+#page-base .base-overview-grid {
+  display:block !important;
+  grid-template-columns:unset !important;
+  margin:0 !important;
+  gap:0 !important;
+}
+#page-base .base-overview-card {
+  padding:1px 0 7px !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
+#page-base .base-book-page .metric-row {
+  display:flex !important;
+  flex-wrap:wrap !important;
+  justify-content:space-between !important;
+  padding:2px 0 !important;
+  gap:3px !important;
+  font:900 clamp(10px,2.7vw,12px)/1.3 'Courier New',monospace !important;
+  color:#4c301e !important;
+  text-shadow:0 1px 0 rgba(249,222,173,.55) !important;
+}
+#page-base .base-book-page .metric-row strong {color:#482717 !important;}
+#page-base .base-book-mini-title {
+  font:900 clamp(10px,2.7vw,12px)/1.4 'Courier New',monospace !important;
+  letter-spacing:.3px !important;
+  margin:4px 0 !important;
+  color:#51321f !important;
+}
+#page-base .base-level-steps {gap:3px !important;margin:3px 0 !important;}
+#page-base .base-level-step {min-width:0 !important;padding:3px 2px !important;font-size:10px !important;}
+#page-base .base-book-page .help-text,
+#page-base .base-book-page .base-section-hint,
+#page-base .base-book-page p,
+#page-base .base-book-page .base-cost-line,
+#page-base .base-book-page .base-build-desc,
+#page-base .base-book-page .base-build-status {
+  font:700 clamp(10px,2.7vw,12px)/1.4 'Courier New',monospace !important;
+  color:#513521 !important;
+  text-shadow:0 1px 0 rgba(255,229,186,.45) !important;
+}
+#page-base .base-book-page p {margin:3px 0 5px !important;}
+#page-base .base-book-page .pixel-track {height:10px !important;margin:4px 0 5px !important;}
+#page-base .base-upgrade-list .upgrade-card,
+#page-base .base-build-grid .base-build {
+  padding:7px 0 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-top:1px dashed #7c4c2c !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  color:#422b1a !important;
+}
+#page-base .base-upgrade-list .upgrade-card strong,
+#page-base .base-build-name,#page-base .base-build-status strong {
+  color:#3f2414 !important;
+  font:900 clamp(10px,2.7vw,12px)/1.3 'Courier New',monospace !important;
+}
+#page-base .base-build-grid {display:block !important;}
+#page-base .base-build-grid .base-build {margin-bottom:4px !important;}
+#page-base .base-build-grid .base-build-top {gap:6px !important;}
+#page-base .base-book-page .pixel-button {
+  border:1px solid #ba8e53 !important;
+  border-radius:2px !important;
+  background:#4b3425 !important;
+  color:#fff0c9 !important;
+  font:800 clamp(8px,2vw,10px)/1.25 'Courier New',monospace !important;
+  min-height:28px !important;
+  padding:5px 7px !important;
+  text-shadow:none !important;
+  box-shadow:0 2px 0 rgba(0,0,0,.18) !important;
+}
+#page-base .base-book-page .pixel-button:disabled {opacity:.46 !important;}
+#page-base .base-book-nav {
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;
+  align-items:center !important;
+  gap:7px !important;
+  width:min(93%,610px) !important;
+  flex:0 0 auto !important;
+}
+#page-base .base-book-nav .pixel-button {
+  display:block !important;
+  min-height:42px !important;
+  padding:8px 4px !important;
+  font:900 clamp(10px,2.7vw,12px)/1.4 'Courier New',monospace !important;
+  border:2px solid #bb9467 !important;
+  border-radius:5px !important;
+  background:rgba(75,49,33,.93) !important;
+  color:#f8dfb1 !important;
+}
+#page-base .base-book-nav .pixel-button:disabled {opacity:.40 !important;}
+#page-base #baseBookNavPage {
+  color:#f5d7a2;font:900 11px 'Courier New',monospace;
+  text-shadow:1px 2px 2px #000;white-space:nowrap;
+}
+#page-base .base-book-return {
+  width:min(93%,610px);
+  flex:0 0 auto;
+  min-height:43px;padding:8px 6px;
+  border:2px solid #b9ca96;border-radius:5px;
+  background:rgba(61,99,73,.96);color:#fff2d4;
+  font:900 clamp(10px,2.7vw,12px)/1.5 'Courier New',monospace;
+  box-shadow:0 3px 10px rgba(0,0,0,.3);
+  cursor:pointer;
+}
+@media(max-height:650px){
+  #page-base .base-book-stage {padding:6px 6px !important;gap:4px !important;}
+  #page-base .base-book-toolbar-title{font-size:11px !important;}
+  #page-base .base-book-progress {font-size:8px !important;}
+  #page-base .base-book-sheet {width:min(96vw,calc((100dvh - 160px)*1.15),540px) !important;max-height:60dvh !important;}
+  #page-base .base-book-close{width:32px !important;height:32px !important;flex-basis:32px !important;}
+  #page-base .base-book-nav .pixel-button{min-height:32px !important;padding:5px 2px !important;}
+  #page-base .base-book-return{min-height:32px !important;padding:5px 2px !important;}
+}
 </style>
 
 </head>
@@ -2271,7 +2562,7 @@ body.de-quest-view .mobile-nav {display:none!important}
     <div class="base-scene-rank" id="baseRank">NIV. 1 / 5</div>
     <div class="base-scene-subtitle" id="baseTierName">ABRI DE BRANCHAGES</div>
   </div>
-  <button class="base-blueprint-hotspot" id="baseBlueprintButton" type="button" aria-label="Ouvrir le plan d'amélioration du refuge">
+  <button class="base-blueprint-hotspot" id="baseBlueprintButton" type="button" aria-label="Ouvrir les plans du refuge en touchant le parchemin">
     <span class="base-hotspot-label" id="baseMapLabel">AMÉLIORATION DU REFUGE</span>
     <span class="base-hotspot-note" id="basePlanNote">1 / 2</span>
   </button>
@@ -2279,43 +2570,50 @@ body.de-quest-view .mobile-nav {display:none!important}
 
 <div class="base-book-overlay" id="baseBookOverlay" hidden>
   <div class="base-book-backdrop" id="baseBookBackdrop"></div>
-  <div class="base-book-stage">
-    <img src="./image%20jeux/livre-refuge-v2.png?v=62" alt="Plan du refuge" class="base-book-art" id="baseBookArt" onload="this.parentElement.classList.add('base-book-art-ready')" onerror="this.hidden=true">
-    <button type="button" class="base-book-close" id="baseBookClose" aria-label="Fermer le livre">×</button>
-    <div class="base-book-content">
-      <div class="base-book-header">
-        <b id="baseBookTitle">ÉVOLUTION DU REFUGE</b>
-        <span id="baseBookPageCount">1 / 2</span>
-      </div>
-      <div class="base-book-pages">
-        <section class="base-book-page active" id="baseBookPage0">
-          <div class="base-overview-grid">
-            <div class="base-overview-card">
-              <div class="metric-row"><span>NIVEAU DU REFUGE</span><strong id="baseLevel">1 / 5</strong></div>
-              <div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
-              <div class="pixel-track dark"><i class="green" id="fortBar"></i></div>
-              <p class="help-text" id="baseLevelDesc">Des branches et des bâches. Protège peu, mais c’est un début.</p>
+  <div class="base-book-stage" role="dialog" aria-modal="true" aria-label="Livre des plans du refuge">
+    <header class="base-book-toolbar">
+      <span class="base-book-toolbar-title">📖 LIVRE DES PLANS</span>
+      <button type="button" class="base-book-close" id="baseBookClose" aria-label="Fermer le livre et retourner au refuge">×</button>
+    </header>
+    <div class="base-book-progress"><span>🏕 REFUGE — ÉVOLUTION & CONSTRUCTIONS</span><strong id="baseBookProgressLevel">1 / 5</strong></div>
+    <div class="base-book-progress-track" aria-hidden="true"><i id="baseBookProgressFill"></i></div>
+    <div class="base-book-sheet">
+      <img src="./image%20jeux/livre-refuge-v2.png?v=63" alt="Parchemin tenu par les mains du survivant" class="base-book-art" id="baseBookArt" draggable="false">
+      <div class="base-book-content">
+        <div class="base-book-header">
+          <b id="baseBookTitle">ÉVOLUTION DU REFUGE</b>
+          <span id="baseBookPageCount">1 / 2</span>
+        </div>
+        <div class="base-book-pages">
+          <section class="base-book-page active" id="baseBookPage0" aria-label="Évolution et améliorations du refuge">
+            <div class="base-overview-grid">
+              <div class="base-overview-card">
+                <div class="metric-row"><span>NIVEAU</span><strong id="baseLevel">1 / 5</strong></div>
+                <div class="metric-row"><span>RÉSISTANCE</span><strong id="fortValue">25 / 35</strong></div>
+                <div class="pixel-track dark"><i class="green" id="fortBar"></i></div>
+                <p class="help-text" id="baseLevelDesc">Quelques branches et des bâches. Protège peu, mais c’est un début.</p>
+              </div>
+              <div class="base-overview-card">
+                <div class="base-book-mini-title">PROGRESSION DU REFUGE</div>
+                <div aria-label="Progression du refuge" class="base-level-steps" id="baseLevelSteps"></div>
+              </div>
             </div>
-            <div class="base-overview-card">
-              <div class="base-book-mini-title">PROGRESSION</div>
-              <div aria-label="Progression du refuge" class="base-level-steps" id="baseLevelSteps"></div>
-              <p class="help-text">Les fonds du refuge changent automatiquement selon le niveau atteint.</p>
-            </div>
-          </div>
-          <div class="item-list base-upgrade-list" id="upgradeList"></div>
-          <button class="pixel-button full danger-button" id="defendBtn" type="button">⚠ SIMULER UNE ATTAQUE DE HORDE</button>
-          <p class="help-text">Le test de défense reste manuel. Le plan sert maintenant d’accès aux améliorations du refuge.</p>
-        </section>
-        <section class="base-book-page" id="baseBookPage1" hidden>
-          <p class="base-section-hint">Structure prête : on pourra encore affiner la présentation des constructions ensuite. Pour l’instant, tout est déjà centralisé dans ce plan.</p>
-          <div class="base-build-grid" id="baseBuildList"></div>
-        </section>
-      </div>
-      <div class="base-book-nav">
-        <button type="button" class="pixel-button" id="baseBookPrev">◀ PAGE PRÉCÉDENTE</button>
-        <button type="button" class="pixel-button" id="baseBookNext">PAGE SUIVANTE ▶</button>
+            <div class="item-list base-upgrade-list" id="upgradeList"></div>
+            <button class="pixel-button full danger-button" id="defendBtn" type="button">⚠ SIMULER UNE HORDE</button>
+          </section>
+          <section class="base-book-page" id="baseBookPage1" hidden aria-label="Constructions de survie">
+            <p class="base-section-hint">Débloque et améliore tes constructions avec les ressources du sac ou de la réserve.</p>
+            <div class="base-build-grid" id="baseBuildList"></div>
+          </section>
+        </div>
       </div>
     </div>
+    <nav class="base-book-nav" aria-label="Pages du livre">
+      <button type="button" class="pixel-button" id="baseBookPrev">◀ PRÉCÉDENT</button>
+      <span id="baseBookNavPage" aria-live="polite">1 / 2</span>
+      <button type="button" class="pixel-button" id="baseBookNext">SUIVANT ▶</button>
+    </nav>
+    <button type="button" class="base-book-return" id="baseBookReturn">↩ FERMER LE LIVRE · RETOUR AU REFUGE</button>
   </div>
 </div>
 
@@ -4913,11 +5211,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   let baseBookPage=0;
   const BASE_SCENE_IMAGES=[
-    './image%20jeux/refuge-niveau-1.jpg?v=62',
-    './image%20jeux/refuge-niveau-2.jpg?v=62',
-    './image%20jeux/refuge-niveau-3.jpg?v=62',
-    './image%20jeux/refuge-niveau-4.jpg?v=62',
-    './image%20jeux/refuge-niveau-5.jpg?v=62'
+    './image%20jeux/refuge-niveau-1.jpg?v=63',
+    './image%20jeux/refuge-niveau-2.jpg?v=63',
+    './image%20jeux/refuge-niveau-3.jpg?v=63',
+    './image%20jeux/refuge-niveau-4.jpg?v=63',
+    './image%20jeux/refuge-niveau-5.jpg?v=63'
   ];
   function showBaseBookPage(page){
     const pages=[...document.querySelectorAll('#page-base .base-book-page')];
@@ -4928,6 +5226,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     const count=$('baseBookPageCount');if(count)count.textContent=`${baseBookPage+1} / ${pages.length}`;
     if($('baseBookPrev'))$('baseBookPrev').disabled=baseBookPage===0;
     if($('baseBookNext'))$('baseBookNext').disabled=baseBookPage===pages.length-1;
+    if($('baseBookNavPage'))$('baseBookNavPage').textContent=`${baseBookPage+1} / ${pages.length}`;
   }
   function openBaseBook(page=0){
     const overlay=$('baseBookOverlay');if(!overlay)return;
@@ -4943,6 +5242,8 @@ const DEAD_EARTH_ICONS = Object.freeze({
     if(scene){scene.style.backgroundImage=`url("${BASE_SCENE_IMAGES[game.baseLevel-1]||BASE_SCENE_IMAGES[0]}")`;scene.dataset.level=String(game.baseLevel);}
     $('baseLevel').textContent=`${game.baseLevel} / ${BASE_TIERS.length}`;
     $('baseRank').textContent=`NIV. ${game.baseLevel} / 5`;
+    if($('baseBookProgressLevel'))$('baseBookProgressLevel').textContent=`${game.baseLevel} / 5`;
+    if($('baseBookProgressFill'))$('baseBookProgressFill').style.width=`${game.baseLevel*20}%`;
     $('baseTierName').textContent=tier.name.toUpperCase();
     $('baseMapLabel').textContent=`AMÉLIORATION DU REFUGE · NIV. ${game.baseLevel}`;
     $('basePlanNote').textContent='1 / 2';
@@ -5865,6 +6166,7 @@ const DEAD_EARTH_ICONS = Object.freeze({
     $('editSafeZone').addEventListener('click',startDrawing);
     $('baseBlueprintButton')?.addEventListener('click',()=>openBaseBook(0));
     $('baseBookClose')?.addEventListener('click',closeBaseBook);
+    $('baseBookReturn')?.addEventListener('click',closeBaseBook);
     $('baseBookBackdrop')?.addEventListener('click',closeBaseBook);
     $('baseBookPrev')?.addEventListener('click',()=>showBaseBookPage(baseBookPage-1));
     $('baseBookNext')?.addEventListener('click',()=>showBaseBookPage(baseBookPage+1));
