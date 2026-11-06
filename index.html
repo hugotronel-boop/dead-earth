@@ -2003,6 +2003,111 @@ body.de-quest-view .mobile-nav {display:none!important}
 @media(prefers-reduced-motion:reduce){#page-missions .de-quest-scroll{scroll-behavior:auto}}
 </style>
 
+
+<!-- DEAD EARTH V6.2 : correctif d'affichage du refuge sur iPhone -->
+<style id="de-v62-refuge-fix">
+/* L'ancienne image globale ne doit plus apparaître derrière le décor évolutif. */
+#gameViewport[data-art-page="base"]::before,
+.viewport[data-art-page="base"]::before { background-image:none !important; }
+#page-base { background:#17120e !important; }
+#page-base .base-scene-shell {
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:0 !important;
+  z-index:1;
+  background-size:cover !important;
+  background-position:center center !important;
+  background-repeat:no-repeat !important;
+}
+#page-base>h1 { z-index:5 !important; }
+#page-base .base-book-overlay {z-index:20 !important;}
+#page-base .base-book-stage {inset:0;overflow:hidden;}
+/* Le nouveau PNG ne contient plus la grande zone transparente au-dessus du parchemin. */
+#page-base .base-book-art {
+  position:absolute !important;
+  left:50% !important;
+  top:50% !important;
+  bottom:auto !important;
+  width:min(110vw,590px) !important;
+  height:auto !important;
+  max-height:78% !important;
+  transform:translate(-50%,-50%) !important;
+  object-fit:contain !important;
+  z-index:1;
+  pointer-events:none;
+}
+/* Repli lisible si l'image met quelques secondes à arriver du réseau. */
+#page-base .base-book-stage.base-book-art-ready::before{display:none !important;}
+#page-base .base-book-stage::before {
+  content:'';
+  position:absolute;
+  left:50%;top:45%;transform:translate(-50%,-50%);
+  width:min(84vw,460px);height:min(34vh,280px);
+  background:#b9895b;
+  border:5px solid #63452b;
+  border-radius:7px;
+  box-shadow:0 12px 25px #0008;
+  z-index:0;
+}
+#page-base .base-book-content {
+  z-index:2 !important;
+  position:absolute !important;
+  left:50% !important;
+  top:46% !important;
+  bottom:auto !important;
+  transform:translate(-50%,-50%) !important;
+  width:min(83vw,450px) !important;
+  height:clamp(190px,33vh,310px) !important;
+  max-height:42% !important;
+  min-height:0 !important;
+  gap:4px !important;
+  padding:3px 7px !important;
+  box-sizing:border-box !important;
+}
+#page-base .base-book-header {
+  flex:0 0 auto;
+  font:700 clamp(8px,2.4vw,12px)/1.3 'Courier New',monospace !important;
+  text-shadow:none !important;
+  color:#362314 !important;
+  padding:2px 3px 4px;
+}
+#page-base .base-book-pages {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  padding:4px !important;
+  background:rgba(255,239,209,.22) !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+#page-base .base-book-page {
+  height:100% !important;
+  max-height:100% !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+#page-base .base-overview-grid {grid-template-columns:1fr !important;gap:5px !important;margin:0 0 6px !important;}
+#page-base .base-overview-card {padding:5px !important;box-shadow:none !important;background:rgba(255,247,219,.36) !important;border:1px solid #895a3847 !important;border-radius:3px !important;}
+#page-base .base-book-page .metric-row {font-size:10px !important;}
+#page-base .base-book-page .help-text,#page-base .base-book-page p {font-size:10px !important;line-height:1.35 !important;}
+#page-base .base-level-steps {margin-top:5px !important;}
+#page-base .base-upgrade-list .upgrade-card {padding:6px !important;background:rgba(255,245,219,.42) !important;}
+#page-base .base-book-nav {flex:0 0 auto;gap:5px !important;}
+#page-base .base-book-nav .pixel-button {padding:6px 2px !important;min-height:30px !important;font-size:8px !important;}
+#page-base .base-book-close {z-index:25 !important;}
+#page-base .base-blueprint-hotspot{touch-action:manipulation;}
+@media(max-height:670px){
+ #page-base .base-book-art{width:min(100vw,500px) !important;max-height:82% !important;}
+ #page-base .base-book-content{height:32vh !important;max-height:36% !important;top:45% !important;}
+}
+</style>
+
 </head>
 <body>
 <div id="app">
@@ -2175,7 +2280,7 @@ body.de-quest-view .mobile-nav {display:none!important}
 <div class="base-book-overlay" id="baseBookOverlay" hidden>
   <div class="base-book-backdrop" id="baseBookBackdrop"></div>
   <div class="base-book-stage">
-    <img src="image jeux/livre-refuge.png" alt="Plan du refuge" class="base-book-art" id="baseBookArt">
+    <img src="./image%20jeux/livre-refuge-v2.png?v=62" alt="Plan du refuge" class="base-book-art" id="baseBookArt" onload="this.parentElement.classList.add('base-book-art-ready')" onerror="this.hidden=true">
     <button type="button" class="base-book-close" id="baseBookClose" aria-label="Fermer le livre">×</button>
     <div class="base-book-content">
       <div class="base-book-header">
@@ -4808,11 +4913,11 @@ const DEAD_EARTH_ICONS = Object.freeze({
   }
   let baseBookPage=0;
   const BASE_SCENE_IMAGES=[
-    'image jeux/refuge-niveau-1.jpg',
-    'image jeux/refuge-niveau-2.jpg',
-    'image jeux/refuge-niveau-3.jpg',
-    'image jeux/refuge-niveau-4.jpg',
-    'image jeux/refuge-niveau-5.jpg'
+    './image%20jeux/refuge-niveau-1.jpg?v=62',
+    './image%20jeux/refuge-niveau-2.jpg?v=62',
+    './image%20jeux/refuge-niveau-3.jpg?v=62',
+    './image%20jeux/refuge-niveau-4.jpg?v=62',
+    './image%20jeux/refuge-niveau-5.jpg?v=62'
   ];
   function showBaseBookPage(page){
     const pages=[...document.querySelectorAll('#page-base .base-book-page')];
